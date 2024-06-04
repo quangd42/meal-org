@@ -1,0 +1,5 @@
+[sqlfluff]
+dialect = postgres
+
+[sqlfluff:indentation]
+allow_implicit_indents = True
