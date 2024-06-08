@@ -1,6 +1,8 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func HandleReadiness(w http.ResponseWriter, r *http.Request) {
 	type response struct {

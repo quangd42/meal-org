@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
 func respondJSON[T any](w http.ResponseWriter, code int, v T) {
@@ -29,4 +33,17 @@ func respondError(w http.ResponseWriter, code int, msg string) {
 	respondJSON(w, code, response{
 		Error: msg,
 	})
+}
+
+type User struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Hash      string    `json:"-"`
+}
+
+func createResponseUser(u database.User) User {
+	return User(u)
 }
