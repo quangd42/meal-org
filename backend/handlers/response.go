@@ -42,8 +42,21 @@ type User struct {
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Hash      string    `json:"-"`
+	Token     string    `json:"token,omitempty"`
 }
 
 func createResponseUser(u database.User) User {
-	return User(u)
+	return User{
+		ID:        u.ID,
+		CreatedAt: u.CreatedAt,
+		UpdatedAt: u.UpdatedAt,
+		Name:      u.Name,
+		Username:  u.Username,
+	}
+}
+
+func createResponseUserWithToken(u database.User, token string) User {
+	user := createResponseUser(u)
+	user.Token = token
+	return user
 }

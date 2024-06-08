@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
@@ -27,6 +29,7 @@ func CreateUserHandler(c *Config) http.HandlerFunc {
 
 		hash, err := auth.HashPassword([]byte(params.Password))
 		if err != nil {
+			log.Printf("error hashing password: %s\n", err)
 			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
@@ -40,10 +43,22 @@ func CreateUserHandler(c *Config) http.HandlerFunc {
 			Hash:      string(hash),
 		})
 		if err != nil {
-			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			log.Printf("error creating new user: %s\n", err)
+			if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == pq.ErrorCode("23505") {
+				respondError(w, http.StatusBadRequest, "User already exists")
+				return
+			}
+			respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		respondJSON(w, http.StatusOK, createResponseUser(user))
+		token, err := auth.NewJWT(user.ID, auth.DefaultExpirationDuration)
+		if err != nil {
+			log.Printf("error creating new JWT: %s\n", err)
+			respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		respondJSON(w, http.StatusOK, createResponseUserWithToken(user, token))
 	}
 }
