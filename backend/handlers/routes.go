@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/quangd42/meal-planner/backend/internal/middleware"
 )
 
 func AddRoutes(r *chi.Mux, c *Config) {
@@ -15,6 +16,10 @@ func AddRoutes(r *chi.Mux, c *Config) {
 		r.Get("/err", HandleError)
 
 		r.Mount("/users", usersAPIRouter(c))
+
+		r.Group(func(r chi.Router) {
+			r.Post("/login", handleLogin)
+		})
 	})
 }
 
@@ -23,6 +28,12 @@ func usersAPIRouter(c *Config) http.Handler {
 	r := chi.NewRouter()
 
 	r.Post("/", CreateUserHandler(c))
+
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.AuthVerifier())
+
+		r.Put("/", UpdateUserHandler(c))
+	})
 
 	return r
 }

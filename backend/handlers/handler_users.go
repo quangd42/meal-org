@@ -10,6 +10,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/backend/internal/middleware"
 )
 
 func CreateUserHandler(c *Config) http.HandlerFunc {
@@ -60,5 +61,47 @@ func CreateUserHandler(c *Config) http.HandlerFunc {
 		}
 
 		respondJSON(w, http.StatusOK, createResponseUserWithToken(user, token))
+	}
+}
+
+func UpdateUserHandler(c *Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+		if !ok {
+			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+			return
+		}
+
+		decoder := json.NewDecoder(r.Body)
+		type Parameters struct {
+			Name     string `json:"name"`
+			Password string `json:"password"`
+		}
+		params := &Parameters{}
+		err := decoder.Decode(params)
+		if err != nil {
+			log.Printf("error decoding: %s\n", err.Error())
+			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			return
+		}
+
+		hash, err := auth.HashPassword([]byte(params.Password))
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		user, err := c.DB.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
+			ID:        userID,
+			UpdatedAt: time.Now().UTC(),
+			Name:      params.Name,
+			Hash:      string(hash),
+		})
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		respondJSON(w, http.StatusOK, createResponseUser(user))
 	}
 }
