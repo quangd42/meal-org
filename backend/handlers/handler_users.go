@@ -52,7 +52,7 @@ func CreateUserHandler(c *Config) http.HandlerFunc {
 			return
 		}
 
-		token, err := auth.NewJWT(user.ID, auth.DefaultExpirationDuration)
+		token, err := auth.CreateJWT(user, auth.DefaultExpirationDuration)
 		if err != nil {
 			log.Printf("error creating new JWT: %s\n", err)
 			respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

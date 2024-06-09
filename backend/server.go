@@ -35,9 +35,8 @@ func run() error {
 	dbQueries := database.New(db)
 
 	config := &handlers.Config{
-		Port:      ":" + port,
-		JWTSecret: jwtSecret,
-		DB:        dbQueries,
+		Port: ":" + port,
+		DB:   dbQueries,
 	}
 
 	r := chi.NewRouter()
