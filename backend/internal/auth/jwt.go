@@ -1,34 +1,14 @@
 package auth
 
 import (
-	"errors"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
-
-const (
-	JWTIssuer                 = "meal_planner"
-	DefaultExpirationDuration = time.Hour * 24
-)
-
-var (
-	ErrTokenNotFound    = errors.New("token not found")
-	ErrClaimTypeInvalid = errors.New("claim type cannot be verified")
-)
-
-var jwtSecret string
-
-func init() {
-	godotenv.Load()
-	jwtSecret = os.Getenv("JWT_SECRET")
-}
 
 type UserClaims struct {
 	UserID uuid.UUID `json:"userID"`
@@ -76,7 +56,7 @@ func VerifyJWT(tokenString string) (uuid.UUID, error) {
 
 func GetHeaderToken(r *http.Request) (string, error) {
 	header := r.Header.Get("Authorization")
-	if len(header) < 7 && strings.ToLower(header[0:6]) != "bearer" {
+	if len(header) < 7 || strings.ToLower(header[0:6]) != "bearer" {
 		return "", ErrTokenNotFound
 	}
 	return header[7:], nil
