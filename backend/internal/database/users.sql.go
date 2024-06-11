@@ -19,12 +19,12 @@ RETURNING id, created_at, updated_at, name, username, hash
 `
 
 type CreateUserParams struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	Username  string
-	Hash      string
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Hash      string    `json:"hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -94,10 +94,10 @@ RETURNING id, created_at, updated_at, name, username, hash
 `
 
 type UpdateUserByIDParams struct {
-	ID        uuid.UUID
-	Name      string
-	Hash      string
-	UpdatedAt time.Time
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Hash      string    `json:"hash"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) (User, error) {

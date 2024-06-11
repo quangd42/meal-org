@@ -17,6 +17,7 @@ func AddRoutes(r *chi.Mux) {
 
 		r.Mount("/users", usersAPIRouter())
 		r.Mount("/auth", authRouter())
+		r.Mount("/recipes", recipesAPIRouter())
 	})
 }
 
@@ -40,6 +41,18 @@ func authRouter() http.Handler {
 	r.Post("/login", loginHandler)
 	r.Post("/refresh", refreshJWTHandler)
 	r.Post("/revoke", revokeJWTHandler)
+
+	return r
+}
+
+// recipesAPIRouter
+func recipesAPIRouter() http.Handler {
+	r := chi.NewRouter()
+
+	r.Use(middleware.AuthVerifier())
+	r.Post("/", createRecipeHandler)
+	r.Put("/", updateRecipeHandler)
+	r.Get("/", listRecipesHandler)
 
 	return r
 }

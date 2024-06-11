@@ -10,19 +10,28 @@ import (
 	"github.com/google/uuid"
 )
 
+type Recipe struct {
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	ExternalUrl string    `json:"external_url"`
+	Name        string    `json:"name"`
+	UserID      uuid.UUID `json:"user_id"`
+}
+
 type Token struct {
-	Value     string
-	CreatedAt time.Time
-	ExpiredAt time.Time
-	IsRevoked bool
-	UserID    uuid.UUID
+	Value     string    `json:"value"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+	IsRevoked bool      `json:"is_revoked"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
 type User struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
-	Username  string
-	Hash      string
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Hash      string    `json:"hash"`
 }

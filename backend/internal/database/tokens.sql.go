@@ -38,8 +38,8 @@ WHERE value = $1
 `
 
 type RevokeTokenParams struct {
-	Value     string
-	IsRevoked bool
+	Value     string `json:"value"`
+	IsRevoked bool   `json:"is_revoked"`
 }
 
 func (q *Queries) RevokeToken(ctx context.Context, arg RevokeTokenParams) error {
@@ -54,10 +54,10 @@ INSERT INTO tokens (
 `
 
 type SaveTokenParams struct {
-	Value     string
-	CreatedAt time.Time
-	ExpiredAt time.Time
-	UserID    uuid.UUID
+	Value     string    `json:"value"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiredAt time.Time `json:"expired_at"`
+	UserID    uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) SaveToken(ctx context.Context, arg SaveTokenParams) error {
