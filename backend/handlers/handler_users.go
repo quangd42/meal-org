@@ -13,7 +13,7 @@ import (
 	"github.com/quangd42/meal-planner/backend/internal/middleware"
 )
 
-func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
+func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	type Parameters struct {
 		Name     string `json:"name"`
 		Username string `json:"username"`
@@ -62,7 +62,7 @@ func CreateUserHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, createResponseUserWithToken(user, token))
 }
 
-func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
 	if !ok {
 		respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())

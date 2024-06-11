@@ -7,6 +7,10 @@ RETURNING *;
 SELECT * FROM users
 WHERE id = $1;
 
+-- name: GetUserByUsername :one
+SELECT * FROM users
+WHERE username = $1;
+
 -- name: UpdateUserByID :one
 UPDATE users
 SET name = $2, hash = $3, updated_at = $4

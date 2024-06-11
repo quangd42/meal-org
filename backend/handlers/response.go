@@ -35,6 +35,10 @@ func respondError(w http.ResponseWriter, code int, msg string) {
 	})
 }
 
+func respondInternalServerError(w http.ResponseWriter) {
+	respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+}
+
 type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
