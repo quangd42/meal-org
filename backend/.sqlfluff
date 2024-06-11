@@ -3,3 +3,8 @@ dialect = postgres
 
 [sqlfluff:indentation]
 allow_implicit_indents = True
+tab_space_size = 2
+
+[sqlfluff:rules:capitalisation.types]
+extended_capitalisation_policy = upper
+

@@ -52,14 +52,13 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.CreateJWT(user, auth.DefaultExpirationDuration)
+	jwt, refreshToken, err := GenerateAndSaveAuthTokens(r, user)
 	if err != nil {
-		log.Printf("error creating new JWT: %s\n", err)
-		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		respondInternalServerError(w)
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createResponseUserWithToken(user, token))
+	respondJSON(w, http.StatusOK, createUserResponseWithToken(user, jwt, refreshToken))
 }
 
 func updateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -99,5 +98,5 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createResponseUser(user))
+	respondJSON(w, http.StatusOK, createUserResponse(user))
 }

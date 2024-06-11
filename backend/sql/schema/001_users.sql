@@ -1,11 +1,11 @@
 -- +goose Up
 CREATE TABLE users (
-    id uuid UNIQUE NOT NULL,
-    created_at timestamp NOT NULL,
-    updated_at timestamp NOT NULL,
-    name varchar(255) NOT NULL,
-    username varchar(255) UNIQUE NOT NULL,
-    hash varchar(255) NOT NULL
+  id UUID UNIQUE PRIMARY KEY NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  username VARCHAR(255) UNIQUE NOT NULL,
+  hash VARCHAR(255) NOT NULL
 );
 
 -- +goose Down

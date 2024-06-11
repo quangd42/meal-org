@@ -11,11 +11,14 @@ import (
 
 const (
 	JWTIssuer                 = "meal_planner"
-	DefaultExpirationDuration = time.Hour * 24
+	ExpirationDurationAccess  = time.Hour
+	ExpirationDurationDefault = time.Hour * 24
+	ExpirationDurationRefresh = time.Hour * 24 * 60
 )
 
 var (
 	ErrTokenNotFound    = errors.New("token not found")
+	ErrTokenInvalid     = errors.New("token expired or invalidated")
 	ErrClaimTypeInvalid = errors.New("claim type cannot be verified")
 )
 

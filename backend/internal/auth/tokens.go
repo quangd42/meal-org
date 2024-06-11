@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"strings"
 	"time"
@@ -60,4 +62,14 @@ func GetHeaderToken(r *http.Request) (string, error) {
 		return "", ErrTokenNotFound
 	}
 	return header[7:], nil
+}
+
+func GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	tokenString := base64.StdEncoding.EncodeToString(b)
+	return tokenString, nil
 }

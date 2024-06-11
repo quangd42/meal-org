@@ -40,16 +40,17 @@ func respondInternalServerError(w http.ResponseWriter) {
 }
 
 type User struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `json:"name"`
-	Username  string    `json:"username"`
-	Hash      string    `json:"-"`
-	Token     string    `json:"token,omitempty"`
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	Name         string    `json:"name"`
+	Username     string    `json:"username"`
+	Hash         string    `json:"-"`
+	Token        string    `json:"token,omitempty"`
+	RefreshToken string    `json:"refresh_token,omitempty"`
 }
 
-func createResponseUser(u database.User) User {
+func createUserResponse(u database.User) User {
 	return User{
 		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
@@ -59,8 +60,9 @@ func createResponseUser(u database.User) User {
 	}
 }
 
-func createResponseUserWithToken(u database.User, token string) User {
-	user := createResponseUser(u)
+func createUserResponseWithToken(u database.User, token, refreshToken string) User {
+	user := createUserResponse(u)
 	user.Token = token
+	user.RefreshToken = refreshToken
 	return user
 }
