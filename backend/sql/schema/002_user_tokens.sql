@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE tokens (
-  value VARCHAR(64) PRIMARY KEY,
+  value TEXT PRIMARY KEY,
   created_at TIMESTAMP NOT NULL,
   expired_at TIMESTAMP NOT NULL,
   is_revoked BOOL NOT NULL DEFAULT false,

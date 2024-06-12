@@ -10,6 +10,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type Cuisine struct {
+	ID        uuid.UUID     `json:"id"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
+	Name      string        `json:"name"`
+	ParentID  uuid.NullUUID `json:"parent_id"`
+}
+
 type Recipe struct {
 	ID          uuid.UUID `json:"id"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -17,6 +25,14 @@ type Recipe struct {
 	ExternalUrl string    `json:"external_url"`
 	Name        string    `json:"name"`
 	UserID      uuid.UUID `json:"user_id"`
+}
+
+type RecipeCuisine struct {
+	ID        uuid.UUID     `json:"id"`
+	CreatedAt time.Time     `json:"created_at"`
+	UpdatedAt time.Time     `json:"updated_at"`
+	CuisineID uuid.NullUUID `json:"cuisine_id"`
+	RecipeID  uuid.NullUUID `json:"recipe_id"`
 }
 
 type Token struct {
