@@ -71,7 +71,7 @@ const listRecipeByUserID = `-- name: ListRecipeByUserID :many
 SELECT id, created_at, updated_at, external_url, name, user_id
 FROM recipes
 WHERE user_id = $1
-ORDER BY updated_at DESC
+ORDER BY name
 LIMIT
   $2
   OFFSET $3

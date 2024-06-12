@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
@@ -104,27 +101,14 @@ func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var limit, offset int32
-	limitStr := chi.URLParam(r, "limit")
-	limit64, err := strconv.ParseInt(limitStr, 10, 32)
-	if err != nil {
-		limit = 20
-	} else {
-		limit = int32(limit64)
-	}
-	offsetStr := chi.URLParam(r, "offset")
-	offset64, err := strconv.ParseInt(offsetStr, 10, 32)
-	if err != nil {
-		offset = 0
-	} else {
-		offset = int32(offset64)
-	}
-
+	limit = getPaginationParamValue(r, "limit", 20)
+	offset = getPaginationParamValue(r, "offset", 0)
 	recipes, err := DB.ListRecipeByUserID(r.Context(), database.ListRecipeByUserIDParams{
 		UserID: userID,
 		Limit:  limit,
 		Offset: offset,
 	})
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+	if err != nil {
 		respondInternalServerError(w)
 		return
 	}
