@@ -17,7 +17,7 @@ func init() {
 		log.Fatal("error loading env file")
 	}
 
-	dbURL := os.Getenv("DB_URL")
+	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
 		log.Fatal("missing env settings")
 	}

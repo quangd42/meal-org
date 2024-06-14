@@ -11,4 +11,4 @@ Current goal - A web app that helps with meal planning with the following featur
   - users can update the generated meal plan
 - Groceries list: groceries for the week will be generated based on the ingredients required in the meal plan.
 
-Built with Go, Templ, HTMX.
+Built with Go, Templ, HTMX, Tailwind CSS.
