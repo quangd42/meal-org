@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -25,10 +23,10 @@ var (
 var jwtSecret string
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("error loading env file: jwt")
+	// }
 	jwtSecret = os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
 		log.Fatal("missing env settings: jwtSecret")

@@ -8,9 +8,13 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
     steps:
       - name: Check out code
@@ -42,4 +46,4 @@ jobs:
         run: ./scripts/migrate_up.sh
 
       - name: Deploy to Cloud run
-        run: gcloud run deploy notely --image us-east4-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal_planner:latest --region us-central1 --allow-unauthenticated --project meal-planner-426313 --max-instances=4
+        run: gcloud run deploy meal_planner --image us-east4-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal_planner:latest --region us-central1 --allow-unauthenticated --project meal-planner-426313 --max-instances=4

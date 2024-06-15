@@ -5,18 +5,17 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
 var DB *database.Queries
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("error loading env file")
-	}
-
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("error loading env file: database")
+	// }
+	//
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
 		log.Fatal("missing env settings")
