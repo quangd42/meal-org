@@ -40,10 +40,10 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Run gcloud build
-        run: gcloud builds submit --tag us-east4-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal_planner:latest .
+        run: gcloud builds submit --tag us-central1-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal-planner:latest .
 
       - name: Run db migration
         run: ./scripts/migrate_up.sh
 
       - name: Deploy to Cloud run
-        run: gcloud run deploy meal_planner --image us-east4-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal_planner:latest --region us-central1 --allow-unauthenticated --project meal-planner-426313 --max-instances=4
+        run: gcloud run deploy meal-planner --image us-central1-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal-planner:latest --region us-central1 --allow-unauthenticated --project meal-planner-426313 --max-instances=4
