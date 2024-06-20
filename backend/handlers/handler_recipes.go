@@ -103,7 +103,7 @@ func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
 	var limit, offset int32
 	limit = getPaginationParamValue(r, "limit", 20)
 	offset = getPaginationParamValue(r, "offset", 0)
-	recipes, err := DB.ListRecipeByUserID(r.Context(), database.ListRecipeByUserIDParams{
+	recipes, err := DB.ListRecipesByUserID(r.Context(), database.ListRecipesByUserIDParams{
 		UserID: userID,
 		Limit:  limit,
 		Offset: offset,

@@ -13,7 +13,7 @@ SET name = $2, external_url = $3, updated_at = $4
 WHERE id = $1
 RETURNING *;
 
--- name: ListRecipeByUserID :many
+-- name: ListRecipesByUserID :many
 SELECT *
 FROM recipes
 WHERE user_id = $1
