@@ -19,7 +19,7 @@ WHERE value = $1
 `
 
 func (q *Queries) GetTokenByValue(ctx context.Context, value string) (Token, error) {
-	row := q.db.QueryRowContext(ctx, getTokenByValue, value)
+	row := q.db.QueryRow(ctx, getTokenByValue, value)
 	var i Token
 	err := row.Scan(
 		&i.Value,
@@ -43,7 +43,7 @@ type RevokeTokenParams struct {
 }
 
 func (q *Queries) RevokeToken(ctx context.Context, arg RevokeTokenParams) error {
-	_, err := q.db.ExecContext(ctx, revokeToken, arg.Value, arg.IsRevoked)
+	_, err := q.db.Exec(ctx, revokeToken, arg.Value, arg.IsRevoked)
 	return err
 }
 
@@ -61,7 +61,7 @@ type SaveTokenParams struct {
 }
 
 func (q *Queries) SaveToken(ctx context.Context, arg SaveTokenParams) error {
-	_, err := q.db.ExecContext(ctx, saveToken,
+	_, err := q.db.Exec(ctx, saveToken,
 		arg.Value,
 		arg.CreatedAt,
 		arg.ExpiredAt,

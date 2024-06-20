@@ -28,7 +28,7 @@ type CreateRecipeParams struct {
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
-	row := q.db.QueryRowContext(ctx, createRecipe,
+	row := q.db.QueryRow(ctx, createRecipe,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
@@ -54,7 +54,7 @@ WHERE id = $1
 `
 
 func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, error) {
-	row := q.db.QueryRowContext(ctx, getRecipeByID, id)
+	row := q.db.QueryRow(ctx, getRecipeByID, id)
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
@@ -67,7 +67,7 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 	return i, err
 }
 
-const listRecipeByUserID = `-- name: ListRecipeByUserID :many
+const listRecipesByUserID = `-- name: ListRecipesByUserID :many
 SELECT id, created_at, updated_at, external_url, name, user_id
 FROM recipes
 WHERE user_id = $1
@@ -77,14 +77,14 @@ LIMIT
   OFFSET $3
 `
 
-type ListRecipeByUserIDParams struct {
+type ListRecipesByUserIDParams struct {
 	UserID uuid.UUID `json:"user_id"`
 	Limit  int32     `json:"limit"`
 	Offset int32     `json:"offset"`
 }
 
-func (q *Queries) ListRecipeByUserID(ctx context.Context, arg ListRecipeByUserIDParams) ([]Recipe, error) {
-	rows, err := q.db.QueryContext(ctx, listRecipeByUserID, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]Recipe, error) {
+	rows, err := q.db.Query(ctx, listRecipesByUserID, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +103,6 @@ func (q *Queries) ListRecipeByUserID(ctx context.Context, arg ListRecipeByUserID
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -128,7 +125,7 @@ type UpdateRecipeByIDParams struct {
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {
-	row := q.db.QueryRowContext(ctx, updateRecipeByID,
+	row := q.db.QueryRow(ctx, updateRecipeByID,
 		arg.ID,
 		arg.Name,
 		arg.ExternalUrl,
