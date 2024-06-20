@@ -17,6 +17,13 @@ type Cuisine struct {
 	Name      string    `json:"name"`
 	ParentID  uuid.UUID `json:"parent_id"`
 }
+
+type Ingredient struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	ParentID  uuid.UUID `json:"parent_id"`
 }
 
 type Recipe struct {
@@ -35,6 +42,13 @@ type RecipeCuisine struct {
 	CuisineID uuid.UUID `json:"cuisine_id"`
 	RecipeID  uuid.UUID `json:"recipe_id"`
 }
+
+type RecipeIngredient struct {
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	IngredientID uuid.UUID `json:"ingredient_id"`
+	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
 type Token struct {
