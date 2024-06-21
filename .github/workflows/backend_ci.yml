@@ -2,12 +2,15 @@ name: ci
 
 on:
   pull_request:
-    branches: [main]
+    # branches: [main]
 
 jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     env:
       GO111MODULE: on
