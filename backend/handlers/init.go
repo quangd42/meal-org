@@ -14,8 +14,7 @@ import (
 var DB *database.Queries
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
 		log.Fatal("error loading env file: database")
 	}
 

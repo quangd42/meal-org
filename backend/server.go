@@ -2,20 +2,21 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/backend/handlers"
 
 	_ "github.com/lib/pq"
 )
 
 func run() error {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("error loading env: server")
-	// }
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
+		log.Fatal("error loading env: server")
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
