@@ -11,11 +11,19 @@ import (
 )
 
 type Cuisine struct {
-	ID        uuid.UUID     `json:"id"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
-	Name      string        `json:"name"`
-	ParentID  uuid.NullUUID `json:"parent_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	ParentID  uuid.UUID `json:"parent_id"`
+}
+
+type Ingredient struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	ParentID  uuid.UUID `json:"parent_id"`
 }
 
 type Recipe struct {
@@ -28,11 +36,19 @@ type Recipe struct {
 }
 
 type RecipeCuisine struct {
-	ID        uuid.UUID     `json:"id"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
-	CuisineID uuid.NullUUID `json:"cuisine_id"`
-	RecipeID  uuid.NullUUID `json:"recipe_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CuisineID uuid.UUID `json:"cuisine_id"`
+	RecipeID  uuid.UUID `json:"recipe_id"`
+}
+
+type RecipeIngredient struct {
+	ID           uuid.UUID `json:"id"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	IngredientID uuid.UUID `json:"ingredient_id"`
+	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
 type Token struct {
