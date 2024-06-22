@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"golang.org/x/crypto/bcrypt"
@@ -29,7 +29,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	user, err := DB.GetUserByUsername(r.Context(), params.Username)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			respondError(w, http.StatusNotFound, ErrAuthenticationFailed.Error())
 			return
 		}
@@ -49,7 +49,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt, refreshToken, err := GenerateAndSaveAuthTokens(r, user)
+	jwt, refreshToken, err := generateAndSaveAuthTokens(r, user)
 	if err != nil {
 		respondInternalServerError(w)
 		return

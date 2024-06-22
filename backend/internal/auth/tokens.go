@@ -24,7 +24,7 @@ func (uc *UserClaims) GetUserID() uuid.UUID {
 func CreateJWT(user database.User, d time.Duration) (string, error) {
 	now := time.Now().UTC()
 	claims := UserClaims{
-		user.ID,
+		user.ID.Bytes,
 		jwt.RegisteredClaims{
 			Issuer:    JWTIssuer,
 			IssuedAt:  jwt.NewNumericDate(now),

@@ -52,7 +52,7 @@ type User struct {
 
 func createUserResponse(u database.User) User {
 	return User{
-		ID:        u.ID,
+		ID:        u.ID.Bytes,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 		Name:      u.Name,

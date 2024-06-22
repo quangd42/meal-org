@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getTokenByValue = `-- name: GetTokenByValue :one
@@ -54,10 +54,10 @@ INSERT INTO tokens (
 `
 
 type SaveTokenParams struct {
-	Value     string    `json:"value"`
-	CreatedAt time.Time `json:"created_at"`
-	ExpiredAt time.Time `json:"expired_at"`
-	UserID    uuid.UUID `json:"user_id"`
+	Value     string      `json:"value"`
+	CreatedAt time.Time   `json:"created_at"`
+	ExpiredAt time.Time   `json:"expired_at"`
+	UserID    pgtype.UUID `json:"user_id"`
 }
 
 func (q *Queries) SaveToken(ctx context.Context, arg SaveTokenParams) error {

@@ -36,7 +36,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID:        uuid.New(),
+		ID:        NewUUID(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
@@ -54,7 +54,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt, refreshToken, err := GenerateAndSaveAuthTokens(r, user)
+	jwt, refreshToken, err := generateAndSaveAuthTokens(r, user)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -90,7 +90,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
-		ID:        userID,
+		ID:        NewUUID(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 		Hash:      string(hash),

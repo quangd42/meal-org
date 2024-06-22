@@ -2,13 +2,16 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
-func GenerateAndSaveAuthTokens(r *http.Request, user database.User) (string, string, error) {
+func generateAndSaveAuthTokens(r *http.Request, user database.User) (string, string, error) {
 	jwt, err := auth.CreateJWT(user, auth.ExpirationDurationAccess)
 	if err != nil {
 		return "", "", err
@@ -29,4 +32,26 @@ func GenerateAndSaveAuthTokens(r *http.Request, user database.User) (string, str
 	}
 
 	return jwt, refreshToken, nil
+}
+
+func getPaginationParamValue(r *http.Request, name string, defaultValue int32) int32 {
+	val := int32(defaultValue)
+	paramStr := r.URL.Query().Get(name)
+	if paramStr == "" {
+		return val
+	}
+	param64, err := strconv.ParseInt(paramStr, 10, 32)
+	if err != nil {
+		return val
+	}
+	val = int32(param64)
+	return val
+}
+
+func NewUUID() pgtype.UUID {
+	return pgtype.UUID{Bytes: uuid.New(), Valid: true}
+}
+
+func pgUUID(u uuid.UUID) pgtype.UUID {
+	return pgtype.UUID{Bytes: u, Valid: true}
 }
