@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
@@ -17,20 +18,19 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		Name     string    `json:"name"`
 		ParentID uuid.UUID `json:"parent_id"`
 	}
-	decoder := json.NewDecoder(r.Body)
 	params := &parameters{}
-	err := decoder.Decode(params)
+	err := json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
 	ingredient, err := DB.CreateIngredient(r.Context(), database.CreateIngredientParams{
-		ID:        uuid.New(),
+		ID:        NewUUID(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
-		ParentID:  params.ParentID,
+		ParentID:  pgtype.UUID{Bytes: params.ParentID, Valid: params.ParentID != uuid.Nil},
 	})
 	if err != nil {
 		log.Printf("error creating new ingredient: %s\n", err)
@@ -43,5 +43,5 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, ingredient)
+	respondJSON(w, http.StatusOK, createIngredientResponse(ingredient))
 }

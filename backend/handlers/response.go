@@ -66,3 +66,25 @@ func createUserResponseWithToken(u database.User, token, refreshToken string) Us
 	user.RefreshToken = refreshToken
 	return user
 }
+
+type Ingredient struct {
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Name      string     `json:"name"`
+	ParentID  *uuid.UUID `json:"parent_id"`
+}
+
+func createIngredientResponse(i database.Ingredient) Ingredient {
+	res := Ingredient{
+		ID:        i.ID.Bytes,
+		Name:      i.Name,
+		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt,
+	}
+	if i.ParentID.Valid {
+		parentID, _ := uuid.ParseBytes(i.ParentID.Bytes[:])
+		res.ParentID = &parentID
+	}
+	return res
+}
