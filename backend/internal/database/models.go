@@ -52,14 +52,6 @@ type RecipeIngredient struct {
 	RecipeID     pgtype.UUID `json:"recipe_id"`
 }
 
-type RecipeIngredient struct {
-	ID           uuid.UUID `json:"id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	IngredientID uuid.UUID `json:"ingredient_id"`
-	RecipeID     uuid.UUID `json:"recipe_id"`
-}
-
 type Token struct {
 	Value     string      `json:"value"`
 	CreatedAt time.Time   `json:"created_at"`
