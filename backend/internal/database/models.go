@@ -7,7 +7,6 @@ package database
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -28,12 +27,12 @@ type Ingredient struct {
 }
 
 type Recipe struct {
-	ID          uuid.UUID `json:"id"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	ExternalUrl string    `json:"external_url"`
-	Name        string    `json:"name"`
-	UserID      uuid.UUID `json:"user_id"`
+	ID          pgtype.UUID `json:"id"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+	ExternalUrl string      `json:"external_url"`
+	Name        string      `json:"name"`
+	UserID      pgtype.UUID `json:"user_id"`
 }
 
 type RecipeCuisine struct {
@@ -43,6 +42,14 @@ type RecipeCuisine struct {
 	CuisineID pgtype.UUID `json:"cuisine_id"`
 	RecipeID  pgtype.UUID `json:"recipe_id"`
 }
+
+type RecipeIngredient struct {
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+	Amount       string      `json:"amount"`
+	Instruction  pgtype.Text `json:"instruction"`
+	IngredientID pgtype.UUID `json:"ingredient_id"`
+	RecipeID     pgtype.UUID `json:"recipe_id"`
 }
 
 type RecipeIngredient struct {
