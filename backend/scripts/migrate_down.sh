@@ -5,4 +5,4 @@ if [ -f .env ]; then
 fi
 
 cd sql/schema || exit
-goose postgres "$DATABASE_URL" down
+goose postgres "$DB_URL" down

@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createRecipe = `-- name: CreateRecipe :one
@@ -19,12 +19,12 @@ RETURNING id, created_at, updated_at, external_url, name, user_id
 `
 
 type CreateRecipeParams struct {
-	ID          pgtype.UUID `json:"id"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Name        string      `json:"name"`
-	ExternalUrl string      `json:"external_url"`
-	UserID      pgtype.UUID `json:"user_id"`
+	ID          uuid.UUID `json:"id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Name        string    `json:"name"`
+	ExternalUrl string    `json:"external_url"`
+	UserID      uuid.UUID `json:"user_id"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
@@ -53,7 +53,7 @@ SELECT id, created_at, updated_at, external_url, name, user_id FROM recipes
 WHERE id = $1
 `
 
-func (q *Queries) GetRecipeByID(ctx context.Context, id pgtype.UUID) (Recipe, error) {
+func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, error) {
 	row := q.db.QueryRow(ctx, getRecipeByID, id)
 	var i Recipe
 	err := row.Scan(
@@ -78,9 +78,9 @@ LIMIT
 `
 
 type ListRecipesByUserIDParams struct {
-	UserID pgtype.UUID `json:"user_id"`
-	Limit  int32       `json:"limit"`
-	Offset int32       `json:"offset"`
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
 }
 
 func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]Recipe, error) {
@@ -118,10 +118,10 @@ RETURNING id, created_at, updated_at, external_url, name, user_id
 `
 
 type UpdateRecipeByIDParams struct {
-	ID          pgtype.UUID `json:"id"`
-	Name        string      `json:"name"`
-	ExternalUrl string      `json:"external_url"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	ExternalUrl string    `json:"external_url"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {

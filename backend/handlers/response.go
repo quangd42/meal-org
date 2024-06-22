@@ -52,7 +52,7 @@ type User struct {
 
 func createUserResponse(u database.User) User {
 	return User{
-		ID:        u.ID.Bytes,
+		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 		Name:      u.Name,
@@ -65,65 +65,4 @@ func createUserResponseWithToken(u database.User, token, refreshToken string) Us
 	user.Token = token
 	user.RefreshToken = refreshToken
 	return user
-}
-
-type Recipe struct {
-	ID          uuid.UUID            `json:"id"`
-	CreatedAt   time.Time            `json:"created_at"`
-	UpdatedAt   time.Time            `json:"updated_at"`
-	Name        string               `json:"name"`
-	ExternalUrl string               `json:"external_url"`
-	UserID      uuid.UUID            `json:"user_id"`
-	Ingredients []IngredientInRecipe `json:"ingredients"`
-}
-
-type IngredientInRecipe struct {
-	ID          uuid.UUID  `json:"id"`
-	Amount      string     `json:"amount"`
-	Instruction string     `json:"instruction"`
-	Name        string     `json:"name"`
-	ParentID    *uuid.UUID `json:"parent_id"`
-}
-
-func createRecipeResponse(dr database.Recipe, dis []database.ListIngredientsByRecipeIDRow) Recipe {
-	ingredients := []IngredientInRecipe{}
-	for _, di := range dis {
-		ingredients = append(ingredients, IngredientInRecipe{
-			ID:          di.ID.Bytes,
-			Amount:      di.Amount,
-			Instruction: di.Instruction.String,
-			Name:        di.Name,
-		})
-	}
-	return Recipe{
-		ID:          dr.ID.Bytes,
-		CreatedAt:   dr.CreatedAt,
-		UpdatedAt:   dr.UpdatedAt,
-		Name:        dr.Name,
-		ExternalUrl: dr.ExternalUrl,
-		UserID:      dr.UserID.Bytes,
-		Ingredients: ingredients,
-	}
-}
-
-type Ingredient struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id"`
-}
-
-func createIngredientResponse(i database.Ingredient) Ingredient {
-	res := Ingredient{
-		ID:        i.ID.Bytes,
-		Name:      i.Name,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt,
-	}
-	if i.ParentID.Valid {
-		parentID, _ := uuid.ParseBytes(i.ParentID.Bytes[:])
-		res.ParentID = &parentID
-	}
-	return res
 }

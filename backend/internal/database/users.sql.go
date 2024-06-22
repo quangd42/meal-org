@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -19,12 +19,12 @@ RETURNING id, created_at, updated_at, name, username, hash
 `
 
 type CreateUserParams struct {
-	ID        pgtype.UUID `json:"id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-	Name      string      `json:"name"`
-	Username  string      `json:"username"`
-	Hash      string      `json:"hash"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	Username  string    `json:"username"`
+	Hash      string    `json:"hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -53,7 +53,7 @@ SELECT id, created_at, updated_at, name, username, hash FROM users
 WHERE id = $1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(
@@ -94,10 +94,10 @@ RETURNING id, created_at, updated_at, name, username, hash
 `
 
 type UpdateUserByIDParams struct {
-	ID        pgtype.UUID `json:"id"`
-	Name      string      `json:"name"`
-	Hash      string      `json:"hash"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Hash      string    `json:"hash"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateUserByID(ctx context.Context, arg UpdateUserByIDParams) (User, error) {

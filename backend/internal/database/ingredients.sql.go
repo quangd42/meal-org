@@ -9,17 +9,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
-
-type AddIngredientsToRecipeParams struct {
-	Amount       string      `json:"amount"`
-	Instruction  pgtype.Text `json:"instruction"`
-	CreatedAt    time.Time   `json:"created_at"`
-	UpdatedAt    time.Time   `json:"updated_at"`
-	IngredientID pgtype.UUID `json:"ingredient_id"`
-	RecipeID     pgtype.UUID `json:"recipe_id"`
-}
 
 const createIngredient = `-- name: CreateIngredient :one
 INSERT INTO ingredients (id, created_at, updated_at, name, parent_id)
@@ -28,11 +19,11 @@ RETURNING id, created_at, updated_at, name, parent_id
 `
 
 type CreateIngredientParams struct {
-	ID        pgtype.UUID `json:"id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-	Name      string      `json:"name"`
-	ParentID  pgtype.UUID `json:"parent_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
+	ParentID  uuid.UUID `json:"parent_id"`
 }
 
 func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error) {
@@ -60,7 +51,7 @@ FROM ingredients
 WHERE id = $1
 `
 
-func (q *Queries) GetIngredientByID(ctx context.Context, id pgtype.UUID) (Ingredient, error) {
+func (q *Queries) GetIngredientByID(ctx context.Context, id uuid.UUID) (Ingredient, error) {
 	row := q.db.QueryRow(ctx, getIngredientByID, id)
 	var i Ingredient
 	err := row.Scan(
@@ -74,40 +65,31 @@ func (q *Queries) GetIngredientByID(ctx context.Context, id pgtype.UUID) (Ingred
 }
 
 const listIngredientsByRecipeID = `-- name: ListIngredientsByRecipeID :many
-SELECT
-  id,
-  name,
-  amount,
-  instruction,
-  recipe_id
+SELECT id, created_at, updated_at, name, parent_id
 FROM ingredients
-JOIN recipe_ingredient ON id = ingredient_id
-WHERE recipe_id = $1
+WHERE id in (
+        SELECT ingredient_id
+        FROM recipe_ingredient
+        WHERE recipe_id = $1
+    )
+ORDER BY ingredients.name
 `
 
-type ListIngredientsByRecipeIDRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Name        string      `json:"name"`
-	Amount      string      `json:"amount"`
-	Instruction pgtype.Text `json:"instruction"`
-	RecipeID    pgtype.UUID `json:"recipe_id"`
-}
-
-func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype.UUID) ([]ListIngredientsByRecipeIDRow, error) {
+func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]Ingredient, error) {
 	rows, err := q.db.Query(ctx, listIngredientsByRecipeID, recipeID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListIngredientsByRecipeIDRow
+	var items []Ingredient
 	for rows.Next() {
-		var i ListIngredientsByRecipeIDRow
+		var i Ingredient
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Name,
-			&i.Amount,
-			&i.Instruction,
-			&i.RecipeID,
+			&i.ParentID,
 		); err != nil {
 			return nil, err
 		}
@@ -121,19 +103,18 @@ func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype
 
 const updateIngredientByID = `-- name: UpdateIngredientByID :one
 UPDATE ingredients
-SET
-  name = $2,
-  parent_id = $3,
-  updated_at = $4
+SET name = $2,
+    parent_id = $3,
+    updated_at = $4
 WHERE id = $1
 RETURNING id, created_at, updated_at, name, parent_id
 `
 
 type UpdateIngredientByIDParams struct {
-	ID        pgtype.UUID `json:"id"`
-	Name      string      `json:"name"`
-	ParentID  pgtype.UUID `json:"parent_id"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	ParentID  uuid.UUID `json:"parent_id"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateIngredientByID(ctx context.Context, arg UpdateIngredientByIDParams) (Ingredient, error) {
