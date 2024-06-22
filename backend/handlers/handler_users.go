@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/middleware"
@@ -35,7 +36,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID:        uuid.New(),
+		ID:        NewUUID(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
@@ -44,15 +45,16 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("error creating new user: %s\n", err)
-		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == pq.ErrorCode("23505") {
-			respondError(w, http.StatusBadRequest, "User already exists")
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			respondError(w, http.StatusBadRequest, "user already exists")
 			return
 		}
 		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	jwt, refreshToken, err := GenerateAndSaveAuthTokens(r, user)
+	jwt, refreshToken, err := generateAndSaveAuthTokens(r, user)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -88,7 +90,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
-		ID:        userID,
+		ID:        NewUUID(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 		Hash:      string(hash),
