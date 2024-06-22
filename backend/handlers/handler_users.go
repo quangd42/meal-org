@@ -90,7 +90,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
-		ID:        NewUUID(),
+		ID:        pgUUID(userID),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 		Hash:      string(hash),
