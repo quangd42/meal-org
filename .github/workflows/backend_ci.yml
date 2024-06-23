@@ -76,7 +76,7 @@ jobs:
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
-          args: -exclude-generated backend/...
+          args: -exclude-generated ./...
 
   style:
     name: Style
