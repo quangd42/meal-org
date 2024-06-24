@@ -120,10 +120,12 @@ func createIngredientResponse(i database.Ingredient) Ingredient {
 		Name:      i.Name,
 		CreatedAt: i.CreatedAt,
 		UpdatedAt: i.UpdatedAt,
+		ParentID:  &uuid.UUID{},
 	}
 	if i.ParentID.Valid {
-		parentID, _ := uuid.ParseBytes(i.ParentID.Bytes[:])
-		res.ParentID = &parentID
+		*res.ParentID = i.ParentID.Bytes
+	} else {
+		res.ParentID = nil
 	}
 	return res
 }

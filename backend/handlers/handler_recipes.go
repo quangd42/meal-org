@@ -98,7 +98,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
 		Name        string `json:"name"`
-		ExternalURL string `json:"external_url,omitempty"`
+		ExternalURL string `json:"external_url"`
 		Ingredients []IngredientInRecipe
 	}
 
@@ -119,6 +119,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// BUG: Missing update ingredients
 	recipe, err := DB.UpdateRecipeByID(r.Context(), database.UpdateRecipeByIDParams{
 		ID:          targetRecipe.ID,
 		UpdatedAt:   time.Now().UTC(),
