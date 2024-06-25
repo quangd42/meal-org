@@ -13,3 +13,12 @@ WHERE recipe_id = $1;
 INSERT INTO recipe_ingredient (
   amount, instruction, created_at, updated_at, ingredient_id, recipe_id
 ) VALUES ($1, $2, $3, $4, $5, $6);
+
+-- name: UpdateIngredientInRecipe :exec
+UPDATE recipe_ingredient
+SET
+  amount = $1,
+  instruction = $2,
+  updated_at = $3
+WHERE
+  ingredient_id = $4 AND recipe_id = $5;

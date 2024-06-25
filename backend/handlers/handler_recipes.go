@@ -99,7 +99,11 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name        string `json:"name"`
 		ExternalURL string `json:"external_url"`
-		Ingredients []IngredientInRecipe
+		Ingredients []struct {
+			ID          uuid.UUID `json:"id"`
+			Amount      string    `json:"amount"`
+			Instruction string    `json:"instruction"`
+		} `json:"ingredients"`
 	}
 
 	params := &parameters{}
@@ -119,7 +123,6 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// BUG: Missing update ingredients
 	recipe, err := DB.UpdateRecipeByID(r.Context(), database.UpdateRecipeByIDParams{
 		ID:          targetRecipe.ID,
 		UpdatedAt:   time.Now().UTC(),
@@ -129,6 +132,22 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondInternalServerError(w)
 		return
+	}
+
+	errs := make(map[int]string, len(params.Ingredients))
+	for index, i := range params.Ingredients {
+		ingreDBParams := database.UpdateIngredientInRecipeParams{
+			Amount:       i.Amount,
+			Instruction:  pgtype.Text{String: i.Instruction, Valid: true},
+			UpdatedAt:    time.Now().UTC(),
+			IngredientID: pgUUID(i.ID),
+			RecipeID:     pgUUID(recipeID),
+		}
+
+		err = DB.UpdateIngredientInRecipe(r.Context(), ingreDBParams)
+		if err != nil {
+			errs[index] = err.Error()
+		}
 	}
 
 	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), pgUUID(recipeID))

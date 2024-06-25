@@ -66,3 +66,32 @@ func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype
 	}
 	return items, nil
 }
+
+const updateIngredientInRecipe = `-- name: UpdateIngredientInRecipe :exec
+UPDATE recipe_ingredient
+SET
+  amount = $1,
+  instruction = $2,
+  updated_at = $3
+WHERE
+  ingredient_id = $4 AND recipe_id = $5
+`
+
+type UpdateIngredientInRecipeParams struct {
+	Amount       string      `json:"amount"`
+	Instruction  pgtype.Text `json:"instruction"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+	IngredientID pgtype.UUID `json:"ingredient_id"`
+	RecipeID     pgtype.UUID `json:"recipe_id"`
+}
+
+func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngredientInRecipeParams) error {
+	_, err := q.db.Exec(ctx, updateIngredientInRecipe,
+		arg.Amount,
+		arg.Instruction,
+		arg.UpdatedAt,
+		arg.IngredientID,
+		arg.RecipeID,
+	)
+	return err
+}
