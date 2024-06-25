@@ -21,3 +21,7 @@ RETURNING *;
 SELECT *
 FROM ingredients
 ORDER BY name;
+
+-- name: DeleteIngredient :exec
+DELETE FROM ingredients
+WHERE id = $1;

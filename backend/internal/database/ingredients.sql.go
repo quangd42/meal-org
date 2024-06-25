@@ -45,6 +45,16 @@ func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientPara
 	return i, err
 }
 
+const deleteIngredient = `-- name: DeleteIngredient :exec
+DELETE FROM ingredients
+WHERE id = $1
+`
+
+func (q *Queries) DeleteIngredient(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteIngredient, id)
+	return err
+}
+
 const getIngredientByID = `-- name: GetIngredientByID :one
 SELECT id, created_at, updated_at, name, parent_id
 FROM ingredients

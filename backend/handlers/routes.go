@@ -65,9 +65,10 @@ func ingredientsAPIRouter() http.Handler {
 
 	r.Use(middleware.AuthVerifier())
 	r.Post("/", createIngredientHandler)
-	r.Get("/", listIngredients)
+	r.Get("/", listIngredientsHandler)
 
 	r.Put("/{id}", updateIngredientHandler)
+	r.Delete("/{id}", deleteIngredientHandler)
 
 	return r
 }
