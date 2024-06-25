@@ -48,6 +48,21 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 	return i, err
 }
 
+const deleteRecipe = `-- name: DeleteRecipe :exec
+DELETE FROM recipes
+WHERE user_id = $1 AND id = $2
+`
+
+type DeleteRecipeParams struct {
+	UserID pgtype.UUID `json:"user_id"`
+	ID     pgtype.UUID `json:"id"`
+}
+
+func (q *Queries) DeleteRecipe(ctx context.Context, arg DeleteRecipeParams) error {
+	_, err := q.db.Exec(ctx, deleteRecipe, arg.UserID, arg.ID)
+	return err
+}
+
 const getRecipeByID = `-- name: GetRecipeByID :one
 SELECT id, created_at, updated_at, external_url, name, user_id FROM recipes
 WHERE id = $1

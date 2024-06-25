@@ -54,8 +54,9 @@ func recipesAPIRouter() http.Handler {
 	r.Post("/", createRecipeHandler)
 	r.Get("/", listRecipesHandler)
 
-	r.Put("/{id}", updateRecipeHandler)
 	r.Get("/{id}", getRecipeHandler)
+	r.Put("/{id}", updateRecipeHandler)
+	r.Delete("/{id}", deleteRecipeHandler)
 
 	return r
 }

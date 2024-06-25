@@ -93,5 +93,5 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createUserResponse(user))
+	respondJSON(w, http.StatusCreated, createUserResponse(user))
 }
