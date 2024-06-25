@@ -2,13 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/middleware"
@@ -24,7 +22,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	params := &Parameters{}
 	err := decoder.Decode(params)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		respondMalformedRequestError(w)
 		return
 	}
 
@@ -45,12 +43,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		log.Printf("error creating new user: %s\n", err)
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			respondError(w, http.StatusBadRequest, "user already exists")
-			return
-		}
-		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		respondUniqueValueError(w, err, "username")
 		return
 	}
 
@@ -79,7 +72,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(params)
 	if err != nil {
 		log.Printf("error decoding: %s\n", err.Error())
-		respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+		respondMalformedRequestError(w)
 		return
 	}
 

@@ -37,7 +37,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	params := &parameters{}
 	err := json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondMalformedRequestError(w)
 		return
 	}
 
@@ -109,7 +109,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	params := &parameters{}
 	err = json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondMalformedRequestError(w)
 		return
 	}
 
@@ -134,8 +134,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errs := make(map[int]string, len(params.Ingredients))
-	for index, i := range params.Ingredients {
+	for _, i := range params.Ingredients {
 		ingreDBParams := database.UpdateIngredientInRecipeParams{
 			Amount:       i.Amount,
 			Instruction:  pgtype.Text{String: i.Instruction, Valid: true},
@@ -146,7 +145,8 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = DB.UpdateIngredientInRecipe(r.Context(), ingreDBParams)
 		if err != nil {
-			errs[index] = err.Error()
+			respondInternalServerError(w)
+			return
 		}
 	}
 
