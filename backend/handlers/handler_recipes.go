@@ -37,7 +37,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	params := &parameters{}
 	err := json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondMalformedRequestError(w)
 		return
 	}
 
@@ -98,14 +98,18 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
 		Name        string `json:"name"`
-		ExternalURL string `json:"external_url,omitempty"`
-		Ingredients []IngredientInRecipe
+		ExternalURL string `json:"external_url"`
+		Ingredients []struct {
+			ID          uuid.UUID `json:"id"`
+			Amount      string    `json:"amount"`
+			Instruction string    `json:"instruction"`
+		} `json:"ingredients"`
 	}
 
 	params := &parameters{}
 	err = json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondMalformedRequestError(w)
 		return
 	}
 
@@ -128,6 +132,22 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondInternalServerError(w)
 		return
+	}
+
+	for _, i := range params.Ingredients {
+		ingreDBParams := database.UpdateIngredientInRecipeParams{
+			Amount:       i.Amount,
+			Instruction:  pgtype.Text{String: i.Instruction, Valid: true},
+			UpdatedAt:    time.Now().UTC(),
+			IngredientID: pgUUID(i.ID),
+			RecipeID:     pgUUID(recipeID),
+		}
+
+		err = DB.UpdateIngredientInRecipe(r.Context(), ingreDBParams)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
 	}
 
 	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), pgUUID(recipeID))

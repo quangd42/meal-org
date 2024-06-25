@@ -2,11 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
@@ -37,6 +39,19 @@ func respondError(w http.ResponseWriter, code int, msg string) {
 
 func respondInternalServerError(w http.ResponseWriter) {
 	respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+}
+
+func respondUniqueValueError(w http.ResponseWriter, err error, msg string) {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		respondError(w, http.StatusBadRequest, "unique value constraint violated: "+msg)
+		return
+	}
+	respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+}
+
+func respondMalformedRequestError(w http.ResponseWriter) {
+	respondError(w, http.StatusBadRequest, "malformed request body")
 }
 
 type User struct {
@@ -120,10 +135,12 @@ func createIngredientResponse(i database.Ingredient) Ingredient {
 		Name:      i.Name,
 		CreatedAt: i.CreatedAt,
 		UpdatedAt: i.UpdatedAt,
+		ParentID:  &uuid.UUID{},
 	}
 	if i.ParentID.Valid {
-		parentID, _ := uuid.ParseBytes(i.ParentID.Bytes[:])
-		res.ParentID = &parentID
+		*res.ParentID = i.ParentID.Bytes
+	} else {
+		res.ParentID = nil
 	}
 	return res
 }

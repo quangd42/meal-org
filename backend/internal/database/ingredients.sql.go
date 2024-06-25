@@ -12,15 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type AddIngredientsToRecipeParams struct {
-	Amount       string      `json:"amount"`
-	Instruction  pgtype.Text `json:"instruction"`
-	CreatedAt    time.Time   `json:"created_at"`
-	UpdatedAt    time.Time   `json:"updated_at"`
-	IngredientID pgtype.UUID `json:"ingredient_id"`
-	RecipeID     pgtype.UUID `json:"recipe_id"`
-}
-
 const createIngredient = `-- name: CreateIngredient :one
 INSERT INTO ingredients (id, created_at, updated_at, name, parent_id)
 VALUES ($1, $2, $3, $4, $5)
@@ -73,41 +64,27 @@ func (q *Queries) GetIngredientByID(ctx context.Context, id pgtype.UUID) (Ingred
 	return i, err
 }
 
-const listIngredientsByRecipeID = `-- name: ListIngredientsByRecipeID :many
-SELECT
-  id,
-  name,
-  amount,
-  instruction,
-  recipe_id
+const listIngredients = `-- name: ListIngredients :many
+SELECT id, created_at, updated_at, name, parent_id
 FROM ingredients
-JOIN recipe_ingredient ON id = ingredient_id
-WHERE recipe_id = $1
+ORDER BY name
 `
 
-type ListIngredientsByRecipeIDRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Name        string      `json:"name"`
-	Amount      string      `json:"amount"`
-	Instruction pgtype.Text `json:"instruction"`
-	RecipeID    pgtype.UUID `json:"recipe_id"`
-}
-
-func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype.UUID) ([]ListIngredientsByRecipeIDRow, error) {
-	rows, err := q.db.Query(ctx, listIngredientsByRecipeID, recipeID)
+func (q *Queries) ListIngredients(ctx context.Context) ([]Ingredient, error) {
+	rows, err := q.db.Query(ctx, listIngredients)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListIngredientsByRecipeIDRow
+	var items []Ingredient
 	for rows.Next() {
-		var i ListIngredientsByRecipeIDRow
+		var i Ingredient
 		if err := rows.Scan(
 			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Name,
-			&i.Amount,
-			&i.Instruction,
-			&i.RecipeID,
+			&i.ParentID,
 		); err != nil {
 			return nil, err
 		}
