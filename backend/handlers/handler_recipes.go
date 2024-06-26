@@ -79,7 +79,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients))
+	respondJSON(w, http.StatusCreated, createRecipeResponse(recipe, ingredients))
 }
 
 func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
@@ -218,4 +218,30 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients))
+}
+
+func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+	if !ok {
+		respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
+		return
+	}
+
+	recipeIDString := chi.URLParam(r, "id")
+	recipeID, err := uuid.Parse(recipeIDString)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "recipe id not found")
+		return
+	}
+
+	err = DB.DeleteRecipe(r.Context(), database.DeleteRecipeParams{
+		UserID: pgUUID(userID),
+		ID:     pgUUID(recipeID),
+	})
+	if err != nil {
+		respondInternalServerError(w)
+		return
+	}
+
+	respondJSON(w, http.StatusNoContent, http.StatusText(http.StatusNoContent))
 }

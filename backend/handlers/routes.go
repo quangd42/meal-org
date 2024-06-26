@@ -30,6 +30,7 @@ func usersAPIRouter() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthVerifier())
 		r.Put("/", updateUserHandler)
+		r.Delete("/", forgetMeHandler)
 	})
 
 	return r
@@ -54,8 +55,9 @@ func recipesAPIRouter() http.Handler {
 	r.Post("/", createRecipeHandler)
 	r.Get("/", listRecipesHandler)
 
-	r.Put("/{id}", updateRecipeHandler)
 	r.Get("/{id}", getRecipeHandler)
+	r.Put("/{id}", updateRecipeHandler)
+	r.Delete("/{id}", deleteRecipeHandler)
 
 	return r
 }
@@ -65,9 +67,10 @@ func ingredientsAPIRouter() http.Handler {
 
 	r.Use(middleware.AuthVerifier())
 	r.Post("/", createIngredientHandler)
-	r.Get("/", listIngredients)
+	r.Get("/", listIngredientsHandler)
 
 	r.Put("/{id}", updateIngredientHandler)
+	r.Delete("/{id}", deleteIngredientHandler)
 
 	return r
 }

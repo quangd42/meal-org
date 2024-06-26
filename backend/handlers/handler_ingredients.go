@@ -13,7 +13,8 @@ import (
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
-// TODO: only allow admin user
+// TODO: each user can create their own ingredients
+// admin create shared set
 func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name     string    `json:"name"`
@@ -39,9 +40,11 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createIngredientResponse(ingredient))
+	respondJSON(w, http.StatusCreated, createIngredientResponse(ingredient))
 }
 
+// TODO: each user can update their own ingredients
+// admin can update the shared set
 func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	ingredientIDString := chi.URLParam(r, "id")
 	ingredientID, err := uuid.Parse(ingredientIDString)
@@ -76,7 +79,8 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, createIngredientResponse(ingredient))
 }
 
-func listIngredients(w http.ResponseWriter, r *http.Request) {
+// TODO: each user should see their own set
+func listIngredientsHandler(w http.ResponseWriter, r *http.Request) {
 	ingredients, err := DB.ListIngredients(r.Context())
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -88,4 +92,22 @@ func listIngredients(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondJSON(w, http.StatusOK, ingredients)
+}
+
+// TODO: normal user can only delete their own ingredients
+func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
+	ingredientIDString := chi.URLParam(r, "id")
+	ingredientID, err := uuid.Parse(ingredientIDString)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "ingredient id not found")
+		return
+	}
+
+	err = DB.DeleteIngredient(r.Context(), pgUUID(ingredientID))
+	if err != nil {
+		respondInternalServerError(w)
+		return
+	}
+
+	respondJSON(w, http.StatusNoContent, http.StatusText(http.StatusNoContent))
 }

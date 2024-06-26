@@ -21,3 +21,7 @@ ORDER BY name
 LIMIT
   $2
   OFFSET $3;
+
+-- name: DeleteRecipe :exec
+DELETE FROM recipes
+WHERE user_id = $1 AND id = $2;
