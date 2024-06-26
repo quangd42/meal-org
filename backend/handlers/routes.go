@@ -30,6 +30,7 @@ func usersAPIRouter() http.Handler {
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthVerifier())
 		r.Put("/", updateUserHandler)
+		r.Delete("/", forgetMeHandler)
 	})
 
 	return r
