@@ -16,3 +16,7 @@ UPDATE users
 SET name = $2, hash = $3, updated_at = $4
 WHERE id = $1
 RETURNING *;
+
+-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1;

@@ -93,5 +93,21 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createUserResponse(user))
+	respondJSON(w, http.StatusCreated, createUserResponse(user))
+}
+
+func forgetMeHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+	if !ok {
+		respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+		return
+	}
+
+	err := DB.DeleteUser(r.Context(), pgUUID(userID))
+	if err != nil {
+		respondInternalServerError(w)
+		return
+	}
+
+	respondJSON(w, http.StatusNoContent, "user deleted")
 }
