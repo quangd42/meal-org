@@ -26,13 +26,25 @@ type Ingredient struct {
 	ParentID  pgtype.UUID `json:"parent_id"`
 }
 
-type Recipe struct {
-	ID          pgtype.UUID `json:"id"`
+type Instruction struct {
 	CreatedAt   time.Time   `json:"created_at"`
 	UpdatedAt   time.Time   `json:"updated_at"`
-	ExternalUrl string      `json:"external_url"`
-	Name        string      `json:"name"`
-	UserID      pgtype.UUID `json:"user_id"`
+	StepNo      int32       `json:"step_no"`
+	Instruction string      `json:"instruction"`
+	RecipeID    pgtype.UUID `json:"recipe_id"`
+}
+
+type Recipe struct {
+	ID                pgtype.UUID `json:"id"`
+	CreatedAt         time.Time   `json:"created_at"`
+	UpdatedAt         time.Time   `json:"updated_at"`
+	ExternalUrl       string      `json:"external_url"`
+	Name              string      `json:"name"`
+	UserID            pgtype.UUID `json:"user_id"`
+	Servings          int32       `json:"servings"`
+	Yield             pgtype.Text `json:"yield"`
+	CookTimeInMinutes int32       `json:"cook_time_in_minutes"`
+	Notes             pgtype.Text `json:"notes"`
 }
 
 type RecipeCuisine struct {

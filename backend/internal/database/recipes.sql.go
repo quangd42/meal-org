@@ -13,18 +13,33 @@ import (
 )
 
 const createRecipe = `-- name: CreateRecipe :one
-INSERT INTO recipes (id, created_at, updated_at, name, external_url, user_id)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, created_at, updated_at, external_url, name, user_id
+INSERT INTO recipes (
+  id,
+  created_at,
+  updated_at,
+  name,
+  external_url,
+  user_id,
+  servings,
+  yield,
+  cook_time_in_minutes,
+  notes
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
 `
 
 type CreateRecipeParams struct {
-	ID          pgtype.UUID `json:"id"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Name        string      `json:"name"`
-	ExternalUrl string      `json:"external_url"`
-	UserID      pgtype.UUID `json:"user_id"`
+	ID                pgtype.UUID `json:"id"`
+	CreatedAt         time.Time   `json:"created_at"`
+	UpdatedAt         time.Time   `json:"updated_at"`
+	Name              string      `json:"name"`
+	ExternalUrl       string      `json:"external_url"`
+	UserID            pgtype.UUID `json:"user_id"`
+	Servings          int32       `json:"servings"`
+	Yield             pgtype.Text `json:"yield"`
+	CookTimeInMinutes int32       `json:"cook_time_in_minutes"`
+	Notes             pgtype.Text `json:"notes"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
@@ -35,6 +50,10 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		arg.Name,
 		arg.ExternalUrl,
 		arg.UserID,
+		arg.Servings,
+		arg.Yield,
+		arg.CookTimeInMinutes,
+		arg.Notes,
 	)
 	var i Recipe
 	err := row.Scan(
@@ -44,6 +63,10 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		&i.ExternalUrl,
 		&i.Name,
 		&i.UserID,
+		&i.Servings,
+		&i.Yield,
+		&i.CookTimeInMinutes,
+		&i.Notes,
 	)
 	return i, err
 }
@@ -64,7 +87,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, arg DeleteRecipeParams) erro
 }
 
 const getRecipeByID = `-- name: GetRecipeByID :one
-SELECT id, created_at, updated_at, external_url, name, user_id FROM recipes
+SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes FROM recipes
 WHERE id = $1
 `
 
@@ -78,12 +101,21 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id pgtype.UUID) (Recipe, er
 		&i.ExternalUrl,
 		&i.Name,
 		&i.UserID,
+		&i.Servings,
+		&i.Yield,
+		&i.CookTimeInMinutes,
+		&i.Notes,
 	)
 	return i, err
 }
 
 const listRecipesByUserID = `-- name: ListRecipesByUserID :many
-SELECT id, created_at, updated_at, external_url, name, user_id
+SELECT
+  name,
+  external_url,
+  updated_at,
+  servings,
+  cook_time_in_minutes
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -98,22 +130,29 @@ type ListRecipesByUserIDParams struct {
 	Offset int32       `json:"offset"`
 }
 
-func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]Recipe, error) {
+type ListRecipesByUserIDRow struct {
+	Name              string    `json:"name"`
+	ExternalUrl       string    `json:"external_url"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	Servings          int32     `json:"servings"`
+	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
+}
+
+func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]ListRecipesByUserIDRow, error) {
 	rows, err := q.db.Query(ctx, listRecipesByUserID, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Recipe
+	var items []ListRecipesByUserIDRow
 	for rows.Next() {
-		var i Recipe
+		var i ListRecipesByUserIDRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.ExternalUrl,
 			&i.Name,
-			&i.UserID,
+			&i.ExternalUrl,
+			&i.UpdatedAt,
+			&i.Servings,
+			&i.CookTimeInMinutes,
 		); err != nil {
 			return nil, err
 		}
@@ -127,16 +166,27 @@ func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUser
 
 const updateRecipeByID = `-- name: UpdateRecipeByID :one
 UPDATE recipes
-SET name = $2, external_url = $3, updated_at = $4
+SET
+  name = $2,
+  external_url = $3,
+  updated_at = $4,
+  servings = $5,
+  yield = $6,
+  cook_time_in_minutes = $7,
+  notes = $8
 WHERE id = $1
-RETURNING id, created_at, updated_at, external_url, name, user_id
+RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
 `
 
 type UpdateRecipeByIDParams struct {
-	ID          pgtype.UUID `json:"id"`
-	Name        string      `json:"name"`
-	ExternalUrl string      `json:"external_url"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+	ID                pgtype.UUID `json:"id"`
+	Name              string      `json:"name"`
+	ExternalUrl       string      `json:"external_url"`
+	UpdatedAt         time.Time   `json:"updated_at"`
+	Servings          int32       `json:"servings"`
+	Yield             pgtype.Text `json:"yield"`
+	CookTimeInMinutes int32       `json:"cook_time_in_minutes"`
+	Notes             pgtype.Text `json:"notes"`
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {
@@ -145,6 +195,10 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		arg.Name,
 		arg.ExternalUrl,
 		arg.UpdatedAt,
+		arg.Servings,
+		arg.Yield,
+		arg.CookTimeInMinutes,
+		arg.Notes,
 	)
 	var i Recipe
 	err := row.Scan(
@@ -154,6 +208,10 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		&i.ExternalUrl,
 		&i.Name,
 		&i.UserID,
+		&i.Servings,
+		&i.Yield,
+		&i.CookTimeInMinutes,
+		&i.Notes,
 	)
 	return i, err
 }

@@ -24,14 +24,24 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	type step struct {
+		StepNo      int    `json:"step_no"`
+		Instruction string `json:"instruction"`
+	}
+
 	type parameters struct {
-		Name        string `json:"name"`
-		ExternalURL string `json:"external_url,omitempty"`
-		Ingredients []struct {
+		Name              string `json:"name"`
+		ExternalURL       string `json:"external_url,omitempty"`
+		Servings          int    `json:"servings"`
+		Yield             string `json:"yield"`
+		CookTimeInMinutes int    `json:"cook_time_in_minutes"`
+		Notes             string `json:"notes"`
+		Ingredients       []struct {
 			ID       uuid.UUID `json:"id"`
 			Amount   string    `json:"amount"`
 			PrepNote string    `json:"prep_note"`
 		} `json:"ingredients"`
+		Instructions []step `json:"instructions"`
 	}
 
 	params := &parameters{}
@@ -41,15 +51,23 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: valitation of required data?
+
+	// Create host Recipe
 	recipe, err := DB.CreateRecipe(r.Context(), database.CreateRecipeParams{
-		ID:          NewUUID(),
-		CreatedAt:   time.Now().UTC(),
-		UpdatedAt:   time.Now().UTC(),
-		Name:        params.Name,
-		ExternalUrl: params.ExternalURL,
-		UserID:      pgUUID(userID),
+		ID:                NewUUID(),
+		CreatedAt:         time.Now().UTC(),
+		UpdatedAt:         time.Now().UTC(),
+		Name:              params.Name,
+		ExternalUrl:       params.ExternalURL,
+		Servings:          int32(params.Servings),
+		Yield:             pgtype.Text{String: params.Yield, Valid: params.Yield != ""},
+		CookTimeInMinutes: int32(params.CookTimeInMinutes),
+		Notes:             pgtype.Text{String: params.Notes, Valid: params.Yield != ""},
+		UserID:            pgUUID(userID),
 	})
 	if err != nil {
+		println(err.Error())
 		respondInternalServerError(w)
 		return
 	}
@@ -74,6 +92,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Add Ingredients to host Recipe
 	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
 		println(err.Error())
@@ -81,7 +100,25 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, createRecipeResponse(recipe, ingredients))
+	// Add Instructions to host Recipe
+	for _, I := range params.Instructions {
+		DB.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			StepNo:      int32(I.StepNo),
+			Instruction: I.Instruction,
+			RecipeID:    recipe.ID,
+		})
+	}
+
+	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
+	if err != nil {
+		println(err.Error())
+		respondUniqueValueError(w, err, "step_no must be unique")
+		return
+	}
+
+	respondJSON(w, http.StatusCreated, createRecipeResponse(recipe, ingredients, instructions))
 }
 
 func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
@@ -158,7 +195,13 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients))
+	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
+	if err != nil {
+		respondInternalServerError(w)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients, instructions))
 }
 
 func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
@@ -219,7 +262,13 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients))
+	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
+	if err != nil {
+		respondInternalServerError(w)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients, instructions))
 }
 
 func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {

@@ -83,13 +83,18 @@ func createUserResponseWithToken(u database.User, token, refreshToken string) Us
 }
 
 type Recipe struct {
-	ID          uuid.UUID            `json:"id"`
-	CreatedAt   time.Time            `json:"created_at"`
-	UpdatedAt   time.Time            `json:"updated_at"`
-	Name        string               `json:"name"`
-	ExternalUrl string               `json:"external_url"`
-	UserID      uuid.UUID            `json:"user_id"`
-	Ingredients []IngredientInRecipe `json:"ingredients"`
+	ID                uuid.UUID             `json:"id"`
+	CreatedAt         time.Time             `json:"created_at"`
+	UpdatedAt         time.Time             `json:"updated_at"`
+	Name              string                `json:"name"`
+	ExternalUrl       string                `json:"external_url"`
+	UserID            uuid.UUID             `json:"user_id"`
+	Servings          int                   `json:"servings"`
+	Yield             string                `json:"yield"`
+	CookTimeInMinutes int                   `json:"cook_time_in_minutes"`
+	Notes             string                `json:"notes"`
+	Ingredients       []IngredientInRecipe  `json:"ingredients"`
+	Instructions      []InstructionInRecipe `json:"instructions"`
 }
 
 type IngredientInRecipe struct {
@@ -100,9 +105,14 @@ type IngredientInRecipe struct {
 	ParentID *uuid.UUID `json:"parent_id"`
 }
 
-func createRecipeResponse(dr database.Recipe, dis []database.ListIngredientsByRecipeIDRow) Recipe {
+type InstructionInRecipe struct {
+	StepNo      int    `json:"step_no"`
+	Instruction string `json:"instruction"`
+}
+
+func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListIngredientsByRecipeIDRow, DBInstructions []database.Instruction) Recipe {
 	ingredients := []IngredientInRecipe{}
-	for _, di := range dis {
+	for _, di := range dbIngredients {
 		ingredients = append(ingredients, IngredientInRecipe{
 			ID:       di.ID.Bytes,
 			Amount:   di.Amount,
@@ -110,14 +120,28 @@ func createRecipeResponse(dr database.Recipe, dis []database.ListIngredientsByRe
 			Name:     di.Name,
 		})
 	}
+
+	instructions := []InstructionInRecipe{}
+	for _, di := range DBInstructions {
+		instructions = append(instructions, InstructionInRecipe{
+			StepNo:      int(di.StepNo),
+			Instruction: di.Instruction,
+		})
+	}
+
 	return Recipe{
-		ID:          dr.ID.Bytes,
-		CreatedAt:   dr.CreatedAt,
-		UpdatedAt:   dr.UpdatedAt,
-		Name:        dr.Name,
-		ExternalUrl: dr.ExternalUrl,
-		UserID:      dr.UserID.Bytes,
-		Ingredients: ingredients,
+		ID:                recipe.ID.Bytes,
+		CreatedAt:         recipe.CreatedAt,
+		UpdatedAt:         recipe.UpdatedAt,
+		Name:              recipe.Name,
+		ExternalUrl:       recipe.ExternalUrl,
+		UserID:            recipe.UserID.Bytes,
+		Servings:          int(recipe.Servings),
+		Yield:             recipe.Yield.String,
+		CookTimeInMinutes: int(recipe.CookTimeInMinutes),
+		Notes:             recipe.Notes.String,
+		Ingredients:       ingredients,
+		Instructions:      instructions,
 	}
 }
 
