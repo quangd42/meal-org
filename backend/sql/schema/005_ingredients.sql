@@ -11,7 +11,7 @@ CREATE TABLE recipe_ingredient (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   amount TEXT NOT NULL,
-  instruction TEXT,
+  prep_note TEXT,
   ingredient_id UUID REFERENCES ingredients (id) ON DELETE CASCADE,
   recipe_id UUID REFERENCES recipes (id) ON DELETE CASCADE,
   PRIMARY KEY (ingredient_id, recipe_id)

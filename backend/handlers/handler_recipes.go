@@ -28,9 +28,9 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		Name        string `json:"name"`
 		ExternalURL string `json:"external_url,omitempty"`
 		Ingredients []struct {
-			ID          uuid.UUID `json:"id"`
-			Amount      string    `json:"amount"`
-			Instruction string    `json:"instruction"`
+			ID       uuid.UUID `json:"id"`
+			Amount   string    `json:"amount"`
+			PrepNote string    `json:"prep_note"`
 		} `json:"ingredients"`
 	}
 
@@ -62,19 +62,21 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 			UpdatedAt:    time.Now().UTC(),
 			IngredientID: pgUUID(p.ID),
 			Amount:       p.Amount,
-			Instruction:  pgtype.Text{String: p.Instruction, Valid: p.Instruction != ""},
+			PrepNote:     pgtype.Text{String: p.PrepNote, Valid: p.PrepNote != ""},
 		}
 	}
 
 	// Can add as many ingredients as desired, no check here
 	_, err = DB.AddIngredientsToRecipe(r.Context(), dbParams)
 	if err != nil {
+		println(err.Error())
 		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
 	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
+		println(err.Error())
 		respondInternalServerError(w)
 		return
 	}
@@ -100,9 +102,9 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		Name        string `json:"name"`
 		ExternalURL string `json:"external_url"`
 		Ingredients []struct {
-			ID          uuid.UUID `json:"id"`
-			Amount      string    `json:"amount"`
-			Instruction string    `json:"instruction"`
+			ID       uuid.UUID `json:"id"`
+			Amount   string    `json:"amount"`
+			PrepNote string    `json:"prep_note"`
 		} `json:"ingredients"`
 	}
 
@@ -137,7 +139,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	for _, i := range params.Ingredients {
 		ingreDBParams := database.UpdateIngredientInRecipeParams{
 			Amount:       i.Amount,
-			Instruction:  pgtype.Text{String: i.Instruction, Valid: true},
+			PrepNote:     pgtype.Text{String: i.PrepNote, Valid: true},
 			UpdatedAt:    time.Now().UTC(),
 			IngredientID: pgUUID(i.ID),
 			RecipeID:     pgUUID(recipeID),

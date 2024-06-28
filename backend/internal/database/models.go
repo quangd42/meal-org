@@ -47,7 +47,7 @@ type RecipeIngredient struct {
 	CreatedAt    time.Time   `json:"created_at"`
 	UpdatedAt    time.Time   `json:"updated_at"`
 	Amount       string      `json:"amount"`
-	Instruction  pgtype.Text `json:"instruction"`
+	PrepNote     pgtype.Text `json:"prep_note"`
 	IngredientID pgtype.UUID `json:"ingredient_id"`
 	RecipeID     pgtype.UUID `json:"recipe_id"`
 }

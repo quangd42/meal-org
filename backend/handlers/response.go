@@ -93,21 +93,21 @@ type Recipe struct {
 }
 
 type IngredientInRecipe struct {
-	ID          uuid.UUID  `json:"id"`
-	Amount      string     `json:"amount"`
-	Instruction string     `json:"instruction"`
-	Name        string     `json:"name"`
-	ParentID    *uuid.UUID `json:"parent_id"`
+	ID       uuid.UUID  `json:"id"`
+	Amount   string     `json:"amount"`
+	PrepNote string     `json:"prep_note"`
+	Name     string     `json:"name"`
+	ParentID *uuid.UUID `json:"parent_id"`
 }
 
 func createRecipeResponse(dr database.Recipe, dis []database.ListIngredientsByRecipeIDRow) Recipe {
 	ingredients := []IngredientInRecipe{}
 	for _, di := range dis {
 		ingredients = append(ingredients, IngredientInRecipe{
-			ID:          di.ID.Bytes,
-			Amount:      di.Amount,
-			Instruction: di.Instruction.String,
-			Name:        di.Name,
+			ID:       di.ID.Bytes,
+			Amount:   di.Amount,
+			PrepNote: di.PrepNote.String,
+			Name:     di.Name,
 		})
 	}
 	return Recipe{
