@@ -14,7 +14,7 @@ import (
 
 type AddIngredientsToRecipeParams struct {
 	Amount       string      `json:"amount"`
-	Instruction  pgtype.Text `json:"instruction"`
+	PrepNote     pgtype.Text `json:"prep_note"`
 	CreatedAt    time.Time   `json:"created_at"`
 	UpdatedAt    time.Time   `json:"updated_at"`
 	IngredientID pgtype.UUID `json:"ingredient_id"`
@@ -26,7 +26,7 @@ SELECT
   id,
   name,
   amount,
-  instruction,
+  prep_note,
   recipe_id
 FROM ingredients
 JOIN recipe_ingredient ON id = ingredient_id
@@ -34,11 +34,11 @@ WHERE recipe_id = $1
 `
 
 type ListIngredientsByRecipeIDRow struct {
-	ID          pgtype.UUID `json:"id"`
-	Name        string      `json:"name"`
-	Amount      string      `json:"amount"`
-	Instruction pgtype.Text `json:"instruction"`
-	RecipeID    pgtype.UUID `json:"recipe_id"`
+	ID       pgtype.UUID `json:"id"`
+	Name     string      `json:"name"`
+	Amount   string      `json:"amount"`
+	PrepNote pgtype.Text `json:"prep_note"`
+	RecipeID pgtype.UUID `json:"recipe_id"`
 }
 
 func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype.UUID) ([]ListIngredientsByRecipeIDRow, error) {
@@ -54,7 +54,7 @@ func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype
 			&i.ID,
 			&i.Name,
 			&i.Amount,
-			&i.Instruction,
+			&i.PrepNote,
 			&i.RecipeID,
 		); err != nil {
 			return nil, err
@@ -71,7 +71,7 @@ const updateIngredientInRecipe = `-- name: UpdateIngredientInRecipe :exec
 UPDATE recipe_ingredient
 SET
   amount = $1,
-  instruction = $2,
+  prep_note = $2,
   updated_at = $3
 WHERE
   ingredient_id = $4 AND recipe_id = $5
@@ -79,7 +79,7 @@ WHERE
 
 type UpdateIngredientInRecipeParams struct {
 	Amount       string      `json:"amount"`
-	Instruction  pgtype.Text `json:"instruction"`
+	PrepNote     pgtype.Text `json:"prep_note"`
 	UpdatedAt    time.Time   `json:"updated_at"`
 	IngredientID pgtype.UUID `json:"ingredient_id"`
 	RecipeID     pgtype.UUID `json:"recipe_id"`
@@ -88,7 +88,7 @@ type UpdateIngredientInRecipeParams struct {
 func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngredientInRecipeParams) error {
 	_, err := q.db.Exec(ctx, updateIngredientInRecipe,
 		arg.Amount,
-		arg.Instruction,
+		arg.PrepNote,
 		arg.UpdatedAt,
 		arg.IngredientID,
 		arg.RecipeID,
