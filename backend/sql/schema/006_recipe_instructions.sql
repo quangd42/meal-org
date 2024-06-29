@@ -1,8 +1,8 @@
 -- +goose Up
 ALTER TABLE recipes
-ADD COLUMN servings INT NOT NULL,
+ADD COLUMN servings INT NOT NULL DEFAULT 0,
 ADD COLUMN yield TEXT,
-ADD COLUMN cook_time_in_minutes INT NOT NULL,
+ADD COLUMN cook_time_in_minutes INT NOT NULL DEFAULT 0,
 ADD COLUMN notes TEXT;
 
 CREATE TABLE instructions (
