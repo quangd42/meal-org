@@ -53,7 +53,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusOK, createUserResponseWithToken(user, jwt, refreshToken))
+	respondJSON(w, http.StatusCreated, createUserResponseWithToken(user, jwt, refreshToken))
 }
 
 func updateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +93,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondJSON(w, http.StatusCreated, createUserResponse(user))
+	respondJSON(w, http.StatusOK, createUserResponse(user))
 }
 
 func forgetMeHandler(w http.ResponseWriter, r *http.Request) {
