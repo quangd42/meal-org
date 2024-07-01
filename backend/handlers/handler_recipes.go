@@ -175,10 +175,14 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Update host Recipe
 	recipe, err := DB.UpdateRecipeByID(r.Context(), database.UpdateRecipeByIDParams{
-		ID:          targetRecipe.ID,
-		UpdatedAt:   time.Now().UTC(),
-		Name:        params.Name,
-		ExternalUrl: params.ExternalURL,
+		ID:                targetRecipe.ID,
+		UpdatedAt:         time.Now().UTC(),
+		Name:              params.Name,
+		ExternalUrl:       params.ExternalURL,
+		Servings:          int32(params.Servings),
+		Yield:             pgtype.Text{String: params.Yield, Valid: params.Yield != ""},
+		CookTimeInMinutes: int32(params.CookTimeInMinutes),
+		Notes:             pgtype.Text{String: params.Notes, Valid: params.Yield != ""},
 	})
 	if err != nil {
 		respondInternalServerError(w)
