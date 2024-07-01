@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -27,12 +28,28 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var parentID pgtype.UUID
+	if params.ParentID == uuid.Nil {
+		parentID = pgtype.UUID{Valid: false}
+	} else {
+		_, err = DB.GetIngredientByID(r.Context(), pgUUID(params.ParentID))
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
+				return
+			}
+			respondInternalServerError(w)
+			return
+		}
+		parentID = pgUUID(params.ParentID)
+	}
+
 	ingredient, err := DB.CreateIngredient(r.Context(), database.CreateIngredientParams{
 		ID:        NewUUID(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
-		ParentID:  pgtype.UUID{Bytes: params.ParentID, Valid: params.ParentID != uuid.Nil},
+		ParentID:  parentID,
 	})
 	if err != nil {
 		log.Printf("error creating new ingredient: %s\n", err)
@@ -64,10 +81,26 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var parentID pgtype.UUID
+	if params.ParentID == uuid.Nil {
+		parentID = pgtype.UUID{Valid: false}
+	} else {
+		_, err = DB.GetIngredientByID(r.Context(), pgUUID(params.ParentID))
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
+				return
+			}
+			respondInternalServerError(w)
+			return
+		}
+		parentID = pgUUID(params.ParentID)
+	}
+
 	ingredient, err := DB.UpdateIngredientByID(r.Context(), database.UpdateIngredientByIDParams{
 		ID:        pgUUID(ingredientID),
 		Name:      params.Name,
-		ParentID:  pgtype.UUID{Bytes: params.ParentID, Valid: params.ParentID != uuid.Nil},
+		ParentID:  parentID,
 		UpdatedAt: time.Now().UTC(),
 	})
 	if err != nil {
