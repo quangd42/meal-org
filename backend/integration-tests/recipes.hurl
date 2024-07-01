@@ -1,6 +1,6 @@
 ### Prepare
 # Create user
-POST http://{{host}}/v1/users
+POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
 {"name":"julia","username":"{{username}}","password":"{{password}}"}
 HTTP 201
@@ -8,7 +8,7 @@ HTTP 201
 user_id: jsonpath "$['id']"
 
 # Login
-POST http://{{host}}/v1/auth/login
+POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
 {"username":"{{username}}","password":"{{password}}"}
 HTTP 200
@@ -17,7 +17,7 @@ token: jsonpath "$['token']"
 
 ### Tests
 # Create Ingredient 1
-POST http://{{host}}/v1/ingredients
+POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Beef"}
@@ -29,7 +29,7 @@ jsonpath "$.parent_id" == null
 ingre_id1: jsonpath "$['id']"
 
 # Create Ingredient 2
-POST http://{{host}}/v1/ingredients
+POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Ground Beef", "parent_id":"{{ingre_id1}}"}
@@ -41,7 +41,7 @@ jsonpath "$.parent_id" == "{{ingre_id1}}"
 ingre_id2: jsonpath "$['id']"
 
 # Create Ingredient 3
-POST http://{{host}}/v1/ingredients
+POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Asparagus"}
@@ -53,7 +53,7 @@ jsonpath "$.parent_id" == null
 ingre_id3: jsonpath "$['id']"
 
 # Create Recipe 1
-POST http://{{host}}/v1/recipes
+POST {{host}}/v1/recipes
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
@@ -109,7 +109,7 @@ jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then stea
 id1: jsonpath "$['id']"
 
 # Get Recipe 1
-GET http://{{host}}/v1/recipes/{{id1}}
+GET {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 200
@@ -133,19 +133,19 @@ jsonpath "$.instructions[1].step_no" == 2
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 
 # Get Recipe not exists
-GET http://{{host}}/v1/recipes/c624bce3-2d1b-4ae8-87e2-af775be70077
+GET {{host}}/v1/recipes/c624bce3-2d1b-4ae8-87e2-af775be70077
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 404
 
 # Get Recipe bad id
-GET http://{{host}}/v1/recipes/some-bad-id
+GET {{host}}/v1/recipes/some-bad-id
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 400
 
 # Update Recipe 1
-PUT http://{{host}}/v1/recipes/{{id1}}
+PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
@@ -204,7 +204,7 @@ jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
 
 # Create Recipe 2
-POST http://{{host}}/v1/recipes
+POST {{host}}/v1/recipes
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
@@ -258,7 +258,7 @@ jsonpath "$.instructions[1].step_no" == 2
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 
 # List Recipes
-GET http://{{host}}/v1/recipes
+GET {{host}}/v1/recipes
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 200
@@ -267,12 +267,12 @@ jsonpath "$" count == 2
 jsonpath "$[*].name" includes "General Tso's Chicken"
 
 # Delete Recipe 1
-DELETE http://{{host}}/v1/recipes/{{id1}}
+DELETE {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 HTTP 204
 
 # List Recipes
-GET http://{{host}}/v1/recipes
+GET {{host}}/v1/recipes
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 200
@@ -284,32 +284,32 @@ jsonpath "$[*].name" not includes "Beef and Broccoli Spaghetti"
 ### Clean up
 
 # Delete Ingredient 3
-DELETE http://{{host}}/v1/ingredients/{{ingre_id3}}
+DELETE {{host}}/v1/ingredients/{{ingre_id3}}
 Authorization: Bearer {{token}}
 HTTP 204
 
 # Delete Ingredient 1
-DELETE http://{{host}}/v1/ingredients/{{ingre_id1}}
+DELETE {{host}}/v1/ingredients/{{ingre_id1}}
 Authorization: Bearer {{token}}
 HTTP 204
 
 # Delete Ingredient 2
-DELETE http://{{host}}/v1/ingredients/{{ingre_id2}}
+DELETE {{host}}/v1/ingredients/{{ingre_id2}}
 Authorization: Bearer {{token}}
 HTTP 204
 
-GET http://{{host}}/v1/ingredients
+GET {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
 jsonpath "$" == null
 
 # Delete Recipe 1
-DELETE http://{{host}}/v1/ingredients/{{id1}}
+DELETE {{host}}/v1/ingredients/{{id1}}
 Authorization: Bearer {{token}}
 HTTP 204
 
 # ForgetMe (while logged in)
-DELETE http://{{host}}/v1/users
+DELETE {{host}}/v1/users
 Authorization: Bearer {{token}}
 HTTP 204

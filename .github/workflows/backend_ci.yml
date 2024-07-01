@@ -2,7 +2,7 @@ name: ci
 
 on:
   pull_request:
-    branches: [none]
+    branches: [main]
 
 jobs:
   tests:
@@ -11,6 +11,28 @@ jobs:
     defaults:
       run:
         working-directory: backend
+
+    # Service containers to run with `tests`
+    # Mainly for integration tests
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres
+        # Maps tcp port 5432 on service container to the host
+        ports:
+          - 5432:5432
+        # Provide the password for postgres
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd="pg_isready -U testuser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
       GO111MODULE: on
@@ -23,15 +45,40 @@ jobs:
         with:
           go-version: "1.22"
 
+      # Unit tests
       - name: Run Tests
         run: go test ./... -cover
 
-      - name: Checkout Source
-        uses: actions/checkout@v3
+      # Run Gosec
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
           args: ./...
+
+      # Run integration tests
+      - name: Build app
+        run: ./scripts/build_prod.sh
+
+      - name: Wait for Postgres to be healthy
+        run: |
+          for i in {1..30}; do
+            docker exec postgres pg_isready -U testuser -d testdb && break
+            sleep 1
+          done
+      - name: Run db migration
+        run: ./scripts/migrate_up.sh
+      - name: Run the application
+        run: ./bin/planner_server &
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+      - name: Run Integration Tests
+        run: |
+          curl --location --remote-name https://github.com/Orange-OpenSource/hurl/releases/download/4.0.0/hurl_4.0.0_amd64.deb
+          sudo dpkg -i hurl_4.0.0_amd64.deb
+          hurl --tests --variables-file integration-tests/vars.env integration-tests/**/*.hurl
 
   style:
     name: Style
