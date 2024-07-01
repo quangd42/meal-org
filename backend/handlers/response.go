@@ -98,11 +98,10 @@ type Recipe struct {
 }
 
 type IngredientInRecipe struct {
-	ID       uuid.UUID  `json:"id"`
-	Amount   string     `json:"amount"`
-	PrepNote string     `json:"prep_note"`
-	Name     string     `json:"name"`
-	ParentID *uuid.UUID `json:"parent_id"`
+	ID       uuid.UUID `json:"id"`
+	Amount   string    `json:"amount"`
+	PrepNote string    `json:"prep_note"`
+	Name     string    `json:"name"`
 }
 
 type InstructionInRecipe struct {
