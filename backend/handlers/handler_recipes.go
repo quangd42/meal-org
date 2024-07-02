@@ -9,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/middleware"
@@ -30,16 +29,16 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type parameters struct {
-		Name              string `json:"name"`
-		ExternalURL       string `json:"external_url"`
-		Servings          int    `json:"servings"`
-		Yield             string `json:"yield"`
-		CookTimeInMinutes int    `json:"cook_time_in_minutes"`
-		Notes             string `json:"notes"`
+		Name              string  `json:"name"`
+		ExternalURL       string  `json:"external_url"`
+		Servings          int     `json:"servings"`
+		Yield             *string `json:"yield"`
+		CookTimeInMinutes int     `json:"cook_time_in_minutes"`
+		Notes             *string `json:"notes"`
 		Ingredients       []struct {
 			ID       uuid.UUID `json:"id"`
 			Amount   string    `json:"amount"`
-			PrepNote string    `json:"prep_note"`
+			PrepNote *string   `json:"prep_note"`
 		} `json:"ingredients"`
 		Instructions []step `json:"instructions"`
 	}
@@ -55,16 +54,16 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Create host Recipe
 	recipe, err := DB.CreateRecipe(r.Context(), database.CreateRecipeParams{
-		ID:                NewUUID(),
+		ID:                uuid.New(),
 		CreatedAt:         time.Now().UTC(),
 		UpdatedAt:         time.Now().UTC(),
 		Name:              params.Name,
 		ExternalUrl:       params.ExternalURL,
 		Servings:          int32(params.Servings),
-		Yield:             pgtype.Text{String: params.Yield, Valid: params.Yield != ""},
+		Yield:             params.Yield,
 		CookTimeInMinutes: int32(params.CookTimeInMinutes),
-		Notes:             pgtype.Text{String: params.Notes, Valid: params.Yield != ""},
-		UserID:            pgUUID(userID),
+		Notes:             params.Notes,
+		UserID:            userID,
 	})
 	if err != nil {
 		println(err.Error())
@@ -78,9 +77,9 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 			RecipeID:     recipe.ID,
 			CreatedAt:    time.Now().UTC(),
 			UpdatedAt:    time.Now().UTC(),
-			IngredientID: pgUUID(p.ID),
+			IngredientID: p.ID,
 			Amount:       p.Amount,
-			PrepNote:     pgtype.Text{String: p.PrepNote, Valid: p.PrepNote != ""},
+			PrepNote:     p.PrepNote,
 		}
 	}
 
@@ -140,16 +139,16 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		Instruction string `json:"instruction"`
 	}
 	type parameters struct {
-		Name              string `json:"name"`
-		ExternalURL       string `json:"external_url"`
-		Servings          int    `json:"servings"`
-		Yield             string `json:"yield"`
-		CookTimeInMinutes int    `json:"cook_time_in_minutes"`
-		Notes             string `json:"notes"`
+		Name              string  `json:"name"`
+		ExternalURL       string  `json:"external_url"`
+		Servings          int     `json:"servings"`
+		Yield             *string `json:"yield"`
+		CookTimeInMinutes int     `json:"cook_time_in_minutes"`
+		Notes             *string `json:"notes"`
 		Ingredients       []struct {
 			ID       uuid.UUID `json:"id"`
 			Amount   string    `json:"amount"`
-			PrepNote string    `json:"prep_note"`
+			PrepNote *string   `json:"prep_note"`
 		} `json:"ingredients"`
 		Instructions []step `json:"instructions"`
 	}
@@ -163,12 +162,12 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the recipe belongs to the user
 	// NOTE: this perhaps should be in a middleware
-	targetRecipe, err := DB.GetRecipeByID(r.Context(), pgUUID(recipeID))
+	targetRecipe, err := DB.GetRecipeByID(r.Context(), recipeID)
 	if err != nil {
 		respondError(w, http.StatusNotFound, ErrRecipeNotFound.Error())
 		return
 	}
-	if targetRecipe.UserID.Bytes != userID {
+	if targetRecipe.UserID != userID {
 		respondError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
@@ -180,9 +179,9 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		Name:              params.Name,
 		ExternalUrl:       params.ExternalURL,
 		Servings:          int32(params.Servings),
-		Yield:             pgtype.Text{String: params.Yield, Valid: params.Yield != ""},
+		Yield:             params.Yield,
 		CookTimeInMinutes: int32(params.CookTimeInMinutes),
-		Notes:             pgtype.Text{String: params.Notes, Valid: params.Yield != ""},
+		Notes:             params.Notes,
 	})
 	if err != nil {
 		respondInternalServerError(w)
@@ -193,10 +192,10 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	for _, i := range params.Ingredients {
 		ingreDBParams := database.UpdateIngredientInRecipeParams{
 			Amount:       i.Amount,
-			PrepNote:     pgtype.Text{String: i.PrepNote, Valid: true},
+			PrepNote:     i.PrepNote,
 			UpdatedAt:    time.Now().UTC(),
-			IngredientID: pgUUID(i.ID),
-			RecipeID:     pgUUID(recipeID),
+			IngredientID: i.ID,
+			RecipeID:     recipeID,
 		}
 
 		err = DB.UpdateIngredientInRecipe(r.Context(), ingreDBParams)
@@ -206,7 +205,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), pgUUID(recipeID))
+	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipeID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -299,7 +298,7 @@ func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
 	limit = getPaginationParamValue(r, "limit", 20)
 	offset = getPaginationParamValue(r, "offset", 0)
 	recipes, err := DB.ListRecipesByUserID(r.Context(), database.ListRecipesByUserIDParams{
-		UserID: pgUUID(userID),
+		UserID: userID,
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -325,7 +324,7 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipe, err := DB.GetRecipeByID(r.Context(), pgUUID(recipeID))
+	recipe, err := DB.GetRecipeByID(r.Context(), recipeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
@@ -335,12 +334,12 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if recipe.UserID.Bytes != userID {
+	if recipe.UserID != userID {
 		respondError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
 
-	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), pgUUID(recipeID))
+	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipeID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -370,8 +369,8 @@ func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = DB.DeleteRecipe(r.Context(), database.DeleteRecipeParams{
-		UserID: pgUUID(userID),
-		ID:     pgUUID(recipeID),
+		UserID: userID,
+		ID:     recipeID,
 	})
 	if err != nil {
 		respondInternalServerError(w)
