@@ -67,7 +67,7 @@ type User struct {
 
 func createUserResponse(u database.User) User {
 	return User{
-		ID:        u.ID.Bytes,
+		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 		Name:      u.Name,
@@ -90,9 +90,9 @@ type Recipe struct {
 	ExternalUrl       string                `json:"external_url"`
 	UserID            uuid.UUID             `json:"user_id"`
 	Servings          int                   `json:"servings"`
-	Yield             string                `json:"yield"`
+	Yield             *string               `json:"yield"`
 	CookTimeInMinutes int                   `json:"cook_time_in_minutes"`
-	Notes             string                `json:"notes"`
+	Notes             *string               `json:"notes"`
 	Ingredients       []IngredientInRecipe  `json:"ingredients"`
 	Instructions      []InstructionInRecipe `json:"instructions"`
 }
@@ -100,7 +100,7 @@ type Recipe struct {
 type IngredientInRecipe struct {
 	ID       uuid.UUID `json:"id"`
 	Amount   string    `json:"amount"`
-	PrepNote string    `json:"prep_note"`
+	PrepNote *string   `json:"prep_note"`
 	Name     string    `json:"name"`
 }
 
@@ -113,9 +113,9 @@ func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListI
 	ingredients := []IngredientInRecipe{}
 	for _, di := range dbIngredients {
 		ingredients = append(ingredients, IngredientInRecipe{
-			ID:       di.ID.Bytes,
+			ID:       di.ID,
 			Amount:   di.Amount,
-			PrepNote: di.PrepNote.String,
+			PrepNote: di.PrepNote,
 			Name:     di.Name,
 		})
 	}
@@ -129,16 +129,16 @@ func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListI
 	}
 
 	return Recipe{
-		ID:                recipe.ID.Bytes,
+		ID:                recipe.ID,
 		CreatedAt:         recipe.CreatedAt,
 		UpdatedAt:         recipe.UpdatedAt,
 		Name:              recipe.Name,
 		ExternalUrl:       recipe.ExternalUrl,
-		UserID:            recipe.UserID.Bytes,
+		UserID:            recipe.UserID,
 		Servings:          int(recipe.Servings),
-		Yield:             recipe.Yield.String,
+		Yield:             recipe.Yield,
 		CookTimeInMinutes: int(recipe.CookTimeInMinutes),
-		Notes:             recipe.Notes.String,
+		Notes:             recipe.Notes,
 		Ingredients:       ingredients,
 		Instructions:      instructions,
 	}
@@ -149,21 +149,16 @@ type Ingredient struct {
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
 	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id"`
+	ParentID  *uuid.UUID `json:"parent_id,omitempty"`
 }
 
 func createIngredientResponse(i database.Ingredient) Ingredient {
 	res := Ingredient{
-		ID:        i.ID.Bytes,
+		ID:        i.ID,
 		Name:      i.Name,
 		CreatedAt: i.CreatedAt,
 		UpdatedAt: i.UpdatedAt,
-		ParentID:  &uuid.UUID{},
-	}
-	if i.ParentID.Valid {
-		*res.ParentID = i.ParentID.Bytes
-	} else {
-		res.ParentID = nil
+		ParentID:  i.ParentID,
 	}
 	return res
 }

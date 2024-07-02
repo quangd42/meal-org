@@ -10,7 +10,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
@@ -18,8 +17,8 @@ import (
 // admin create shared set
 func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Name     string    `json:"name"`
-		ParentID uuid.UUID `json:"parent_id"`
+		Name     string     `json:"name"`
+		ParentID *uuid.UUID `json:"parent_id"`
 	}
 	params := &parameters{}
 	err := json.NewDecoder(r.Body).Decode(params)
@@ -28,11 +27,8 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var parentID pgtype.UUID
-	if params.ParentID == uuid.Nil {
-		parentID = pgtype.UUID{Valid: false}
-	} else {
-		_, err = DB.GetIngredientByID(r.Context(), pgUUID(params.ParentID))
+	if params.ParentID != nil {
+		_, err = DB.GetIngredientByID(r.Context(), *params.ParentID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
@@ -41,15 +37,14 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 			respondInternalServerError(w)
 			return
 		}
-		parentID = pgUUID(params.ParentID)
 	}
 
 	ingredient, err := DB.CreateIngredient(r.Context(), database.CreateIngredientParams{
-		ID:        NewUUID(),
+		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
-		ParentID:  parentID,
+		ParentID:  params.ParentID,
 	})
 	if err != nil {
 		log.Printf("error creating new ingredient: %s\n", err)
@@ -71,8 +66,8 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type parameters struct {
-		Name     string    `json:"name"`
-		ParentID uuid.UUID `json:"parent_id"`
+		Name     string     `json:"name"`
+		ParentID *uuid.UUID `json:"parent_id"`
 	}
 	params := &parameters{}
 	err = json.NewDecoder(r.Body).Decode(params)
@@ -81,11 +76,8 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var parentID pgtype.UUID
-	if params.ParentID == uuid.Nil {
-		parentID = pgtype.UUID{Valid: false}
-	} else {
-		_, err = DB.GetIngredientByID(r.Context(), pgUUID(params.ParentID))
+	if params.ParentID != nil {
+		_, err = DB.GetIngredientByID(r.Context(), *params.ParentID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
@@ -94,13 +86,12 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 			respondInternalServerError(w)
 			return
 		}
-		parentID = pgUUID(params.ParentID)
 	}
 
 	ingredient, err := DB.UpdateIngredientByID(r.Context(), database.UpdateIngredientByIDParams{
-		ID:        pgUUID(ingredientID),
+		ID:        ingredientID,
 		Name:      params.Name,
-		ParentID:  parentID,
+		ParentID:  params.ParentID,
 		UpdatedAt: time.Now().UTC(),
 	})
 	if err != nil {
@@ -136,7 +127,7 @@ func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DB.DeleteIngredient(r.Context(), pgUUID(ingredientID))
+	err = DB.DeleteIngredient(r.Context(), ingredientID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
