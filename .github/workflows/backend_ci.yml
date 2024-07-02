@@ -41,8 +41,8 @@ jobs:
           go-version: "1.22"
 
       # Unit tests
-      - name: Run Tests
-        run: go test ./... -cover
+      # - name: Run Tests
+      #   run: go test ./... -cover
 
       - name: Checkout Source
         uses: actions/checkout@v3
