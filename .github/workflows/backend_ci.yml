@@ -77,6 +77,7 @@ jobs:
           POSTGRES_PASSWORD: testpassword
           DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
           JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
+          PORT: 8080
 
       - name: Run db migration
         run: ./scripts/migrate_up.sh
