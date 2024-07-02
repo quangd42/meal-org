@@ -34,7 +34,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.CreateUser(r.Context(), database.CreateUserParams{
-		ID:        NewUUID(),
+		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
@@ -83,7 +83,7 @@ func updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user, err := DB.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
-		ID:        pgUUID(userID),
+		ID:        userID,
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 		Hash:      string(hash),
@@ -103,7 +103,7 @@ func forgetMeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := DB.DeleteUser(r.Context(), pgUUID(userID))
+	err := DB.DeleteUser(r.Context(), userID)
 	if err != nil {
 		respondInternalServerError(w)
 		return

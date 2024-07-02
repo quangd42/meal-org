@@ -48,10 +48,6 @@ func getPaginationParamValue(r *http.Request, name string, defaultValue int32) i
 	return val
 }
 
-func NewUUID() pgtype.UUID {
-	return pgtype.UUID{Bytes: uuid.New(), Valid: true}
-}
-
 func pgUUID(u uuid.UUID) pgtype.UUID {
 	return pgtype.UUID{Bytes: u, Valid: true}
 }

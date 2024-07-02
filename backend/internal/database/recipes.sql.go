@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createRecipe = `-- name: CreateRecipe :one
@@ -30,16 +30,16 @@ RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yie
 `
 
 type CreateRecipeParams struct {
-	ID                pgtype.UUID `json:"id"`
-	CreatedAt         time.Time   `json:"created_at"`
-	UpdatedAt         time.Time   `json:"updated_at"`
-	Name              string      `json:"name"`
-	ExternalUrl       string      `json:"external_url"`
-	UserID            pgtype.UUID `json:"user_id"`
-	Servings          int32       `json:"servings"`
-	Yield             pgtype.Text `json:"yield"`
-	CookTimeInMinutes int32       `json:"cook_time_in_minutes"`
-	Notes             pgtype.Text `json:"notes"`
+	ID                uuid.UUID `json:"id"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	Name              string    `json:"name"`
+	ExternalUrl       string    `json:"external_url"`
+	UserID            uuid.UUID `json:"user_id"`
+	Servings          int32     `json:"servings"`
+	Yield             *string   `json:"yield"`
+	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
+	Notes             *string   `json:"notes"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
@@ -77,8 +77,8 @@ WHERE user_id = $1 AND id = $2
 `
 
 type DeleteRecipeParams struct {
-	UserID pgtype.UUID `json:"user_id"`
-	ID     pgtype.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+	ID     uuid.UUID `json:"id"`
 }
 
 func (q *Queries) DeleteRecipe(ctx context.Context, arg DeleteRecipeParams) error {
@@ -91,7 +91,7 @@ SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield,
 WHERE id = $1
 `
 
-func (q *Queries) GetRecipeByID(ctx context.Context, id pgtype.UUID) (Recipe, error) {
+func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, error) {
 	row := q.db.QueryRow(ctx, getRecipeByID, id)
 	var i Recipe
 	err := row.Scan(
@@ -125,9 +125,9 @@ LIMIT
 `
 
 type ListRecipesByUserIDParams struct {
-	UserID pgtype.UUID `json:"user_id"`
-	Limit  int32       `json:"limit"`
-	Offset int32       `json:"offset"`
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
 }
 
 type ListRecipesByUserIDRow struct {
@@ -179,14 +179,14 @@ RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yie
 `
 
 type UpdateRecipeByIDParams struct {
-	ID                pgtype.UUID `json:"id"`
-	Name              string      `json:"name"`
-	ExternalUrl       string      `json:"external_url"`
-	UpdatedAt         time.Time   `json:"updated_at"`
-	Servings          int32       `json:"servings"`
-	Yield             pgtype.Text `json:"yield"`
-	CookTimeInMinutes int32       `json:"cook_time_in_minutes"`
-	Notes             pgtype.Text `json:"notes"`
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	ExternalUrl       string    `json:"external_url"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	Servings          int32     `json:"servings"`
+	Yield             *string   `json:"yield"`
+	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
+	Notes             *string   `json:"notes"`
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {
