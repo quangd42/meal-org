@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -26,8 +27,15 @@ func run() error {
 	r := chi.NewRouter()
 	handlers.AddRoutes(r)
 
+	server := &http.Server{
+		Addr:         ":" + port,
+		Handler:      r,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
 	fmt.Printf("listening on port %s...\n", port)
-	err := http.ListenAndServe(":"+port, r)
+	err := server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
 	}

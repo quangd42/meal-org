@@ -22,7 +22,7 @@ func respondJSON[T any](w http.ResponseWriter, code int, v T) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	w.Write(data)
+	w.Write(data) // #nosec G104
 }
 
 func respondError(w http.ResponseWriter, code int, msg string) {
