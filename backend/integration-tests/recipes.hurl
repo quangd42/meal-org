@@ -24,7 +24,7 @@ Content-Type: application/json; charset=utf-8
 HTTP 201
 [Asserts]
 jsonpath "$.name" == "Beef"
-jsonpath "$.parent_id" == null
+jsonpath "$.parent_id" not exists
 [Captures]
 ingre_id1: jsonpath "$['id']"
 
@@ -48,7 +48,7 @@ Content-Type: application/json; charset=utf-8
 HTTP 201
 [Asserts]
 jsonpath "$.name" == "Asparagus"
-jsonpath "$.parent_id" == null
+jsonpath "$.parent_id" not exists
 [Captures]
 ingre_id3: jsonpath "$['id']"
 
