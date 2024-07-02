@@ -62,12 +62,12 @@ jobs:
       - name: Build app
         run: ./scripts/build_prod.sh
 
-      - name: Wait for Postgres to be healthy
-        run: |
-          for i in {1..30}; do
-            docker exec postgres pg_isready -U testuser -d testdb && break
-            sleep 1
-          done
+      # - name: Wait for Postgres to be healthy
+      #   run: |
+      #     for i in {1..30}; do
+      #       docker exec postgres pg_isready -U testuser -d testdb && break
+      #       sleep 1
+      #     done
 
       - name: Run the application
         run: ./bin/planner_server &
@@ -76,6 +76,7 @@ jobs:
           POSTGRES_USER: testuser
           POSTGRES_PASSWORD: testpassword
           DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+          JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
 
       - name: Run db migration
         run: ./scripts/migrate_up.sh
