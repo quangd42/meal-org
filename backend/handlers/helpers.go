@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
@@ -46,8 +44,4 @@ func getPaginationParamValue(r *http.Request, name string, defaultValue int32) i
 	}
 	val = int32(param64)
 	return val
-}
-
-func pgUUID(u uuid.UUID) pgtype.UUID {
-	return pgtype.UUID{Bytes: u, Valid: true}
 }
