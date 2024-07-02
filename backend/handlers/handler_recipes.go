@@ -66,7 +66,6 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		UserID:            userID,
 	})
 	if err != nil {
-		println(err.Error())
 		respondInternalServerError(w)
 		return
 	}
@@ -86,7 +85,6 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	// Can add as many ingredients as desired, no check here
 	_, err = DB.AddIngredientsToRecipe(r.Context(), dbParams)
 	if err != nil {
-		println(err.Error())
 		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
@@ -94,26 +92,28 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	// Add Ingredients to host Recipe
 	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
-		println(err.Error())
 		respondInternalServerError(w)
 		return
 	}
 
 	// Add Instructions to host Recipe
 	for _, I := range params.Instructions {
-		DB.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
+		err = DB.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
 			CreatedAt:   time.Now().UTC(),
 			UpdatedAt:   time.Now().UTC(),
 			StepNo:      int32(I.StepNo),
 			Instruction: I.Instruction,
 			RecipeID:    recipe.ID,
 		})
+		if err != nil {
+			respondUniqueValueError(w, err, "step_no must be unique for each step")
+			return
+		}
 	}
 
 	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
-		println(err.Error())
-		respondUniqueValueError(w, err, "step_no must be unique")
+		respondInternalServerError(w)
 		return
 	}
 
@@ -261,7 +261,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 			RecipeID:    recipe.ID,
 		})
 		if err != nil {
-			respondInternalServerError(w)
+			respondUniqueValueError(w, err, "step_no must be unique for each step")
 			return
 		}
 	}
