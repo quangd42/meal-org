@@ -1,10 +1,6 @@
 # Create user
 POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
-[Options]
-variable: host=localhost:8080
-variable: username=jbergey5
-variable: password=verySafePassword1
 {"name":"julia","username":"{{username}}","password":"{{password}}"}
 HTTP 201
 [Captures]
