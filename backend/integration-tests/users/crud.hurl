@@ -1,5 +1,5 @@
 # Create user
-POST http://{{host}}/v1/users
+POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
 {"name":"julia","username":"{{username}}","password":"{{password}}"}
 HTTP 201
@@ -7,7 +7,7 @@ HTTP 201
 user_id: jsonpath "$['id']"
 
 # Login
-POST http://{{host}}/v1/auth/login
+POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
 {"username":"{{username}}","password":"{{password}}"}
 HTTP 200
@@ -16,7 +16,7 @@ token: jsonpath "$['token']"
 refresh_token: jsonpath "$['refresh_token']"
 
 # Update user
-PUT http://{{host}}/v1/users
+PUT {{host}}/v1/users
 Authorization: Bearer {{token}}
 Content-Type: text/plain; charset=utf-8
 [Options]
@@ -31,7 +31,7 @@ HTTP 200
 jsonpath "$.name" == "julia2"
 
 # Login post update
-POST http://{{host}}/v1/auth/login
+POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
 {"username":"{{username}}","password":"{{password2}}"}
 HTTP 200
@@ -40,7 +40,7 @@ token2: jsonpath "$['token']"
 refresh_token2: jsonpath "$['refresh_token']"
 
 # ForgetMe (while logged in)
-DELETE http://{{host}}/v1/users
+DELETE {{host}}/v1/users
 Authorization: Bearer {{token2}}
 HTTP 204
 
