@@ -6,6 +6,9 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     # Service containers to run with `tests`
     # Mainly for integration tests
