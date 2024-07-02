@@ -75,6 +75,18 @@ jobs:
           sudo dpkg -i hurl_4.3.0_amd64.deb
           hurl --test --variables-file integration-tests/vars.env --glob "integration-tests/**/*.hurl"
 
+  security:
+    name: Golang Security
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
