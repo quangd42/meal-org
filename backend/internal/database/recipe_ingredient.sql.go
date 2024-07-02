@@ -9,16 +9,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 type AddIngredientsToRecipeParams struct {
-	Amount       string      `json:"amount"`
-	PrepNote     pgtype.Text `json:"prep_note"`
-	CreatedAt    time.Time   `json:"created_at"`
-	UpdatedAt    time.Time   `json:"updated_at"`
-	IngredientID pgtype.UUID `json:"ingredient_id"`
-	RecipeID     pgtype.UUID `json:"recipe_id"`
+	Amount       string    `json:"amount"`
+	PrepNote     *string   `json:"prep_note"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	IngredientID uuid.UUID `json:"ingredient_id"`
+	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
 const listIngredientsByRecipeID = `-- name: ListIngredientsByRecipeID :many
@@ -34,14 +34,14 @@ WHERE recipe_id = $1
 `
 
 type ListIngredientsByRecipeIDRow struct {
-	ID       pgtype.UUID `json:"id"`
-	Name     string      `json:"name"`
-	Amount   string      `json:"amount"`
-	PrepNote pgtype.Text `json:"prep_note"`
-	RecipeID pgtype.UUID `json:"recipe_id"`
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Amount   string    `json:"amount"`
+	PrepNote *string   `json:"prep_note"`
+	RecipeID uuid.UUID `json:"recipe_id"`
 }
 
-func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID pgtype.UUID) ([]ListIngredientsByRecipeIDRow, error) {
+func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]ListIngredientsByRecipeIDRow, error) {
 	rows, err := q.db.Query(ctx, listIngredientsByRecipeID, recipeID)
 	if err != nil {
 		return nil, err
@@ -78,11 +78,11 @@ WHERE
 `
 
 type UpdateIngredientInRecipeParams struct {
-	Amount       string      `json:"amount"`
-	PrepNote     pgtype.Text `json:"prep_note"`
-	UpdatedAt    time.Time   `json:"updated_at"`
-	IngredientID pgtype.UUID `json:"ingredient_id"`
-	RecipeID     pgtype.UUID `json:"recipe_id"`
+	Amount       string    `json:"amount"`
+	PrepNote     *string   `json:"prep_note"`
+	UpdatedAt    time.Time `json:"updated_at"`
+	IngredientID uuid.UUID `json:"ingredient_id"`
+	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
 func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngredientInRecipeParams) error {

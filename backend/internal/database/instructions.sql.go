@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const addInstructionToRecipe = `-- name: AddInstructionToRecipe :exec
@@ -19,11 +19,11 @@ INSERT INTO instructions (
 `
 
 type AddInstructionToRecipeParams struct {
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Instruction string      `json:"instruction"`
-	StepNo      int32       `json:"step_no"`
-	RecipeID    pgtype.UUID `json:"recipe_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Instruction string    `json:"instruction"`
+	StepNo      int32     `json:"step_no"`
+	RecipeID    uuid.UUID `json:"recipe_id"`
 }
 
 func (q *Queries) AddInstructionToRecipe(ctx context.Context, arg AddInstructionToRecipeParams) error {
@@ -43,8 +43,8 @@ WHERE step_no = $1 AND recipe_id = $2
 `
 
 type DeleteInstructionByIDParams struct {
-	StepNo   int32       `json:"step_no"`
-	RecipeID pgtype.UUID `json:"recipe_id"`
+	StepNo   int32     `json:"step_no"`
+	RecipeID uuid.UUID `json:"recipe_id"`
 }
 
 func (q *Queries) DeleteInstructionByID(ctx context.Context, arg DeleteInstructionByIDParams) error {
@@ -59,7 +59,7 @@ WHERE recipe_id = $1
 ORDER BY step_no ASC
 `
 
-func (q *Queries) ListInstructionsByRecipeID(ctx context.Context, recipeID pgtype.UUID) ([]Instruction, error) {
+func (q *Queries) ListInstructionsByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]Instruction, error) {
 	rows, err := q.db.Query(ctx, listInstructionsByRecipeID, recipeID)
 	if err != nil {
 		return nil, err
@@ -92,10 +92,10 @@ WHERE step_no = $1 AND recipe_id = $2
 `
 
 type UpdateInstructionByIDParams struct {
-	StepNo      int32       `json:"step_no"`
-	RecipeID    pgtype.UUID `json:"recipe_id"`
-	UpdatedAt   time.Time   `json:"updated_at"`
-	Instruction string      `json:"instruction"`
+	StepNo      int32     `json:"step_no"`
+	RecipeID    uuid.UUID `json:"recipe_id"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Instruction string    `json:"instruction"`
 }
 
 func (q *Queries) UpdateInstructionByID(ctx context.Context, arg UpdateInstructionByIDParams) error {

@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createIngredient = `-- name: CreateIngredient :one
@@ -19,11 +19,11 @@ RETURNING id, created_at, updated_at, name, parent_id
 `
 
 type CreateIngredientParams struct {
-	ID        pgtype.UUID `json:"id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-	Name      string      `json:"name"`
-	ParentID  pgtype.UUID `json:"parent_id"`
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Name      string     `json:"name"`
+	ParentID  *uuid.UUID `json:"parent_id"`
 }
 
 func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error) {
@@ -50,7 +50,7 @@ DELETE FROM ingredients
 WHERE id = $1
 `
 
-func (q *Queries) DeleteIngredient(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DeleteIngredient(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteIngredient, id)
 	return err
 }
@@ -61,7 +61,7 @@ FROM ingredients
 WHERE id = $1
 `
 
-func (q *Queries) GetIngredientByID(ctx context.Context, id pgtype.UUID) (Ingredient, error) {
+func (q *Queries) GetIngredientByID(ctx context.Context, id uuid.UUID) (Ingredient, error) {
 	row := q.db.QueryRow(ctx, getIngredientByID, id)
 	var i Ingredient
 	err := row.Scan(
@@ -117,10 +117,10 @@ RETURNING id, created_at, updated_at, name, parent_id
 `
 
 type UpdateIngredientByIDParams struct {
-	ID        pgtype.UUID `json:"id"`
-	Name      string      `json:"name"`
-	ParentID  pgtype.UUID `json:"parent_id"`
-	UpdatedAt time.Time   `json:"updated_at"`
+	ID        uuid.UUID  `json:"id"`
+	Name      string     `json:"name"`
+	ParentID  *uuid.UUID `json:"parent_id"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 func (q *Queries) UpdateIngredientByID(ctx context.Context, arg UpdateIngredientByIDParams) (Ingredient, error) {
