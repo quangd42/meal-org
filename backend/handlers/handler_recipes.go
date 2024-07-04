@@ -53,7 +53,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: valitation of required data?
 
 	// Create host Recipe
-	recipe, err := DB.CreateRecipe(r.Context(), database.CreateRecipeParams{
+	recipe, err := store.Q.CreateRecipe(r.Context(), database.CreateRecipeParams{
 		ID:                uuid.New(),
 		CreatedAt:         time.Now().UTC(),
 		UpdatedAt:         time.Now().UTC(),
@@ -83,14 +83,14 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Can add as many ingredients as desired, no check here
-	_, err = DB.AddIngredientsToRecipe(r.Context(), dbParams)
+	_, err = store.Q.AddIngredientsToRecipe(r.Context(), dbParams)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
 	// Add Ingredients to host Recipe
-	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipe.ID)
+	ingredients, err := store.Q.ListIngredientsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -98,7 +98,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Add Instructions to host Recipe
 	for _, I := range params.Instructions {
-		err = DB.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
+		err = store.Q.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
 			CreatedAt:   time.Now().UTC(),
 			UpdatedAt:   time.Now().UTC(),
 			StepNo:      int32(I.StepNo),
@@ -111,7 +111,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
+	instructions, err := store.Q.ListInstructionsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -162,7 +162,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check if the recipe belongs to the user
 	// NOTE: this perhaps should be in a middleware
-	targetRecipe, err := DB.GetRecipeByID(r.Context(), recipeID)
+	targetRecipe, err := store.Q.GetRecipeByID(r.Context(), recipeID)
 	if err != nil {
 		respondError(w, http.StatusNotFound, ErrRecipeNotFound.Error())
 		return
@@ -297,7 +297,7 @@ func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
 	var limit, offset int32
 	limit = getPaginationParamValue(r, "limit", 20)
 	offset = getPaginationParamValue(r, "offset", 0)
-	recipes, err := DB.ListRecipesByUserID(r.Context(), database.ListRecipesByUserIDParams{
+	recipes, err := store.Q.ListRecipesByUserID(r.Context(), database.ListRecipesByUserIDParams{
 		UserID: userID,
 		Limit:  limit,
 		Offset: offset,
@@ -324,7 +324,7 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipe, err := DB.GetRecipeByID(r.Context(), recipeID)
+	recipe, err := store.Q.GetRecipeByID(r.Context(), recipeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
@@ -339,13 +339,13 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ingredients, err := DB.ListIngredientsByRecipeID(r.Context(), recipeID)
+	ingredients, err := store.Q.ListIngredientsByRecipeID(r.Context(), recipeID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
 	}
 
-	instructions, err := DB.ListInstructionsByRecipeID(r.Context(), recipe.ID)
+	instructions, err := store.Q.ListInstructionsByRecipeID(r.Context(), recipe.ID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
@@ -368,7 +368,7 @@ func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DB.DeleteRecipe(r.Context(), database.DeleteRecipeParams{
+	err = store.Q.DeleteRecipe(r.Context(), database.DeleteRecipeParams{
 		UserID: userID,
 		ID:     recipeID,
 	})

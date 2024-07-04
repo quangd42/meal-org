@@ -28,7 +28,7 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params.ParentID != nil {
-		_, err = DB.GetIngredientByID(r.Context(), *params.ParentID)
+		_, err = store.Q.GetIngredientByID(r.Context(), *params.ParentID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
@@ -39,7 +39,7 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ingredient, err := DB.CreateIngredient(r.Context(), database.CreateIngredientParams{
+	ingredient, err := store.Q.CreateIngredient(r.Context(), database.CreateIngredientParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
@@ -77,7 +77,7 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if params.ParentID != nil {
-		_, err = DB.GetIngredientByID(r.Context(), *params.ParentID)
+		_, err = store.Q.GetIngredientByID(r.Context(), *params.ParentID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
 				respondError(w, http.StatusBadRequest, "parent ingredient does not exist")
@@ -88,7 +88,7 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	ingredient, err := DB.UpdateIngredientByID(r.Context(), database.UpdateIngredientByIDParams{
+	ingredient, err := store.Q.UpdateIngredientByID(r.Context(), database.UpdateIngredientByIDParams{
 		ID:        ingredientID,
 		Name:      params.Name,
 		ParentID:  params.ParentID,
@@ -105,7 +105,7 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 
 // TODO: each user should see their own set
 func listIngredientsHandler(w http.ResponseWriter, r *http.Request) {
-	ingredients, err := DB.ListIngredients(r.Context())
+	ingredients, err := store.Q.ListIngredients(r.Context())
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			respondError(w, http.StatusNotFound, "no ingredients found")
@@ -127,7 +127,7 @@ func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = DB.DeleteIngredient(r.Context(), ingredientID)
+	err = store.Q.DeleteIngredient(r.Context(), ingredientID)
 	if err != nil {
 		respondInternalServerError(w)
 		return
