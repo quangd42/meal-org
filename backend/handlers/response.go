@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -40,6 +41,15 @@ func respondInternalServerError(w http.ResponseWriter) {
 	respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 }
 
+func respondDBConstraintsError(w http.ResponseWriter, err error, msg string) {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code[0:2] == "23" {
+		respondError(w, http.StatusForbidden, fmt.Sprintf("parameters contains invalid value, check: %s", msg))
+		return
+	}
+	respondInternalServerError(w)
+}
+
 func respondUniqueValueError(w http.ResponseWriter, err error, msg string) {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -68,41 +78,6 @@ func createUserResponseWithToken(u database.User, token, refreshToken string) mo
 	user.Token = token
 	user.RefreshToken = refreshToken
 	return user
-}
-
-func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListIngredientsByRecipeIDRow, DBInstructions []database.Instruction) models.Recipe {
-	ingredients := []models.IngredientInRecipe{}
-	for _, di := range dbIngredients {
-		ingredients = append(ingredients, models.IngredientInRecipe{
-			ID:       di.ID,
-			Amount:   di.Amount,
-			PrepNote: di.PrepNote,
-			Name:     di.Name,
-		})
-	}
-
-	instructions := []models.InstructionInRecipe{}
-	for _, di := range DBInstructions {
-		instructions = append(instructions, models.InstructionInRecipe{
-			StepNo:      int(di.StepNo),
-			Instruction: di.Instruction,
-		})
-	}
-
-	return models.Recipe{
-		ID:                recipe.ID,
-		CreatedAt:         recipe.CreatedAt,
-		UpdatedAt:         recipe.UpdatedAt,
-		Name:              recipe.Name,
-		ExternalUrl:       recipe.ExternalUrl,
-		UserID:            recipe.UserID,
-		Servings:          int(recipe.Servings),
-		Yield:             recipe.Yield,
-		CookTimeInMinutes: int(recipe.CookTimeInMinutes),
-		Notes:             recipe.Notes,
-		Ingredients:       ingredients,
-		Instructions:      instructions,
-	}
 }
 
 func createIngredientResponse(i database.Ingredient) models.Ingredient {

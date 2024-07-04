@@ -144,6 +144,42 @@ id1: jsonpath "$['id']"
 # [Asserts]
 # jsonpath "$.error" exists
 
+# Create Recipe - ingredient_id does not exist
+POST {{host}}/v1/recipes
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{
+  "name": "Beef and Broccoli Spaghetti",
+  "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "yield": "a whole pan of goodness",
+  "notes": "enjoy!",
+  "ingredients": [
+    {
+      "id": "f689252d-9719-420f-8bc5-26e5c9bde366",
+      "amount": "1lb",
+      "prep_note": "seasoned with salt and pepper"
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "2lb",
+      "prep_note": "cut to bite size"
+    }
+  ],
+  "instructions": [
+    {
+      "step_no": 1,
+      "instruction": "cook the meat till brown"
+    },
+    {
+      "step_no": 2,
+      "instruction": "put the broccoli in, stir then steam"
+    }
+  ]
+}
+HTTP 403
+[Asserts]
+jsonpath "$.error" exists
+
 # Get Recipe 1
 GET {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
@@ -281,11 +317,11 @@ Content-Type: application/json; charset=utf-8
     }
   ]
 }
-HTTP 400
+HTTP 403
 [Asserts]
 jsonpath "$.error" exists
 
-# Get Recipe 1 - post Update - bad instructions
+# Get Recipe 1 - post Update with bad instructions - expect no change
 GET {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
