@@ -5,31 +5,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/models"
 )
 
-type step struct {
-	StepNo      int    `json:"step_no"`
-	Instruction string `json:"instruction"`
-}
-
-type ingredient struct {
-	ID       uuid.UUID `json:"id"`
-	Amount   string    `json:"amount"`
-	PrepNote *string   `json:"prep_note"`
-}
-
 type CreateWholeRecipeParams struct {
-	UserID            uuid.UUID    `json:"user_id"`
-	Name              string       `json:"name"`
-	ExternalURL       *string      `json:"external_url"`
-	Servings          int          `json:"servings"`
-	Yield             *string      `json:"yield"`
-	CookTimeInMinutes int          `json:"cook_time_in_minutes"`
-	Notes             *string      `json:"notes"`
-	Ingredients       []ingredient `json:"ingredients"`
-	Instructions      []step       `json:"instructions"`
+	UserID uuid.UUID `json:"user_id"`
+	models.RecipeRequest
 }
 
 func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWholeRecipeParams) (models.Recipe, error) {
@@ -109,15 +92,8 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 }
 
 type UpdateWholeRecipeParams struct {
-	ID                uuid.UUID    `json:"id"`
-	Name              string       `json:"name"`
-	ExternalURL       *string      `json:"external_url"`
-	Servings          int          `json:"servings"`
-	Yield             *string      `json:"yield"`
-	CookTimeInMinutes int          `json:"cook_time_in_minutes"`
-	Notes             *string      `json:"notes"`
-	Ingredients       []ingredient `json:"ingredients"`
-	Instructions      []step       `json:"instructions"`
+	ID uuid.UUID `json:"id"`
+	models.RecipeRequest
 }
 
 func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWholeRecipeParams) (models.Recipe, error) {
@@ -146,13 +122,30 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 	}
 
 	// Update ingredients in Recipe
+
+	// Make sure that ingredients already belong to the host recipe
+	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
+	if err != nil {
+		return r, err
+	}
+	dbIngredientsMap := make(map[uuid.UUID]bool, len(dbIngredients))
+	for _, i := range dbIngredients {
+		dbIngredientsMap[i.ID] = true
+	}
+
 	for _, i := range arg.Ingredients {
+		if _, ok := dbIngredientsMap[i.ID]; !ok {
+			pgErr := &pgconn.PgError{
+				Code: "23000",
+			}
+			return r, pgErr
+		}
 		ingreDBParams := database.UpdateIngredientInRecipeParams{
 			Amount:       i.Amount,
 			PrepNote:     i.PrepNote,
 			UpdatedAt:    time.Now().UTC(),
 			IngredientID: i.ID,
-			RecipeID:     arg.ID,
+			RecipeID:     dbRecipe.ID,
 		}
 
 		err = qtx.UpdateIngredientInRecipe(ctx, ingreDBParams)
@@ -161,7 +154,7 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 		}
 	}
 
-	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
+	dbIngredients, err = qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
@@ -179,7 +172,7 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 		dbInstructionsMap[int(dbi.StepNo)] = dbi
 	}
 
-	var toAdd, toUpdate []step
+	var toAdd, toUpdate []models.InstructionInRecipe
 	for _, pi := range arg.Instructions {
 		_, ok := dbInstructionsMap[pi.StepNo]
 		// If in param the step no is found in db, add it to the update list
