@@ -122,14 +122,14 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	recipeIDString := chi.URLParam(r, "id")
 	recipeID, err := uuid.Parse(recipeIDString)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "recipe id not found")
+		respondError(w, http.StatusBadRequest, "invalid recipe id")
 		return
 	}
 
 	recipe, err := GetWholeRecipe(r.Context(), store, recipeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			respondError(w, http.StatusNotFound, ErrRecipeNotFound.Error())
 			return
 		}
 		respondInternalServerError(w)
@@ -149,7 +149,7 @@ func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	recipeIDString := chi.URLParam(r, "id")
 	recipeID, err := uuid.Parse(recipeIDString)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "recipe id not found")
+		respondError(w, http.StatusBadRequest, "invalid recipe id")
 		return
 	}
 
