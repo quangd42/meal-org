@@ -108,6 +108,42 @@ jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then stea
 [Captures]
 id1: jsonpath "$['id']"
 
+# Create Recipe - missing params
+# POST {{host}}/v1/recipes
+# Authorization: Bearer {{token}}
+# Content-Type: application/json; charset=utf-8
+# {
+#   "name": "Beef and Broccoli Spaghetti",
+#   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+#   "yield": "a whole pan of goodness",
+#   "notes": "enjoy!",
+#   "ingredients": [
+#     {
+#       "id": "{{ingre_id2}}",
+#       "amount": "1lb",
+#       "prep_note": "seasoned with salt and pepper"
+#     },
+#     {
+#       "id": "{{ingre_id3}}",
+#       "amount": "2lb",
+#       "prep_note": "cut to bite size"
+#     }
+#   ],
+#   "instructions": [
+#     {
+#       "step_no": 1,
+#       "instruction": "cook the meat till brown"
+#     },
+#     {
+#       "step_no": 2,
+#       "instruction": "put the broccoli in, stir then steam"
+#     }
+#   ]
+# }
+# HTTP 400
+# [Asserts]
+# jsonpath "$.error" exists
+
 # Get Recipe 1
 GET {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
@@ -137,12 +173,16 @@ GET {{host}}/v1/recipes/c624bce3-2d1b-4ae8-87e2-af775be70077
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 404
+[Asserts]
+jsonpath "$.error" exists
 
 # Get Recipe bad id
 GET {{host}}/v1/recipes/some-bad-id
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 HTTP 400
+[Asserts]
+jsonpath "$.error" exists
 
 # Update Recipe 1
 PUT {{host}}/v1/recipes/{{id1}}
@@ -202,6 +242,174 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
+
+# Update Recipe - bad instructions
+PUT {{host}}/v1/recipes/{{id1}}
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{
+  "name": "Beef and Broccoli Spaghetti",
+  "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "servings": 4,
+  "yield": "a whole pan of goodness",
+  "cook_time_in_minutes": 20,
+  "notes": "enjoy!",
+  "ingredients": [
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "seasoned with salt and pepper"
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "2lb",
+      "prep_note": "cut to bite size"
+    }
+  ],
+  "instructions": [
+    {
+      "step_no": 2,
+      "instruction": "just leave the meat raw, raw stuff is the best"
+    },
+    {
+      "step_no": 2,
+      "instruction": "put the broccoli in, stir then steam"
+    },
+    {
+      "step_no": 4,
+      "instruction": "put some garnish on"
+    }
+  ]
+}
+HTTP 400
+[Asserts]
+jsonpath "$.error" exists
+
+# Get Recipe 1 - post Update - bad instructions
+GET {{host}}/v1/recipes/{{id1}}
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+HTTP 200
+[Asserts]
+jsonpath "$.name" == "Beef and Broccoli Spaghetti"
+jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.servings" == 4
+jsonpath "$.yield" == "a whole pan of goodness"
+jsonpath "$.cook_time_in_minutes" == 20
+jsonpath "$.notes" == "enjoy!"
+jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients[0].amount" == "1lb"
+jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[1].amount" == "2lb"
+jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.instructions" count == 3
+jsonpath "$.instructions[0].step_no" == 2
+jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
+jsonpath "$.instructions[1].step_no" == 3
+jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
+jsonpath "$.instructions[2].step_no" == 4
+jsonpath "$.instructions[2].instruction" == "put some garnish on"
+
+# Update Recipe - missing params in host recipe
+# PUT {{host}}/v1/recipes/{{id1}}
+# Authorization: Bearer {{token}}
+# Content-Type: application/json; charset=utf-8
+# {
+#   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+#   "servings": 4,
+#   "yield": "a whole pan of goodness",
+#   "cook_time_in_minutes": 20,
+#   "notes": "enjoy!",
+#   "ingredients": [
+#     {
+#       "id": "{{ingre_id2}}",
+#       "amount": "1lb",
+#       "prep_note": "seasoned with salt and pepper"
+#     },
+#     {
+#       "id": "{{ingre_id3}}",
+#       "amount": "2lb",
+#       "prep_note": "cut to bite size"
+#     }
+#   ],
+#   "instructions": [
+#     {
+#       "step_no": 2,
+#       "instruction": "just leave the meat raw, raw stuff is the best"
+#     },
+#     {
+#       "step_no": 3,
+#       "instruction": "put the broccoli in, stir then steam"
+#     },
+#     {
+#       "step_no": 4,
+#       "instruction": "put some garnish on"
+#     }
+#   ]
+# }
+# HTTP 400
+# [Asserts]
+# jsonpath "$.error" exists
+#
+# Update Recipe - no ingredients
+# PUT {{host}}/v1/recipes/{{id1}}
+# Authorization: Bearer {{token}}
+# Content-Type: application/json; charset=utf-8
+# {
+#   "name": "Beef and Broccoli Spaghetti",
+#   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+#   "servings": 4,
+#   "yield": "a whole pan of goodness",
+#   "cook_time_in_minutes": 20,
+#   "notes": "enjoy!",
+#   "ingredients": [],
+#   "instructions": [
+#     {
+#       "step_no": 2,
+#       "instruction": "just leave the meat raw, raw stuff is the best"
+#     },
+#     {
+#       "step_no": 3,
+#       "instruction": "put the broccoli in, stir then steam"
+#     },
+#     {
+#       "step_no": 4,
+#       "instruction": "put some garnish on"
+#     }
+#   ]
+# }
+# HTTP 400
+# [Asserts]
+# jsonpath "$.error" exists
+#
+# Update Recipe - no instructions
+# PUT {{host}}/v1/recipes/{{id1}}
+# Authorization: Bearer {{token}}
+# Content-Type: application/json; charset=utf-8
+# {
+#   "name": "Beef and Broccoli Spaghetti",
+#   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+#   "servings": 4,
+#   "yield": "a whole pan of goodness",
+#   "cook_time_in_minutes": 20,
+#   "notes": "enjoy!",
+#   "ingredients": [
+#     {
+#       "id": "{{ingre_id2}}",
+#       "amount": "1lb",
+#       "prep_note": "seasoned with salt and pepper"
+#     },
+#     {
+#       "id": "{{ingre_id3}}",
+#       "amount": "2lb",
+#       "prep_note": "cut to bite size"
+#     }
+#   ],
+#   "instructions": []
+# }
+# HTTP 400
+# [Asserts]
+# jsonpath "$.error" exists
 
 # Create Recipe 2
 POST {{host}}/v1/recipes

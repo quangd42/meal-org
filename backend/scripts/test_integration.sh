@@ -13,18 +13,18 @@ PORT="3000"
 
 # Function to drop the test database
 cleanup() {
-	# Kill the application
-	if [ -n "$SERVER_PID" ]; then
-		echo "Shutting down the application..."
-		kill $SERVER_PID
-	fi
+  # Kill the application
+  if [ -n "$SERVER_PID" ]; then
+    echo "Shutting down the application..."
+    kill $SERVER_PID
+  fi
 
-	# Drop the database
-	echo "Dropping test database..."
-	psql -h "$DB_HOST" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
+  # Drop the database
+  echo "Dropping test database..."
+  psql -h "$DB_HOST" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
 
-	# Remove the test binary
-	rm bin/planner_server_test
+  # Remove the test binary
+  rm bin/planner_server_test
 }
 
 # Register the cleanup function to be called on the EXIT signal
@@ -53,4 +53,4 @@ sleep 1
 
 # Run integration tests
 echo "Running integration tests..."
-hurl --test --variable host=localhost:"$PORT" --variable username=jbergey2 --variable password=verySafePassword1 --glob "integration-tests/**/*.hurl"
+hurl --test --variable host=http://localhost:"$PORT" --variable username=jbergey2 --variable password=verySafePassword1 --glob "integration-tests/**/*.hurl"
