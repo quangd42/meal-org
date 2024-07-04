@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -23,101 +22,22 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type step struct {
-		StepNo      int    `json:"step_no"`
-		Instruction string `json:"instruction"`
-	}
-
-	type parameters struct {
-		Name              string  `json:"name"`
-		ExternalURL       *string `json:"external_url"`
-		Servings          int     `json:"servings"`
-		Yield             *string `json:"yield"`
-		CookTimeInMinutes int     `json:"cook_time_in_minutes"`
-		Notes             *string `json:"notes"`
-		Ingredients       []struct {
-			ID       uuid.UUID `json:"id"`
-			Amount   string    `json:"amount"`
-			PrepNote *string   `json:"prep_note"`
-		} `json:"ingredients"`
-		Instructions []step `json:"instructions"`
-	}
-
-	params := &parameters{}
+	params := &CreateWholeRecipeParams{}
 	err := json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
 		respondMalformedRequestError(w)
 		return
 	}
 
-	// TODO: valitation of required data?
+	params.UserID = userID
 
-	// Create host Recipe
-	recipe, err := store.Q.CreateRecipe(r.Context(), database.CreateRecipeParams{
-		ID:                uuid.New(),
-		CreatedAt:         time.Now().UTC(),
-		UpdatedAt:         time.Now().UTC(),
-		Name:              params.Name,
-		ExternalUrl:       params.ExternalURL,
-		Servings:          int32(params.Servings),
-		Yield:             params.Yield,
-		CookTimeInMinutes: int32(params.CookTimeInMinutes),
-		Notes:             params.Notes,
-		UserID:            userID,
-	})
+	recipe, err := CreateWholeRecipe(r.Context(), store, *params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondDBConstraintsError(w, err, "ingredient_id, step_no")
 		return
 	}
 
-	dbParams := make([]database.AddIngredientsToRecipeParams, len(params.Ingredients))
-	for i, p := range params.Ingredients {
-		dbParams[i] = database.AddIngredientsToRecipeParams{
-			RecipeID:     recipe.ID,
-			CreatedAt:    time.Now().UTC(),
-			UpdatedAt:    time.Now().UTC(),
-			IngredientID: p.ID,
-			Amount:       p.Amount,
-			PrepNote:     p.PrepNote,
-		}
-	}
-
-	// Can add as many ingredients as desired, no check here
-	_, err = store.Q.AddIngredientsToRecipe(r.Context(), dbParams)
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
-	}
-
-	// Add Ingredients to host Recipe
-	ingredients, err := store.Q.ListIngredientsByRecipeID(r.Context(), recipe.ID)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	// Add Instructions to host Recipe
-	for _, I := range params.Instructions {
-		err = store.Q.AddInstructionToRecipe(r.Context(), database.AddInstructionToRecipeParams{
-			CreatedAt:   time.Now().UTC(),
-			UpdatedAt:   time.Now().UTC(),
-			StepNo:      int32(I.StepNo),
-			Instruction: I.Instruction,
-			RecipeID:    recipe.ID,
-		})
-		if err != nil {
-			respondUniqueValueError(w, err, "step_no must be unique for each step")
-			return
-		}
-	}
-
-	instructions, err := store.Q.ListInstructionsByRecipeID(r.Context(), recipe.ID)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	respondJSON(w, http.StatusCreated, createRecipeResponse(recipe, ingredients, instructions))
+	respondJSON(w, http.StatusCreated, recipe)
 }
 
 func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
@@ -134,7 +54,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := &database.UpdateAllRecipeDataParams{}
+	params := &UpdateWholeRecipeParams{}
 	err = json.NewDecoder(r.Body).Decode(params)
 	if err != nil {
 		respondMalformedRequestError(w)
@@ -154,14 +74,15 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	params.ID = targetRecipe.ID
 
+	err = validateRequiredParams2(params)
 	if err != nil {
-		respondInternalServerError(w)
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	recipe, err := database.UpdateAllRecipeData(r.Context(), store, *params)
+	recipe, err := UpdateWholeRecipe(r.Context(), store, *params)
 	if err != nil {
-		respondMalformedRequestError(w)
+		respondDBConstraintsError(w, err, "ingredient_id, step_no")
 		return
 	}
 
@@ -192,7 +113,7 @@ func listRecipesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+	_, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
 	if !ok {
 		respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 		return
@@ -205,7 +126,7 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recipe, err := store.Q.GetRecipeByID(r.Context(), recipeID)
+	recipe, err := GetWholeRecipe(r.Context(), store, recipeID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
@@ -215,24 +136,7 @@ func getRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if recipe.UserID != userID {
-		respondError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
-		return
-	}
-
-	ingredients, err := store.Q.ListIngredientsByRecipeID(r.Context(), recipeID)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	instructions, err := store.Q.ListInstructionsByRecipeID(r.Context(), recipe.ID)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	respondJSON(w, http.StatusOK, createRecipeResponse(recipe, ingredients, instructions))
+	respondJSON(w, http.StatusOK, recipe)
 }
 
 func deleteRecipeHandler(w http.ResponseWriter, r *http.Request) {
