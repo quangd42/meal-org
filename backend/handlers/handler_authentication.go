@@ -27,7 +27,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := DB.GetUserByUsername(r.Context(), params.Username)
+	user, err := store.Q.GetUserByUsername(r.Context(), params.Username)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			respondError(w, http.StatusNotFound, ErrAuthenticationFailed.Error())
@@ -66,7 +66,7 @@ func refreshJWTHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := DB.GetTokenByValue(r.Context(), paramToken)
+	token, err := store.Q.GetTokenByValue(r.Context(), paramToken)
 	if err != nil {
 		respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
@@ -74,7 +74,7 @@ func refreshJWTHandler(w http.ResponseWriter, r *http.Request) {
 
 	if token.ExpiredAt.Before(time.Now().UTC()) {
 		token.IsRevoked = true
-		err = DB.RevokeToken(r.Context(), database.RevokeTokenParams{
+		err = store.Q.RevokeToken(r.Context(), database.RevokeTokenParams{
 			Value:     paramToken,
 			IsRevoked: true,
 		})
@@ -110,13 +110,13 @@ func revokeJWTHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = DB.GetTokenByValue(r.Context(), paramToken)
+	_, err = store.Q.GetTokenByValue(r.Context(), paramToken)
 	if err != nil {
 		respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 
-	err = DB.RevokeToken(r.Context(), database.RevokeTokenParams{
+	err = store.Q.RevokeToken(r.Context(), database.RevokeTokenParams{
 		Value:     paramToken,
 		IsRevoked: true,
 	})

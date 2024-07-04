@@ -19,7 +19,7 @@ func generateAndSaveAuthTokens(r *http.Request, user database.User) (string, str
 	if err != nil {
 		return "", "", err
 	}
-	err = DB.SaveToken(r.Context(), database.SaveTokenParams{
+	err = store.Q.SaveToken(r.Context(), database.SaveTokenParams{
 		Value:     refreshToken,
 		CreatedAt: time.Now().UTC(),
 		ExpiredAt: time.Now().Add(auth.ExpirationDurationRefresh),
