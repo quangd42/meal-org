@@ -5,11 +5,10 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/backend/internal/models"
 )
 
 func respondJSON[T any](w http.ResponseWriter, code int, v T) {
@@ -54,19 +53,8 @@ func respondMalformedRequestError(w http.ResponseWriter) {
 	respondError(w, http.StatusBadRequest, "malformed request body")
 }
 
-type User struct {
-	ID           uuid.UUID `json:"id"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	Name         string    `json:"name"`
-	Username     string    `json:"username"`
-	Hash         string    `json:"-"`
-	Token        string    `json:"token,omitempty"`
-	RefreshToken string    `json:"refresh_token,omitempty"`
-}
-
-func createUserResponse(u database.User) User {
-	return User{
+func createUserResponse(u database.User) models.User {
+	return models.User{
 		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -75,44 +63,17 @@ func createUserResponse(u database.User) User {
 	}
 }
 
-func createUserResponseWithToken(u database.User, token, refreshToken string) User {
+func createUserResponseWithToken(u database.User, token, refreshToken string) models.User {
 	user := createUserResponse(u)
 	user.Token = token
 	user.RefreshToken = refreshToken
 	return user
 }
 
-type Recipe struct {
-	ID                uuid.UUID             `json:"id"`
-	CreatedAt         time.Time             `json:"created_at"`
-	UpdatedAt         time.Time             `json:"updated_at"`
-	Name              string                `json:"name"`
-	ExternalUrl       string                `json:"external_url"`
-	UserID            uuid.UUID             `json:"user_id"`
-	Servings          int                   `json:"servings"`
-	Yield             *string               `json:"yield"`
-	CookTimeInMinutes int                   `json:"cook_time_in_minutes"`
-	Notes             *string               `json:"notes"`
-	Ingredients       []IngredientInRecipe  `json:"ingredients"`
-	Instructions      []InstructionInRecipe `json:"instructions"`
-}
-
-type IngredientInRecipe struct {
-	ID       uuid.UUID `json:"id"`
-	Amount   string    `json:"amount"`
-	PrepNote *string   `json:"prep_note"`
-	Name     string    `json:"name"`
-}
-
-type InstructionInRecipe struct {
-	StepNo      int    `json:"step_no"`
-	Instruction string `json:"instruction"`
-}
-
-func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListIngredientsByRecipeIDRow, DBInstructions []database.Instruction) Recipe {
-	ingredients := []IngredientInRecipe{}
+func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListIngredientsByRecipeIDRow, DBInstructions []database.Instruction) models.Recipe {
+	ingredients := []models.IngredientInRecipe{}
 	for _, di := range dbIngredients {
-		ingredients = append(ingredients, IngredientInRecipe{
+		ingredients = append(ingredients, models.IngredientInRecipe{
 			ID:       di.ID,
 			Amount:   di.Amount,
 			PrepNote: di.PrepNote,
@@ -120,15 +81,15 @@ func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListI
 		})
 	}
 
-	instructions := []InstructionInRecipe{}
+	instructions := []models.InstructionInRecipe{}
 	for _, di := range DBInstructions {
-		instructions = append(instructions, InstructionInRecipe{
+		instructions = append(instructions, models.InstructionInRecipe{
 			StepNo:      int(di.StepNo),
 			Instruction: di.Instruction,
 		})
 	}
 
-	return Recipe{
+	return models.Recipe{
 		ID:                recipe.ID,
 		CreatedAt:         recipe.CreatedAt,
 		UpdatedAt:         recipe.UpdatedAt,
@@ -144,16 +105,8 @@ func createRecipeResponse(recipe database.Recipe, dbIngredients []database.ListI
 	}
 }
 
-type Ingredient struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id,omitempty"`
-}
-
-func createIngredientResponse(i database.Ingredient) Ingredient {
-	res := Ingredient{
+func createIngredientResponse(i database.Ingredient) models.Ingredient {
+	res := models.Ingredient{
 		ID:        i.ID,
 		Name:      i.Name,
 		CreatedAt: i.CreatedAt,
