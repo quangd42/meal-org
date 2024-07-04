@@ -34,7 +34,7 @@ type CreateRecipeParams struct {
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 	Name              string    `json:"name"`
-	ExternalUrl       string    `json:"external_url"`
+	ExternalUrl       *string   `json:"external_url"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int32     `json:"servings"`
 	Yield             *string   `json:"yield"`
@@ -132,7 +132,7 @@ type ListRecipesByUserIDParams struct {
 
 type ListRecipesByUserIDRow struct {
 	Name              string    `json:"name"`
-	ExternalUrl       string    `json:"external_url"`
+	ExternalUrl       *string   `json:"external_url"`
 	UpdatedAt         time.Time `json:"updated_at"`
 	Servings          int32     `json:"servings"`
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
@@ -181,7 +181,7 @@ RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yie
 type UpdateRecipeByIDParams struct {
 	ID                uuid.UUID `json:"id"`
 	Name              string    `json:"name"`
-	ExternalUrl       string    `json:"external_url"`
+	ExternalUrl       *string   `json:"external_url"`
 	UpdatedAt         time.Time `json:"updated_at"`
 	Servings          int32     `json:"servings"`
 	Yield             *string   `json:"yield"`

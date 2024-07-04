@@ -30,7 +30,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	type parameters struct {
 		Name              string  `json:"name"`
-		ExternalURL       string  `json:"external_url"`
+		ExternalURL       *string `json:"external_url"`
 		Servings          int     `json:"servings"`
 		Yield             *string `json:"yield"`
 		CookTimeInMinutes int     `json:"cook_time_in_minutes"`
