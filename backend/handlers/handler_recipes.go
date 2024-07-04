@@ -11,6 +11,7 @@ import (
 	"github.com/quangd42/meal-planner/backend/internal/auth"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/middleware"
+	"github.com/quangd42/meal-planner/backend/internal/models"
 )
 
 var ErrRecipeNotFound = errors.New("recipe not found")
@@ -22,16 +23,25 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := &CreateWholeRecipeParams{}
-	err := json.NewDecoder(r.Body).Decode(params)
+	rr := &models.RecipeRequest{}
+	err := json.NewDecoder(r.Body).Decode(rr)
 	if err != nil {
 		respondMalformedRequestError(w)
 		return
 	}
 
-	params.UserID = userID
+	err = rr.Validate()
+	if err != nil {
+		respondMalformedRequestError(w)
+		return
+	}
 
-	recipe, err := CreateWholeRecipe(r.Context(), store, *params)
+	params := CreateWholeRecipeParams{
+		UserID:        userID,
+		RecipeRequest: *rr,
+	}
+
+	recipe, err := CreateWholeRecipe(r.Context(), store, params)
 	if err != nil {
 		respondDBConstraintsError(w, err, "ingredient_id, step_no")
 		return
@@ -50,12 +60,18 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	recipeIDString := chi.URLParam(r, "id")
 	recipeID, err := uuid.Parse(recipeIDString)
 	if err != nil {
-		respondError(w, http.StatusBadRequest, "recipe id not found")
+		respondError(w, http.StatusBadRequest, "invalid recipe id")
 		return
 	}
 
-	params := &UpdateWholeRecipeParams{}
-	err = json.NewDecoder(r.Body).Decode(params)
+	rr := &models.RecipeRequest{}
+	err = json.NewDecoder(r.Body).Decode(rr)
+	if err != nil {
+		respondMalformedRequestError(w)
+		return
+	}
+
+	err = rr.Validate()
 	if err != nil {
 		respondMalformedRequestError(w)
 		return
@@ -72,15 +88,13 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 		return
 	}
-	params.ID = targetRecipe.ID
 
-	err = validateRequiredParams2(params)
-	if err != nil {
-		respondError(w, http.StatusBadRequest, err.Error())
-		return
+	params := UpdateWholeRecipeParams{
+		ID:            recipeID,
+		RecipeRequest: *rr,
 	}
 
-	recipe, err := UpdateWholeRecipe(r.Context(), store, *params)
+	recipe, err := UpdateWholeRecipe(r.Context(), store, params)
 	if err != nil {
 		respondDBConstraintsError(w, err, "ingredient_id, step_no")
 		return
