@@ -7,7 +7,72 @@ package database
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
 )
+
+const createCuisine = `-- name: CreateCuisine :one
+INSERT INTO cuisines (id, created_at, updated_at, name, parent_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, created_at, updated_at, name, parent_id
+`
+
+type CreateCuisineParams struct {
+	ID        uuid.UUID  `json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	Name      string     `json:"name"`
+	ParentID  *uuid.UUID `json:"parent_id"`
+}
+
+func (q *Queries) CreateCuisine(ctx context.Context, arg CreateCuisineParams) (Cuisine, error) {
+	row := q.db.QueryRow(ctx, createCuisine,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Name,
+		arg.ParentID,
+	)
+	var i Cuisine
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.ParentID,
+	)
+	return i, err
+}
+
+const deleteCuisine = `-- name: DeleteCuisine :exec
+DELETE FROM cuisines
+WHERE id = $1
+`
+
+func (q *Queries) DeleteCuisine(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCuisine, id)
+	return err
+}
+
+const getCuisineByID = `-- name: GetCuisineByID :one
+SELECT id, created_at, updated_at, name, parent_id
+FROM cuisines
+WHERE id = $1
+`
+
+func (q *Queries) GetCuisineByID(ctx context.Context, id uuid.UUID) (Cuisine, error) {
+	row := q.db.QueryRow(ctx, getCuisineByID, id)
+	var i Cuisine
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.ParentID,
+	)
+	return i, err
+}
 
 const listCuisines = `-- name: ListCuisines :many
 SELECT id, created_at, updated_at, name, parent_id
@@ -39,4 +104,39 @@ func (q *Queries) ListCuisines(ctx context.Context) ([]Cuisine, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateCuisineByID = `-- name: UpdateCuisineByID :one
+UPDATE cuisines
+SET
+  name = $2,
+  parent_id = $3,
+  updated_at = $4
+WHERE id = $1
+RETURNING id, created_at, updated_at, name, parent_id
+`
+
+type UpdateCuisineByIDParams struct {
+	ID        uuid.UUID  `json:"id"`
+	Name      string     `json:"name"`
+	ParentID  *uuid.UUID `json:"parent_id"`
+	UpdatedAt time.Time  `json:"updated_at"`
+}
+
+func (q *Queries) UpdateCuisineByID(ctx context.Context, arg UpdateCuisineByIDParams) (Cuisine, error) {
+	row := q.db.QueryRow(ctx, updateCuisineByID,
+		arg.ID,
+		arg.Name,
+		arg.ParentID,
+		arg.UpdatedAt,
+	)
+	var i Cuisine
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.ParentID,
+	)
+	return i, err
 }

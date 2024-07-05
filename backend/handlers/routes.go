@@ -78,10 +78,17 @@ func ingredientsAPIRouter() http.Handler {
 	return r
 }
 
+// TODO: create, update and delete should be
+// restricted to admin only
 func cuisinesAPIRouter() http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(middleware.AuthVerifier())
+	r.Post("/", createCuisineHandler)
 	r.Get("/", listCuisinesHandler)
+
+	r.Put("/{id}", updateCuisineHandler)
+	r.Delete("/{id}", deleteCuisineHandler)
 
 	return r
 }
