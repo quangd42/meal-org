@@ -1,11 +1,11 @@
 import csv
 import os
+import uuid
+from datetime import datetime
 
 import psycopg2
 from dotenv import load_dotenv
-from psycopg2 import sql
-from datetime import datetime
-import uuid
+from psycopg2 import sql, connect
 
 
 def get_parent_id(cursor, parent_name, table_name):
@@ -19,7 +19,7 @@ def get_parent_id(cursor, parent_name, table_name):
 
 def import_csv_to_postgres(csv_file_path, db_config, table_name):
     # Connect to PostgreSQL database
-    conn = psycopg2.connect(
+    conn = connect(
         dbname=db_config["dbname"],
         user=db_config["user"],
         password=db_config["password"],

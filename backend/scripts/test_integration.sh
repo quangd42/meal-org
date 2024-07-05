@@ -10,21 +10,21 @@ DB_PASSWORD=""
 DB_HOST="localhost"
 DB_PORT="5432"
 PORT="3000"
+DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME"
+
+# Export environment variables
+export DB_NAME DB_USER DB_PASSWORD DB_HOST DB_PORT DATABASE_URL PORT
 
 # Function to drop the test database
 cleanup() {
-  # Kill the application
-  if [ -n "$SERVER_PID" ]; then
-    echo "Shutting down the application..."
-    kill $SERVER_PID
-  fi
+  echo "Shutting down the application..."
+  [ -n "$SERVER_PID" ] && kill $SERVER_PID
 
-  # Drop the database
   echo "Dropping test database..."
   psql -h "$DB_HOST" -d postgres -c "DROP DATABASE IF EXISTS $DB_NAME;"
 
-  # Remove the test binary
-  rm bin/planner_server_test
+  echo "Removing test binary..."
+  rm -f bin/planner_server_test
 }
 
 # Register the cleanup function to be called on the EXIT signal
@@ -36,16 +36,31 @@ psql -h "$DB_HOST" -d postgres -c "CREATE DATABASE $DB_NAME;"
 
 # Run migrations
 echo "Running migrations..."
-cd sql/schema || exit
-goose postgres "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" up
-cd ../../
+(
+  cd sql/schema || exit
+  goose postgres "$DATABASE_URL" up
+)
+
+# Ensure virtual environment is set up and activated
+if [ ! -d ".venv" ]; then
+  echo "Creating virtual environment..."
+  python3 -m venv .venv
+fi
+
+echo "Activating virtual environment..."
+source .venv/bin/activate
+pip install -r scripts/populate_cuisines/requirements.txt
+
+echo "Populating database with cuisine data..."
+python scripts/populate_cuisines/populate_cuisines.py
 
 # Build the test binary
+echo "Building the test binary..."
 go build -o bin/planner_server_test
 
 # Run the application in the background
 echo "Starting the application..."
-PORT=$PORT DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" bin/planner_server_test &
+bin/planner_server_test &
 SERVER_PID=$!
 
 # Give the server some time to start
