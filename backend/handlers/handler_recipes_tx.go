@@ -335,6 +335,7 @@ func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesB
 	}
 }
 
+// TODO: refactor ingredients to use similar func
 func updateCuisinesInRecipe(ctx context.Context, qtx *database.Queries, params []uuid.UUID, recipeID uuid.UUID) ([]database.ListCuisinesByRecipeIDRow, error) {
 	var dbCuisines []database.ListCuisinesByRecipeIDRow
 	// Add Cuisines to host Recipe

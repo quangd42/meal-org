@@ -90,3 +90,14 @@ func createIngredientResponse(i database.Ingredient) models.Ingredient {
 	}
 	return res
 }
+
+func createCuisineResponse(i database.Cuisine) models.Cuisine {
+	res := models.Cuisine{
+		ID:        i.ID,
+		Name:      i.Name,
+		CreatedAt: i.CreatedAt,
+		UpdatedAt: i.UpdatedAt,
+		ParentID:  i.ParentID,
+	}
+	return res
+}

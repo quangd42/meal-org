@@ -17,7 +17,6 @@ import (
 var ErrRecipeNotFound = errors.New("recipe not found")
 
 // TODO: allow for uploading images
-// TODO: add cuisine to recipe dataload
 func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
 	if !ok {
