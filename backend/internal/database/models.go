@@ -48,11 +48,10 @@ type Recipe struct {
 }
 
 type RecipeCuisine struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	CuisineID *uuid.UUID `json:"cuisine_id"`
-	RecipeID  *uuid.UUID `json:"recipe_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CuisineID uuid.UUID `json:"cuisine_id"`
+	RecipeID  uuid.UUID `json:"recipe_id"`
 }
 
 type RecipeIngredient struct {

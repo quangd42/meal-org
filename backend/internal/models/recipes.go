@@ -17,8 +17,14 @@ type Recipe struct {
 	Yield             *string               `json:"yield"`
 	CookTimeInMinutes int                   `json:"cook_time_in_minutes"`
 	Notes             *string               `json:"notes"`
+	Cuisines          []CuisineInRecipe     `json:"cuisines"`
 	Ingredients       []IngredientInRecipe  `json:"ingredients"`
 	Instructions      []InstructionInRecipe `json:"instructions"`
+}
+
+type CuisineInRecipe struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 type IngredientInRecipe struct {
@@ -40,6 +46,7 @@ type RecipeRequest struct {
 	Yield             *string               `json:"yield"`
 	CookTimeInMinutes int                   `json:"cook_time_in_minutes" validate:"required"`
 	Notes             *string               `json:"notes"`
+	Cuisines          []uuid.UUID           `json:"cuisines" validate:"required,gt=0"`
 	Ingredients       []IngredientInRecipe  `json:"ingredients" validate:"required,gt=0"`
 	Instructions      []InstructionInRecipe `json:"instructions" validate:"required,gt=0"`
 }

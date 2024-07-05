@@ -15,7 +15,6 @@ HTTP 200
 [Captures]
 token: jsonpath "$['token']"
 
-### Tests
 # Create Ingredient 1
 POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
@@ -52,6 +51,18 @@ jsonpath "$.parent_id" not exists
 [Captures]
 ingre_id3: jsonpath "$['id']"
 
+# List Cuisines
+GET {{host}}/v1/cuisines
+Authorization: Bearer {{token}}
+HTTP 200
+[Asserts]
+jsonpath "$" count > 0
+[Captures]
+cuisine_id1: jsonpath "$[0].id"
+cuisine_id2: jsonpath "$[1].id"
+cuisine_id3: jsonpath "$[2].id"
+
+### Tests
 # Create Recipe 1
 POST {{host}}/v1/recipes
 Authorization: Bearer {{token}}
@@ -63,6 +74,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
       "id": "{{ingre_id2}}",
@@ -105,6 +117,9 @@ jsonpath "$.instructions[0].step_no" == 1
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
 jsonpath "$.instructions[1].step_no" == 2
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id1}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
 [Captures]
 id1: jsonpath "$['id']"
 
@@ -119,6 +134,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id2}}", "{{cuisine_id3}}"],
   "ingredients": [
     {
       "id": "{{ingre_id2}}",
@@ -166,6 +182,9 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
 # Update Recipe - ingredient_id does not exist
 PUT {{host}}/v1/recipes/{{id1}}
@@ -178,6 +197,7 @@ Content-Type: application/json; charset=utf-8
   "cook_time_in_minutes": 60,
   "yield": "a whole pan of goodness",
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
       "id": "f689252d-9719-420f-8bc5-26e5c9bde366",
@@ -205,6 +225,34 @@ HTTP 403
 [Asserts]
 jsonpath "$.error" exists
 
+# Get Recipe 1 - post Update with ingredient_id that does not exist
+GET {{host}}/v1/recipes/{{id1}}
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+HTTP 200
+[Asserts]
+jsonpath "$.name" == "Beef and Broccoli Spaghetti"
+jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.servings" == 4
+jsonpath "$.yield" == "a whole pan of goodness"
+jsonpath "$.cook_time_in_minutes" == 20
+jsonpath "$.notes" == "enjoy!"
+jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients[0].amount" == "1lb"
+jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[1].amount" == "2lb"
+jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.instructions" count == 3
+jsonpath "$.instructions[0].step_no" == 2
+jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
+jsonpath "$.instructions[1].step_no" == 3
+jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
+jsonpath "$.instructions[2].step_no" == 4
+jsonpath "$.instructions[2].instruction" == "put some garnish on"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
+
 # Update Recipe - duplicate step_no in instructions
 PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
@@ -216,6 +264,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
       "id": "{{ingre_id2}}",
@@ -271,6 +320,9 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
 # Update Recipe - missing params name in host recipe
 PUT {{host}}/v1/recipes/{{id1}}
@@ -282,6 +334,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
       "id": "{{ingre_id2}}",
@@ -337,6 +390,9 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
 # Update Recipe - no ingredients
 PUT {{host}}/v1/recipes/{{id1}}
@@ -349,6 +405,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [],
   "instructions": [
     {
@@ -393,6 +450,9 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
 # Update Recipe - no instructions
 PUT {{host}}/v1/recipes/{{id1}}
@@ -405,6 +465,7 @@ Content-Type: application/json; charset=utf-8
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
   "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
       "id": "{{ingre_id2}}",
@@ -447,60 +508,9 @@ jsonpath "$.instructions[1].step_no" == 3
 jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
 jsonpath "$.instructions[2].step_no" == 4
 jsonpath "$.instructions[2].instruction" == "put some garnish on"
-
-# Create Recipe 2
-POST {{host}}/v1/recipes
-Authorization: Bearer {{token}}
-Content-Type: application/json; charset=utf-8
-{
-  "name": "General Tso's Chicken",
-  "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
-  "servings": 4,
-  "yield": "a whole pan of goodness",
-  "cook_time_in_minutes": 20,
-  "notes": "enjoy!",
-  "ingredients": [
-    {
-      "id": "{{ingre_id2}}",
-      "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
-    },
-    {
-      "id": "{{ingre_id3}}",
-      "amount": "2lb",
-      "prep_note": "cut to bite size"
-    }
-  ],
-  "instructions": [
-    {
-      "step_no": 1,
-      "instruction": "cook the meat till brown"
-    },
-    {
-      "step_no": 2,
-      "instruction": "put the broccoli in, stir then steam"
-    }
-  ]
-}
-HTTP 201
-[Asserts]
-jsonpath "$.name" == "General Tso's Chicken"
-jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
-jsonpath "$.servings" == 4
-jsonpath "$.yield" == "a whole pan of goodness"
-jsonpath "$.cook_time_in_minutes" == 20
-jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
-jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
-jsonpath "$.ingredients[0].parent_id" not exists
-jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
-jsonpath "$.instructions" count == 2
-jsonpath "$.instructions[0].step_no" == 1
-jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
-jsonpath "$.instructions[1].step_no" == 2
-jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then steam"
+jsonpath "$.cuisines" count == 2
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
+jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
 
 ### Clean up

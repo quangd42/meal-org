@@ -43,6 +43,25 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 		return r, err
 	}
 
+	// Add Cuisines to host Recipe
+	for _, c := range arg.Cuisines {
+		err = qtx.AddCuisinesToRecipe(ctx,
+			database.AddCuisinesToRecipeParams{
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+				RecipeID:  dbRecipe.ID,
+				CuisineID: c,
+			})
+		if err != nil {
+			return r, err
+		}
+	}
+
+	dbCuisines, err := qtx.ListCuisinesByRecipeID(ctx, dbRecipe.ID)
+	if err != nil {
+		return r, err
+	}
+
 	// Add Ingredients to host Recipe
 	dbIngredientParams := make([]database.AddIngredientsToRecipeParams, len(arg.Ingredients))
 	for i, p := range arg.Ingredients {
@@ -86,7 +105,7 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 		return r, err
 	}
 
-	r = createWholeRecipe(dbRecipe, dbIngredients, dbInstructions)
+	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 
 	return r, tx.Commit(ctx)
 }
@@ -117,6 +136,11 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 		CookTimeInMinutes: int32(arg.CookTimeInMinutes),
 		Notes:             arg.Notes,
 	})
+	if err != nil {
+		return r, err
+	}
+
+	dbCuisines, err := updateCuisinesInRecipe(ctx, qtx, arg.Cuisines, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
@@ -228,7 +252,7 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 	}
 
 	// Assemble all updated data
-	r = createWholeRecipe(dbRecipe, dbIngredients, dbInstructions)
+	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 
 	return r, tx.Commit(ctx)
 }
@@ -249,20 +273,33 @@ func GetWholeRecipe(ctx context.Context, store *database.Store, recipeID uuid.UU
 		return r, err
 	}
 
-	ingredients, err := qtx.ListIngredientsByRecipeID(ctx, recipeID)
+	dbCuisines, err := qtx.ListCuisinesByRecipeID(ctx, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
 
-	instructions, err := qtx.ListInstructionsByRecipeID(ctx, recipeID)
+	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, recipeID)
 	if err != nil {
 		return r, err
 	}
-	r = createWholeRecipe(dbRecipe, ingredients, instructions)
+
+	dbInstructions, err := qtx.ListInstructionsByRecipeID(ctx, recipeID)
+	if err != nil {
+		return r, err
+	}
+	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 	return r, tx.Commit(ctx)
 }
 
-func createWholeRecipe(dr database.Recipe, dbIngredients []database.ListIngredientsByRecipeIDRow, dbInstructions []database.Instruction) models.Recipe {
+func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesByRecipeIDRow, dbIngredients []database.ListIngredientsByRecipeIDRow, dbInstructions []database.Instruction) models.Recipe {
+	cuisines := make([]models.CuisineInRecipe, len(dbCuisines))
+	for i, c := range dbCuisines {
+		cuisines[i] = models.CuisineInRecipe{
+			ID:   c.ID,
+			Name: c.Name,
+		}
+	}
+
 	ingredients := []models.IngredientInRecipe{}
 	for _, di := range dbIngredients {
 		ingredients = append(ingredients, models.IngredientInRecipe{
@@ -292,7 +329,64 @@ func createWholeRecipe(dr database.Recipe, dbIngredients []database.ListIngredie
 		Yield:             dr.Yield,
 		CookTimeInMinutes: int(dr.CookTimeInMinutes),
 		Notes:             dr.Notes,
+		Cuisines:          cuisines,
 		Ingredients:       ingredients,
 		Instructions:      instructions,
 	}
+}
+
+func updateCuisinesInRecipe(ctx context.Context, qtx *database.Queries, params []uuid.UUID, recipeID uuid.UUID) ([]database.ListCuisinesByRecipeIDRow, error) {
+	var dbCuisines []database.ListCuisinesByRecipeIDRow
+	// Add Cuisines to host Recipe
+	dbCuisines, err := qtx.ListCuisinesByRecipeID(ctx, recipeID)
+	if err != nil {
+		return dbCuisines, err
+	}
+	dbCuisinesMap := make(map[uuid.UUID]bool, len(dbCuisines))
+	for _, c := range dbCuisines {
+		dbCuisinesMap[c.ID] = true
+	}
+
+	var toAdd, toRemove []uuid.UUID
+	for _, c := range params {
+		if _, ok := dbCuisinesMap[c]; !ok {
+			toAdd = append(toAdd, c)
+		} else {
+			delete(dbCuisinesMap, c)
+		}
+	}
+	for id := range dbCuisinesMap {
+		toRemove = append(toRemove, id)
+	}
+
+	for _, c := range toAdd {
+		err = qtx.AddCuisinesToRecipe(ctx,
+			database.AddCuisinesToRecipeParams{
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+				RecipeID:  recipeID,
+				CuisineID: c,
+			})
+		if err != nil {
+			return dbCuisines, err
+		}
+	}
+
+	for _, c := range toRemove {
+		err = qtx.RemoveCuisineFromRecipe(ctx, database.RemoveCuisineFromRecipeParams{
+			RecipeID:  recipeID,
+			CuisineID: c,
+		})
+		if err != nil {
+			return dbCuisines, err
+		}
+	}
+
+	// Get the latest list
+	dbCuisines, err = qtx.ListCuisinesByRecipeID(ctx, recipeID)
+	if err != nil {
+		return dbCuisines, err
+	}
+
+	return dbCuisines, nil
 }

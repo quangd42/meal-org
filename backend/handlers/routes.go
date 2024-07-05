@@ -19,6 +19,7 @@ func AddRoutes(r *chi.Mux) {
 		r.Mount("/auth", authRouter())
 		r.Mount("/recipes", recipesAPIRouter())
 		r.Mount("/ingredients", ingredientsAPIRouter())
+		r.Mount("/cuisines", cuisinesAPIRouter())
 	})
 }
 
@@ -59,6 +60,8 @@ func recipesAPIRouter() http.Handler {
 	r.Put("/{id}", updateRecipeHandler)
 	r.Delete("/{id}", deleteRecipeHandler)
 
+	// TODO: add search & filter
+
 	return r
 }
 
@@ -71,6 +74,14 @@ func ingredientsAPIRouter() http.Handler {
 
 	r.Put("/{id}", updateIngredientHandler)
 	r.Delete("/{id}", deleteIngredientHandler)
+
+	return r
+}
+
+func cuisinesAPIRouter() http.Handler {
+	r := chi.NewRouter()
+
+	r.Get("/", listCuisinesHandler)
 
 	return r
 }
