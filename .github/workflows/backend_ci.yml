@@ -1,6 +1,16 @@
+name: ci
+
 on:
   pull_request:
     branches: [main]
+
+env:
+  POSTGRES_DB: testdb
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpassword
+  DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+  JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
+  PORT: 8080
 
 jobs:
   tests:
@@ -10,24 +20,17 @@ jobs:
       run:
         working-directory: backend
 
-    # Service containers to run with `tests`
-    # Mainly for integration tests
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
         image: postgres
-        # Maps tcp port 5432 on service container to the host
         ports:
           - 5432:5432
-        # Provide the password for postgres
         env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-        # Set health checks to wait until postgres has started
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
         options: >-
-          --health-cmd="pg_isready -U testuser"
+          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER }}"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -44,24 +47,20 @@ jobs:
       - name: Install Goose
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
-      # Run integration tests
       - name: Build app
         run: ./scripts/build_prod.sh
 
       - name: Run the application
         run: ./bin/planner_server &
-        env:
-          POSTGRES_DB: testdb
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
-          JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
-          PORT: 8080
 
       - name: Run db migration
         run: ./scripts/migrate_up.sh
-        env:
-          DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+
+      - name: Build go script to prepopulate the database
+        run: go build -o scripts/populate_cuisines/bin/populate_cuisines scripts/populate_cuisines/populate_cuisines.go
+
+      - name: Populate the database with cuisines
+        run: ./scripts/populate_cuisines/bin/populate_cuisines
 
       - name: Run Integration Tests
         run: |
@@ -89,7 +88,7 @@ jobs:
         run: go install honnef.co/go/tools/cmd/staticcheck@latest
 
       - name: Run formatter
-        run: test -z $(go fmt backend/...)
+        run: test -z $(go fmt ./...)
 
       - name: Run staticcheck
-        run: staticcheck backend/...
+        run: staticcheck ./...
