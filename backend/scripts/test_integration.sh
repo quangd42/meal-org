@@ -41,18 +41,16 @@ echo "Running migrations..."
   goose postgres "$DATABASE_URL" up
 )
 
-# Ensure virtual environment is set up and activated
-if [ ! -d ".venv" ]; then
-  echo "Creating virtual environment..."
-  python3 -m venv .venv
-fi
+# Build the Go script for populating the database
+echo "Building the Go script..."
+(
+  cd scripts/populate_cuisines/
+  go build -o bin/populate_cuisines populate_cuisines.go
 
-echo "Activating virtual environment..."
-source .venv/bin/activate
-pip install -r scripts/populate_cuisines/requirements.txt
-
-echo "Populating database with cuisine data..."
-python scripts/populate_cuisines/populate_cuisines.py
+  # Populate the database with cuisine data using the Go script
+  echo "Populating database with cuisine data..."
+  ./bin/populate_cuisines
+)
 
 # Build the test binary
 echo "Building the test binary..."
