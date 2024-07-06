@@ -5,10 +5,7 @@ on:
     branches: [main]
 
 env:
-  POSTGRES_DB: testdb
-  POSTGRES_USER: testuser
-  POSTGRES_PASSWORD: testpassword
-  DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb
+  DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb?sslmode=disable
   JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
   PORT: 8080
 
@@ -26,11 +23,11 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_DB: ${{ env.POSTGRES_DB }}
-          POSTGRES_USER: ${{ env.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
         options: >-
-          --health-cmd="pg_isready -U ${{ env.POSTGRES_USER }}"
+          --health-cmd="pg_isready -U testuser"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -56,11 +53,11 @@ jobs:
       - name: Run db migration
         run: ./scripts/migrate_up.sh
 
-      - name: Build go script to prepopulate the database
-        run: go build -o scripts/populate_cuisines/bin/populate_cuisines scripts/populate_cuisines/populate_cuisines.go
-
       - name: Populate the database with cuisines
-        run: ./scripts/populate_cuisines/bin/populate_cuisines
+        run: |
+          cd scripts/populate_cuisines
+          go build -o bin/populate_cuisines populate_cuisines.go
+          ./bin/populate_cuisines
 
       - name: Run Integration Tests
         run: |

@@ -13,15 +13,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// DBConfig holds the database configuration
-type DBConfig struct {
-	DBName   string
-	User     string
-	Password string
-	Host     string
-	Port     string
-}
-
 // getParentID retrieves the ID of the parent row by its name
 func getParentID(db *sql.DB, parentName, tableName string) (sql.NullString, error) {
 	query := fmt.Sprintf("SELECT id FROM %s WHERE name = $1", tableName)
@@ -34,12 +25,10 @@ func getParentID(db *sql.DB, parentName, tableName string) (sql.NullString, erro
 }
 
 // importCSVToPostgres imports data from a CSV file into a PostgreSQL table
-func importCSVToPostgres(csvFilePath string, dbConfig DBConfig, tableName string) error {
-	connStr := fmt.Sprintf("dbname=%s user=%s password=%s host=%s port=%s sslmode=disable",
-		dbConfig.DBName, dbConfig.User, dbConfig.Password, dbConfig.Host, dbConfig.Port)
+func importCSV(connStr, csvFilePath, tableName string) error {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		return err
+		log.Fatalf("Error connecting to the database: %v", err)
 	}
 	defer db.Close()
 
@@ -91,18 +80,16 @@ func main() {
 		log.Fatal("error loading env file: database")
 	}
 
-	dbConfig := DBConfig{
-		DBName:   os.Getenv("DB_NAME"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
+	connStr := os.Getenv("DATABASE_URL")
+	println(connStr)
+	if connStr == "" {
+		log.Fatal("DATABASE_URL is not set")
 	}
 
 	csvFilePath := "data/cuisines.csv"
 	tableName := "cuisines"
 
-	err := importCSVToPostgres(csvFilePath, dbConfig, tableName)
+	err := importCSV(connStr, csvFilePath, tableName)
 	if err != nil {
 		log.Fatalf("error importing CSV to PostgreSQL: %v", err)
 	}
