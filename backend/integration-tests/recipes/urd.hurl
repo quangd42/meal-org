@@ -194,13 +194,16 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
 jsonpath "$.ingredients[1].index" == 3
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 4
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -350,13 +353,16 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
 jsonpath "$.ingredients[1].index" == 3
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 4
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -430,13 +436,16 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
 jsonpath "$.ingredients[1].index" == 3
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 4
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -492,13 +501,16 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
 jsonpath "$.ingredients[1].index" == 3
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 4
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -560,13 +572,16 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
 jsonpath "$.ingredients[1].index" == 3
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 4
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"

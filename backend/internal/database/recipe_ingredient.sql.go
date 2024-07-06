@@ -72,31 +72,12 @@ func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID uuid.U
 	return items, nil
 }
 
-const updateIngredientInRecipe = `-- name: UpdateIngredientInRecipe :exec
-UPDATE recipe_ingredient
-SET
-  amount = $1,
-  prep_note = $2,
-  updated_at = $3
-WHERE
-  index = $4 AND recipe_id = $5
+const removeAllIngredientsFromRecipe = `-- name: RemoveAllIngredientsFromRecipe :exec
+DELETE FROM recipe_ingredient
+WHERE recipe_id = $1
 `
 
-type UpdateIngredientInRecipeParams struct {
-	Amount    string    `json:"amount"`
-	PrepNote  *string   `json:"prep_note"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Index     int32     `json:"index"`
-	RecipeID  uuid.UUID `json:"recipe_id"`
-}
-
-func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngredientInRecipeParams) error {
-	_, err := q.db.Exec(ctx, updateIngredientInRecipe,
-		arg.Amount,
-		arg.PrepNote,
-		arg.UpdatedAt,
-		arg.Index,
-		arg.RecipeID,
-	)
+func (q *Queries) RemoveAllIngredientsFromRecipe(ctx context.Context, recipeID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, removeAllIngredientsFromRecipe, recipeID)
 	return err
 }
