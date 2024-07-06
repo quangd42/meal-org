@@ -21,11 +21,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Beef"}
 HTTP 201
+[Captures]
+ingre_id1: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Beef"
 jsonpath "$.parent_id" not exists
-[Captures]
-ingre_id1: jsonpath "$['id']"
 
 # Create Ingredient 2
 POST {{host}}/v1/ingredients
@@ -33,11 +33,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Ground Beef", "parent_id":"{{ingre_id1}}"}
 HTTP 201
+[Captures]
+ingre_id2: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Ground Beef"
 jsonpath "$.parent_id" == "{{ingre_id1}}"
-[Captures]
-ingre_id2: jsonpath "$['id']"
 
 # Create Ingredient 3
 POST {{host}}/v1/ingredients
@@ -45,11 +45,11 @@ Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Asparagus"}
 HTTP 201
+[Captures]
+ingre_id3: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Asparagus"
 jsonpath "$.parent_id" not exists
-[Captures]
-ingre_id3: jsonpath "$['id']"
 
 # List Cuisines
 GET {{host}}/v1/cuisines
@@ -77,14 +77,22 @@ Content-Type: application/json; charset=utf-8
   "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
-      "id": "{{ingre_id2}}",
+      "id": "{{ingre_id1}}",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 1
     },
     {
-      "id": "{{ingre_id3}}",
+      "id": "{{ingre_id2}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 3
     }
   ],
   "instructions": [
@@ -99,6 +107,10 @@ Content-Type: application/json; charset=utf-8
   ]
 }
 HTTP 201
+[Captures]
+id1: jsonpath "$['id']"
+ingre_in_re_id1: jsonpath "$.ingredients[1].id"
+ingre_in_re_id2: jsonpath "$.ingredients[2].id"
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
@@ -106,12 +118,18 @@ jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
-jsonpath "$.ingredients" count == 2
+jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
 jsonpath "$.ingredients[0].parent_id" not exists
+jsonpath "$.ingredients[0].index" == 1
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 2
+jsonpath "$.ingredients[2].amount" == "1lb"
+jsonpath "$.ingredients[2].prep_note" == "leave as is for decoration"
+jsonpath "$.ingredients[2].index" == 3
+variable "ingre_in_re_id1" ==  "{{ingre_in_re_id2}}"
 jsonpath "$.instructions" count == 2
 jsonpath "$.instructions[0].step_no" == 1
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -120,8 +138,6 @@ jsonpath "$.instructions[1].instruction" == "put the broccoli in, stir then stea
 jsonpath "$.cuisines" count == 2
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id1}}"
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
-[Captures]
-id1: jsonpath "$['id']"
 
 # Update Recipe 1
 PUT {{host}}/v1/recipes/{{id1}}
@@ -139,12 +155,20 @@ Content-Type: application/json; charset=utf-8
     {
       "id": "{{ingre_id2}}",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 2
     },
     {
       "id": "{{ingre_id3}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 3
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 4
     }
   ],
   "instructions": [
@@ -172,9 +196,11 @@ jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 2
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 3
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -202,12 +228,20 @@ Content-Type: application/json; charset=utf-8
     {
       "id": "f689252d-9719-420f-8bc5-26e5c9bde366",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 1
     },
     {
-      "id": "{{ingre_id3}}",
+      "id": "{{ingre_id2}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 3
     }
   ],
   "instructions": [
@@ -258,7 +292,7 @@ PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
-  "name": "Beef and Broccoli Spaghetti",
+  "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
   "servings": 4,
   "yield": "a whole pan of goodness",
@@ -267,14 +301,22 @@ Content-Type: application/json; charset=utf-8
   "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
-      "id": "{{ingre_id2}}",
+      "id": "{{ingre_id1}}",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 1
     },
     {
-      "id": "{{ingre_id3}}",
+      "id": "{{ingre_id2}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 3
     }
   ],
   "instructions": [
@@ -310,9 +352,11 @@ jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 2
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 3
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -337,14 +381,22 @@ Content-Type: application/json; charset=utf-8
   "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
   "ingredients": [
     {
-      "id": "{{ingre_id2}}",
+      "id": "{{ingre_id1}}",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 1
     },
     {
-      "id": "{{ingre_id3}}",
+      "id": "{{ingre_id2}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 3
     }
   ],
   "instructions": [
@@ -380,9 +432,11 @@ jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 2
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 3
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -399,7 +453,7 @@ PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
-  "name": "Beef and Broccoli Spaghetti",
+  "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
   "servings": 4,
   "yield": "a whole pan of goodness",
@@ -440,9 +494,11 @@ jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 2
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 3
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -459,7 +515,7 @@ PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
-  "name": "Beef and Broccoli Spaghetti",
+  "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
   "servings": 4,
   "yield": "a whole pan of goodness",
@@ -470,12 +526,20 @@ Content-Type: application/json; charset=utf-8
     {
       "id": "{{ingre_id2}}",
       "amount": "1lb",
-      "prep_note": "seasoned with salt and pepper"
+      "prep_note": "seasoned with salt and pepper",
+      "index": 1
     },
     {
       "id": "{{ingre_id3}}",
       "amount": "2lb",
-      "prep_note": "cut to bite size"
+      "prep_note": "cut to bite size",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 3
     }
   ],
   "instructions": []
@@ -498,9 +562,11 @@ jsonpath "$.cook_time_in_minutes" == 20
 jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 2
 jsonpath "$.ingredients[0].amount" == "1lb"
-jsonpath "$.ingredients[0].prep_note" ==  "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
+jsonpath "$.ingredients[0].index" == 2
 jsonpath "$.ingredients[1].amount" == "2lb"
-jsonpath "$.ingredients[1].prep_note" ==  "cut to bite size"
+jsonpath "$.ingredients[1].prep_note" == "cut to bite size"
+jsonpath "$.ingredients[1].index" == 3
 jsonpath "$.instructions" count == 3
 jsonpath "$.instructions[0].step_no" == 2
 jsonpath "$.instructions[0].instruction" == "cook the meat till brown"
@@ -511,7 +577,6 @@ jsonpath "$.instructions[2].instruction" == "put some garnish on"
 jsonpath "$.cuisines" count == 2
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
-
 
 ### Clean up
 
