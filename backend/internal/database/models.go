@@ -61,6 +61,7 @@ type RecipeIngredient struct {
 	PrepNote     *string   `json:"prep_note"`
 	IngredientID uuid.UUID `json:"ingredient_id"`
 	RecipeID     uuid.UUID `json:"recipe_id"`
+	Index        int32     `json:"index"`
 }
 
 type Token struct {

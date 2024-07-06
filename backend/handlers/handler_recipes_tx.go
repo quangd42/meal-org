@@ -307,6 +307,7 @@ func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesB
 			Amount:   di.Amount,
 			PrepNote: di.PrepNote,
 			Name:     di.Name,
+			Index:    int(di.Index),
 		})
 	}
 

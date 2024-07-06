@@ -19,6 +19,7 @@ type AddIngredientsToRecipeParams struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 	IngredientID uuid.UUID `json:"ingredient_id"`
 	RecipeID     uuid.UUID `json:"recipe_id"`
+	Index        int32     `json:"index"`
 }
 
 const listIngredientsByRecipeID = `-- name: ListIngredientsByRecipeID :many
@@ -27,10 +28,12 @@ SELECT
   name,
   amount,
   prep_note,
-  recipe_id
+  recipe_id,
+  index
 FROM ingredients
 JOIN recipe_ingredient ON id = ingredient_id
 WHERE recipe_id = $1
+ORDER BY index
 `
 
 type ListIngredientsByRecipeIDRow struct {
@@ -39,6 +42,7 @@ type ListIngredientsByRecipeIDRow struct {
 	Amount   string    `json:"amount"`
 	PrepNote *string   `json:"prep_note"`
 	RecipeID uuid.UUID `json:"recipe_id"`
+	Index    int32     `json:"index"`
 }
 
 func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]ListIngredientsByRecipeIDRow, error) {
@@ -56,6 +60,7 @@ func (q *Queries) ListIngredientsByRecipeID(ctx context.Context, recipeID uuid.U
 			&i.Amount,
 			&i.PrepNote,
 			&i.RecipeID,
+			&i.Index,
 		); err != nil {
 			return nil, err
 		}
@@ -74,15 +79,15 @@ SET
   prep_note = $2,
   updated_at = $3
 WHERE
-  ingredient_id = $4 AND recipe_id = $5
+  index = $4 AND recipe_id = $5
 `
 
 type UpdateIngredientInRecipeParams struct {
-	Amount       string    `json:"amount"`
-	PrepNote     *string   `json:"prep_note"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	IngredientID uuid.UUID `json:"ingredient_id"`
-	RecipeID     uuid.UUID `json:"recipe_id"`
+	Amount    string    `json:"amount"`
+	PrepNote  *string   `json:"prep_note"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Index     int32     `json:"index"`
+	RecipeID  uuid.UUID `json:"recipe_id"`
 }
 
 func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngredientInRecipeParams) error {
@@ -90,7 +95,7 @@ func (q *Queries) UpdateIngredientInRecipe(ctx context.Context, arg UpdateIngred
 		arg.Amount,
 		arg.PrepNote,
 		arg.UpdatedAt,
-		arg.IngredientID,
+		arg.Index,
 		arg.RecipeID,
 	)
 	return err
