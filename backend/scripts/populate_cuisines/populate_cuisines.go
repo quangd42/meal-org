@@ -24,14 +24,7 @@ func getParentID(db *sql.DB, parentName, tableName string) (sql.NullString, erro
 	return parentID, err
 }
 
-// importCSVToPostgres imports data from a CSV file into a PostgreSQL table
-func importCSV(connStr, csvFilePath, tableName string) error {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		log.Fatalf("Error connecting to the database: %v", err)
-	}
-	defer db.Close()
-
+func importCSV(db *sql.DB, csvFilePath, tableName string) error {
 	file, err := os.Open(csvFilePath)
 	if err != nil {
 		return err
@@ -81,17 +74,22 @@ func main() {
 	}
 
 	connStr := os.Getenv("DATABASE_URL")
-	println(connStr)
 	if connStr == "" {
 		log.Fatal("DATABASE_URL is not set")
 	}
 
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+	defer db.Close()
+
 	csvFilePath := "data/cuisines.csv"
 	tableName := "cuisines"
 
-	err := importCSV(connStr, csvFilePath, tableName)
+	err = importCSV(db, csvFilePath, tableName)
 	if err != nil {
-		log.Fatalf("error importing CSV to PostgreSQL: %v", err)
+		log.Fatalf("error importing CSV: %v", err)
 	}
 
 	fmt.Println("cuisines data successfully imported!")

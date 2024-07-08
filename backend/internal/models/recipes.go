@@ -32,6 +32,7 @@ type IngredientInRecipe struct {
 	Amount   string    `json:"amount"`
 	PrepNote *string   `json:"prep_note"`
 	Name     string    `json:"name"`
+	Index    int       `json:"index"`
 }
 
 type InstructionInRecipe struct {

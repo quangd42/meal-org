@@ -97,7 +97,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	recipe, err := UpdateWholeRecipe(r.Context(), store, params)
 	if err != nil {
-		respondDBConstraintsError(w, err, "ingredient_id, step_no")
+		respondDBConstraintsError(w, err, "cuisine_id, step_no")
 		return
 	}
 

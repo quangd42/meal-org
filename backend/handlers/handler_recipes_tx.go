@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/quangd42/meal-planner/backend/internal/database"
 	"github.com/quangd42/meal-planner/backend/internal/models"
 )
@@ -72,6 +71,7 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 			IngredientID: p.ID,
 			Amount:       p.Amount,
 			PrepNote:     p.PrepNote,
+			Index:        int32(p.Index),
 		}
 	}
 
@@ -140,45 +140,39 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 		return r, err
 	}
 
+	// Update Cuisines in Recipe
 	dbCuisines, err := updateCuisinesInRecipe(ctx, qtx, arg.Cuisines, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
 
-	// Update ingredients in Recipe
-
-	// Make sure that ingredients already belong to the host recipe
-	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
+	// Remove all ingredients in Recipe and add them anew
+	err = qtx.RemoveAllIngredientsFromRecipe(ctx, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
-	dbIngredientsMap := make(map[uuid.UUID]bool, len(dbIngredients))
-	for _, i := range dbIngredients {
-		dbIngredientsMap[i.ID] = true
-	}
 
-	for _, i := range arg.Ingredients {
-		if _, ok := dbIngredientsMap[i.ID]; !ok {
-			pgErr := &pgconn.PgError{
-				Code: "23000",
-			}
-			return r, pgErr
-		}
-		ingreDBParams := database.UpdateIngredientInRecipeParams{
-			Amount:       i.Amount,
-			PrepNote:     i.PrepNote,
-			UpdatedAt:    time.Now().UTC(),
-			IngredientID: i.ID,
+	// Add Ingredients back to host Recipe
+	dbIngredientParams := make([]database.AddIngredientsToRecipeParams, len(arg.Ingredients))
+	for i, p := range arg.Ingredients {
+		dbIngredientParams[i] = database.AddIngredientsToRecipeParams{
 			RecipeID:     dbRecipe.ID,
-		}
-
-		err = qtx.UpdateIngredientInRecipe(ctx, ingreDBParams)
-		if err != nil {
-			return r, err
+			CreatedAt:    time.Now().UTC(),
+			UpdatedAt:    time.Now().UTC(),
+			IngredientID: p.ID,
+			Amount:       p.Amount,
+			PrepNote:     p.PrepNote,
+			Index:        int32(p.Index),
 		}
 	}
 
-	dbIngredients, err = qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
+	// Can add as many ingredients as desired, no check here
+	_, err = qtx.AddIngredientsToRecipe(ctx, dbIngredientParams)
+	if err != nil {
+		return r, err
+	}
+
+	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
@@ -307,6 +301,7 @@ func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesB
 			Amount:   di.Amount,
 			PrepNote: di.PrepNote,
 			Name:     di.Name,
+			Index:    int(di.Index),
 		})
 	}
 
