@@ -13,8 +13,7 @@ import (
 	"github.com/quangd42/meal-planner/backend/internal/database"
 )
 
-// TODO: each user can create their own ingredients
-// admin create shared set
+// TODO: restrict operation on ingredients to admin
 func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name     string     `json:"name"`
@@ -55,8 +54,6 @@ func createIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusCreated, createIngredientResponse(ingredient))
 }
 
-// TODO: each user can update their own ingredients
-// admin can update the shared set
 func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	ingredientIDString := chi.URLParam(r, "id")
 	ingredientID, err := uuid.Parse(ingredientIDString)
@@ -103,7 +100,6 @@ func updateIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, createIngredientResponse(ingredient))
 }
 
-// TODO: each user should see their own set
 func listIngredientsHandler(w http.ResponseWriter, r *http.Request) {
 	ingredients, err := store.Q.ListIngredients(r.Context())
 	if err != nil {
@@ -118,7 +114,6 @@ func listIngredientsHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, ingredients)
 }
 
-// TODO: normal user can only delete their own ingredients
 func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	ingredientIDString := chi.URLParam(r, "id")
 	ingredientID, err := uuid.Parse(ingredientIDString)

@@ -58,7 +58,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, createUserResponseWithToken(user, jwt, refreshToken))
 }
 
-// TODO: requires authentication for refreshing and revoking tokens
 func refreshJWTHandler(w http.ResponseWriter, r *http.Request) {
 	paramToken, err := auth.GetHeaderToken(r)
 	if err != nil {
