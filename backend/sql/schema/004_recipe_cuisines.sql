@@ -4,7 +4,7 @@ CREATE TABLE cuisines (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   name VARCHAR(255) NOT NULL,
-  parent_id UUID
+  parent_id UUID REFERENCES cuisines (id)
 );
 
 CREATE TABLE recipe_cuisine (

@@ -44,7 +44,7 @@ func respondInternalServerError(w http.ResponseWriter) {
 func respondDBConstraintsError(w http.ResponseWriter, err error, msg string) {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code[0:2] == "23" {
-		respondError(w, http.StatusForbidden, fmt.Sprintf("parameters contains invalid value, check: %s", msg))
+		respondError(w, http.StatusForbidden, fmt.Sprintf("invalid operation, check: %s", msg))
 		return
 	}
 	respondInternalServerError(w)

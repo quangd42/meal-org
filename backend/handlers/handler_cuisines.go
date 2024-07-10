@@ -113,7 +113,6 @@ func listCuisinesHandler(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, cuisines)
 }
 
-// TODO: deleting parent should return an error
 func deleteCuisineHandler(w http.ResponseWriter, r *http.Request) {
 	cuisineIDString := chi.URLParam(r, "id")
 	cuisineID, err := uuid.Parse(cuisineIDString)
@@ -124,7 +123,7 @@ func deleteCuisineHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = store.Q.DeleteCuisine(r.Context(), cuisineID)
 	if err != nil {
-		respondInternalServerError(w)
+		respondDBConstraintsError(w, err, "children cuisine id")
 		return
 	}
 

@@ -119,7 +119,6 @@ func listIngredientsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO: normal user can only delete their own ingredients
-// TODO: deleting parent should return an error
 func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
 	ingredientIDString := chi.URLParam(r, "id")
 	ingredientID, err := uuid.Parse(ingredientIDString)
@@ -130,7 +129,7 @@ func deleteIngredientHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = store.Q.DeleteIngredient(r.Context(), ingredientID)
 	if err != nil {
-		respondInternalServerError(w)
+		respondDBConstraintsError(w, err, "children ingredient id")
 		return
 	}
 

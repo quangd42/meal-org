@@ -111,9 +111,9 @@ HTTP 200
 jsonpath "$" count == 26
 
 # Delete Cuisine 4: should fail because it's a parent
-# DELETE {{host}}/v1/cuisines/{{id4}}
-# Authorization: Bearer {{token}}
-# HTTP 500
+DELETE {{host}}/v1/cuisines/{{id4}}
+Authorization: Bearer {{token}}
+HTTP 403
 
 GET {{host}}/v1/cuisines
 Authorization: Bearer {{token}}

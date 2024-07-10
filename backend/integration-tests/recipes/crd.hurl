@@ -510,13 +510,13 @@ DELETE {{host}}/v1/ingredients/{{ingre_id3}}
 Authorization: Bearer {{token}}
 HTTP 204
 
-# Delete Ingredient 1
-DELETE {{host}}/v1/ingredients/{{ingre_id1}}
+# Delete Ingredient 2
+DELETE {{host}}/v1/ingredients/{{ingre_id2}}
 Authorization: Bearer {{token}}
 HTTP 204
 
-# Delete Ingredient 2
-DELETE {{host}}/v1/ingredients/{{ingre_id2}}
+# Delete Ingredient 1
+DELETE {{host}}/v1/ingredients/{{ingre_id1}}
 Authorization: Bearer {{token}}
 HTTP 204
 
