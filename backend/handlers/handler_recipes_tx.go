@@ -146,101 +146,14 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 		return r, err
 	}
 
-	// Remove all ingredients in Recipe and add them anew
-	err = qtx.RemoveAllIngredientsFromRecipe(ctx, dbRecipe.ID)
-	if err != nil {
-		return r, err
-	}
-
-	// Add Ingredients back to host Recipe
-	dbIngredientParams := make([]database.AddIngredientsToRecipeParams, len(arg.Ingredients))
-	for i, p := range arg.Ingredients {
-		dbIngredientParams[i] = database.AddIngredientsToRecipeParams{
-			RecipeID:     dbRecipe.ID,
-			CreatedAt:    time.Now().UTC(),
-			UpdatedAt:    time.Now().UTC(),
-			IngredientID: p.ID,
-			Amount:       p.Amount,
-			PrepNote:     p.PrepNote,
-			Index:        int32(p.Index),
-		}
-	}
-
-	// Can add as many ingredients as desired, no check here
-	_, err = qtx.AddIngredientsToRecipe(ctx, dbIngredientParams)
-	if err != nil {
-		return r, err
-	}
-
-	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
+	// Update Ingredients in Recipe
+	dbIngredients, err := updateIngredientsInRecipe(ctx, qtx, arg.Ingredients, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
 
 	// Update instructions in Recipe
-	// List instructions from db
-	dbInstructions, err := qtx.ListInstructionsByRecipeID(ctx, dbRecipe.ID)
-	if err != nil {
-		return r, err
-	}
-
-	// Make map from db
-	dbInstructionsMap := make(map[int]database.Instruction, len(dbInstructions))
-	for _, dbi := range dbInstructions {
-		dbInstructionsMap[int(dbi.StepNo)] = dbi
-	}
-
-	var toAdd, toUpdate []models.InstructionInRecipe
-	for _, pi := range arg.Instructions {
-		_, ok := dbInstructionsMap[pi.StepNo]
-		// If in param the step no is found in db, add it to the update list
-		// then delete it from the map
-		if ok {
-			toUpdate = append(toUpdate, pi)
-			delete(dbInstructionsMap, pi.StepNo)
-			// Else the param is new, add it to the add list
-		} else {
-			toAdd = append(toAdd, pi)
-		}
-	}
-
-	for _, pi := range toAdd {
-		err = qtx.AddInstructionToRecipe(ctx, database.AddInstructionToRecipeParams{
-			CreatedAt:   time.Now().UTC(),
-			UpdatedAt:   time.Now().UTC(),
-			Instruction: pi.Instruction,
-			StepNo:      int32(pi.StepNo),
-			RecipeID:    dbRecipe.ID,
-		})
-		if err != nil {
-			return r, err
-		}
-	}
-
-	for _, pi := range toUpdate {
-		err = qtx.UpdateInstructionByID(ctx, database.UpdateInstructionByIDParams{
-			UpdatedAt:   time.Now().UTC(),
-			Instruction: pi.Instruction,
-			StepNo:      int32(pi.StepNo),
-			RecipeID:    dbRecipe.ID,
-		})
-		if err != nil {
-			return r, err
-		}
-	}
-
-	// The rest of the dbMap is not found in param, so delete them
-	for _, dbi := range dbInstructionsMap {
-		err = qtx.DeleteInstructionByID(ctx, database.DeleteInstructionByIDParams{
-			StepNo:   dbi.StepNo,
-			RecipeID: dbi.RecipeID,
-		})
-		if err != nil {
-			return r, err
-		}
-	}
-
-	dbInstructions, err = qtx.ListInstructionsByRecipeID(ctx, dbRecipe.ID)
+	dbInstructions, err := updateInstructionsInRecipe(ctx, qtx, arg.Instructions, dbRecipe.ID)
 	if err != nil {
 		return r, err
 	}
@@ -330,7 +243,6 @@ func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesB
 	}
 }
 
-// TODO: refactor ingredients to use similar func
 func updateCuisinesInRecipe(ctx context.Context, qtx *database.Queries, params []uuid.UUID, recipeID uuid.UUID) ([]database.ListCuisinesByRecipeIDRow, error) {
 	var dbCuisines []database.ListCuisinesByRecipeIDRow
 	// Add Cuisines to host Recipe
@@ -385,4 +297,112 @@ func updateCuisinesInRecipe(ctx context.Context, qtx *database.Queries, params [
 	}
 
 	return dbCuisines, nil
+}
+
+func updateIngredientsInRecipe(ctx context.Context, qtx *database.Queries, params []models.IngredientInRecipe, recipeID uuid.UUID) ([]database.ListIngredientsByRecipeIDRow, error) {
+	var dbIngredients []database.ListIngredientsByRecipeIDRow
+	// Remove all ingredients in Recipe and add them anew
+	err := qtx.RemoveAllIngredientsFromRecipe(ctx, recipeID)
+	if err != nil {
+		return dbIngredients, err
+	}
+
+	// Add Ingredients back to host Recipe
+	dbIngredientParams := make([]database.AddIngredientsToRecipeParams, len(params))
+	for i, p := range params {
+		dbIngredientParams[i] = database.AddIngredientsToRecipeParams{
+			RecipeID:     recipeID,
+			CreatedAt:    time.Now().UTC(),
+			UpdatedAt:    time.Now().UTC(),
+			IngredientID: p.ID,
+			Amount:       p.Amount,
+			PrepNote:     p.PrepNote,
+			Index:        int32(p.Index),
+		}
+	}
+
+	// Can add as many ingredients as desired, no check here
+	_, err = qtx.AddIngredientsToRecipe(ctx, dbIngredientParams)
+	if err != nil {
+		return dbIngredients, err
+	}
+
+	dbIngredients, err = qtx.ListIngredientsByRecipeID(ctx, recipeID)
+	if err != nil {
+		return dbIngredients, err
+	}
+
+	return dbIngredients, nil
+}
+
+func updateInstructionsInRecipe(ctx context.Context, qtx *database.Queries, params []models.InstructionInRecipe, recipeID uuid.UUID) ([]database.Instruction, error) {
+	var dbInstructions []database.Instruction
+	// List instructions from db
+	dbInstructions, err := qtx.ListInstructionsByRecipeID(ctx, recipeID)
+	if err != nil {
+		return dbInstructions, err
+	}
+
+	// Make map from db
+	dbInstructionsMap := make(map[int]database.Instruction, len(dbInstructions))
+	for _, dbi := range dbInstructions {
+		dbInstructionsMap[int(dbi.StepNo)] = dbi
+	}
+
+	var toAdd, toUpdate []models.InstructionInRecipe
+	for _, pi := range params {
+		_, ok := dbInstructionsMap[pi.StepNo]
+		// If in param the step no is found in db, add it to the update list
+		// then delete it from the map
+		if ok {
+			toUpdate = append(toUpdate, pi)
+			delete(dbInstructionsMap, pi.StepNo)
+			// Else the param is new, add it to the add list
+		} else {
+			toAdd = append(toAdd, pi)
+		}
+	}
+
+	for _, pi := range toAdd {
+		err = qtx.AddInstructionToRecipe(ctx, database.AddInstructionToRecipeParams{
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Instruction: pi.Instruction,
+			StepNo:      int32(pi.StepNo),
+			RecipeID:    recipeID,
+		})
+		if err != nil {
+			return dbInstructions, err
+		}
+	}
+
+	for _, pi := range toUpdate {
+		err = qtx.UpdateInstructionByID(ctx, database.UpdateInstructionByIDParams{
+			UpdatedAt:   time.Now().UTC(),
+			Instruction: pi.Instruction,
+			StepNo:      int32(pi.StepNo),
+			RecipeID:    recipeID,
+		})
+		if err != nil {
+			return dbInstructions, err
+		}
+	}
+
+	// The rest of the dbMap is not found in param, so delete them
+	for _, dbi := range dbInstructionsMap {
+		err = qtx.DeleteInstructionByID(ctx, database.DeleteInstructionByIDParams{
+			StepNo:   dbi.StepNo,
+			RecipeID: dbi.RecipeID,
+		})
+		if err != nil {
+			return dbInstructions, err
+		}
+	}
+
+	dbInstructions, err = qtx.ListInstructionsByRecipeID(ctx, recipeID)
+	if err != nil {
+		return dbInstructions, err
+	}
+
+	return dbInstructions, nil
 }
