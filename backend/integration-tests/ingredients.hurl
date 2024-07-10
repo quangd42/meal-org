@@ -120,9 +120,9 @@ HTTP 200
 jsonpath "$" count == 3
 
 # Delete Ingredient 4: should fail because it's a parent
-# DELETE {{host}}/v1/ingredients/{{id4}}
-# Authorization: Bearer {{token}}
-# HTTP 500
+DELETE {{host}}/v1/ingredients/{{id4}}
+Authorization: Bearer {{token}}
+HTTP 403
 
 GET {{host}}/v1/ingredients
 Authorization: Bearer {{token}}

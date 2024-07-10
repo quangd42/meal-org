@@ -78,8 +78,7 @@ func ingredientsAPIRouter() http.Handler {
 	return r
 }
 
-// TODO: create, update and delete should be
-// restricted to admin only
+// TODO: create, update and delete should be restricted to admin only
 func cuisinesAPIRouter() http.Handler {
 	r := chi.NewRouter()
 
