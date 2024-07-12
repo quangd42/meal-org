@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -24,14 +23,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rr := &models.RecipeRequest{}
-	err := json.NewDecoder(r.Body).Decode(rr)
-	if err != nil {
-		respondMalformedRequestError(w)
-		return
-	}
-
-	err = rr.Validate()
+	rr, err := decodeValidate[models.RecipeRequest](r)
 	if err != nil {
 		respondMalformedRequestError(w)
 		return
@@ -39,7 +31,7 @@ func createRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := CreateWholeRecipeParams{
 		UserID:        userID,
-		RecipeRequest: *rr,
+		RecipeRequest: rr,
 	}
 
 	recipe, err := CreateWholeRecipe(r.Context(), store, params)
@@ -65,14 +57,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rr := &models.RecipeRequest{}
-	err = json.NewDecoder(r.Body).Decode(rr)
-	if err != nil {
-		respondMalformedRequestError(w)
-		return
-	}
-
-	err = rr.Validate()
+	rr, err := decodeValidate[models.RecipeRequest](r)
 	if err != nil {
 		respondMalformedRequestError(w)
 		return
@@ -92,7 +77,7 @@ func updateRecipeHandler(w http.ResponseWriter, r *http.Request) {
 
 	params := UpdateWholeRecipeParams{
 		ID:            recipeID,
-		RecipeRequest: *rr,
+		RecipeRequest: rr,
 	}
 
 	recipe, err := UpdateWholeRecipe(r.Context(), store, params)

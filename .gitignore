@@ -1,1 +1,8 @@
+# env
+.env
+
+# binary related
+bin
+
+# other
 supabase
