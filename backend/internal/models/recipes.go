@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,6 +53,6 @@ type RecipeRequest struct {
 	Instructions      []InstructionInRecipe `json:"instructions" validate:"required,gt=0"`
 }
 
-func (rr RecipeRequest) Validate() error {
+func (rr RecipeRequest) Validate(ctx context.Context) error {
 	return validate.Struct(rr)
 }
