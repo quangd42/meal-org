@@ -8,7 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/internal/database"
 )
 
 var store *database.Store

@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/quangd42/meal-planner/backend/internal/auth"
+	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 type contextKey struct {

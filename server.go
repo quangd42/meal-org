@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
-	"github.com/quangd42/meal-planner/backend/handlers"
+	"github.com/quangd42/meal-planner/internal/handlers"
 
 	_ "github.com/lib/pq"
 )

@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/internal/database"
 )
 
 type UserClaims struct {

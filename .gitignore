@@ -6,3 +6,5 @@ bin
 
 # other
 supabase
+.env
+bin

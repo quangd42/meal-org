@@ -4,8 +4,8 @@ tmp_dir = "tmp"
 
 [build]
 args_bin = []
-bin = "./tmp/planner"
-cmd = "go build -o ./tmp/planner ."
+bin = "./bin/planner-dev"
+cmd = "go build -o ./bin/planner-dev ."
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata", "sql", "scripts"]
 exclude_file = []
@@ -20,7 +20,7 @@ kill_delay = "0s"
 log = "build-errors.log"
 poll = false
 poll_interval = 0
-post_cmd = ["pkill planner"]
+post_cmd = ["pkill planner-dev"]
 pre_cmd = []
 rerun = false
 rerun_delay = 500

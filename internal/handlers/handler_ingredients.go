@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/internal/database"
 )
 
 // TODO: restrict operation on ingredients to admin

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/backend/internal/database"
-	"github.com/quangd42/meal-planner/backend/internal/models"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/models"
 )
 
 type CreateWholeRecipeParams struct {

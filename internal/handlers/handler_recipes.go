@@ -7,10 +7,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/quangd42/meal-planner/backend/internal/auth"
-	"github.com/quangd42/meal-planner/backend/internal/database"
-	"github.com/quangd42/meal-planner/backend/internal/middleware"
-	"github.com/quangd42/meal-planner/backend/internal/models"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 var ErrRecipeNotFound = errors.New("recipe not found")

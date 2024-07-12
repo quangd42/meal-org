@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/quangd42/meal-planner/backend/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/middleware"
 )
 
 func AddRoutes(r *chi.Mux) {

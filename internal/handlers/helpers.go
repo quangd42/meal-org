@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/quangd42/meal-planner/backend/internal/auth"
-	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 func generateAndSaveAuthTokens(r *http.Request, user database.User) (string, string, error) {

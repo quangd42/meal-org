@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/quangd42/meal-planner/backend/internal/database"
-	"github.com/quangd42/meal-planner/backend/internal/models"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/models"
 )
 
 func respondJSON[T any](w http.ResponseWriter, code int, v T) {

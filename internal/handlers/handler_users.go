@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/backend/internal/auth"
-	"github.com/quangd42/meal-planner/backend/internal/database"
-	"github.com/quangd42/meal-planner/backend/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {

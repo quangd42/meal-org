@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/quangd42/meal-planner/backend/internal/auth"
-	"github.com/quangd42/meal-planner/backend/internal/database"
+	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/services/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
