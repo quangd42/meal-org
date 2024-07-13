@@ -27,11 +27,3 @@ func checkErrDBConstraint(err error) error {
 	}
 	return err
 }
-
-func checkErrUniqueValue(err error) error {
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-		return ErrUniqueValue
-	}
-	return err
-}

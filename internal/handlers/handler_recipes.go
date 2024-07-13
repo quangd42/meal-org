@@ -38,7 +38,7 @@ func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 
 		recipe, err := rs.CreateRecipe(r.Context(), userID, rr)
 		if err != nil {
-			respondDBConstraintsError(w, err, "ingredient_id, step_no")
+			respondDBConstraintsError(w, err, "cuisine_id, ingredient_id, step_no")
 			return
 		}
 
@@ -77,7 +77,7 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 				respondError(w, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 				return
 			}
-			respondDBConstraintsError(w, err, "cuisine_id, step_no")
+			respondDBConstraintsError(w, err, "cuisine_id, ingredient_id, step_no")
 			return
 		}
 

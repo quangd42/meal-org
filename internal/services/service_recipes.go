@@ -58,7 +58,7 @@ func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg 
 				CuisineID: c,
 			})
 		if err != nil {
-			return r, err
+			return r, checkErrDBConstraint(err)
 		}
 	}
 
@@ -81,10 +81,9 @@ func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg 
 		}
 	}
 
-	// Can add as many ingredients as desired, no check here
 	_, err = qtx.AddIngredientsToRecipe(ctx, dbIngredientParams)
 	if err != nil {
-		return r, err
+		return r, checkErrDBConstraint(err)
 	}
 
 	dbIngredients, err := qtx.ListIngredientsByRecipeID(ctx, dbRecipe.ID)
@@ -102,7 +101,7 @@ func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg 
 			RecipeID:    dbRecipe.ID,
 		})
 		if err != nil {
-			return r, err
+			return r, checkErrDBConstraint(err)
 		}
 	}
 
@@ -155,19 +154,19 @@ func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID u
 	// Update Cuisines in Recipe
 	dbCuisines, err := updateCuisinesInRecipe(ctx, qtx, arg.Cuisines, dbRecipe.ID)
 	if err != nil {
-		return r, err
+		return r, checkErrDBConstraint(err)
 	}
 
 	// Update Ingredients in Recipe
 	dbIngredients, err := updateIngredientsInRecipe(ctx, qtx, arg.Ingredients, dbRecipe.ID)
 	if err != nil {
-		return r, err
+		return r, checkErrDBConstraint(err)
 	}
 
 	// Update instructions in Recipe
 	dbInstructions, err := updateInstructionsInRecipe(ctx, qtx, arg.Instructions, dbRecipe.ID)
 	if err != nil {
-		return r, err
+		return r, checkErrDBConstraint(err)
 	}
 
 	// Assemble all updated data
@@ -369,7 +368,6 @@ func updateIngredientsInRecipe(ctx context.Context, qtx *database.Queries, param
 		}
 	}
 
-	// Can add as many ingredients as desired, no check here
 	_, err = qtx.AddIngredientsToRecipe(ctx, dbIngredientParams)
 	if err != nil {
 		return dbIngredients, err
