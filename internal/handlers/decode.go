@@ -73,13 +73,6 @@ func createUserResponse(u database.User) models.User {
 	}
 }
 
-func createUserResponseWithToken(u database.User, token, refreshToken string) models.User {
-	user := createUserResponse(u)
-	user.Token = token
-	user.RefreshToken = refreshToken
-	return user
-}
-
 func createIngredientResponse(i database.Ingredient) models.Ingredient {
 	res := models.Ingredient{
 		ID:        i.ID,

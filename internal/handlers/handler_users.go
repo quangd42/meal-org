@@ -1,113 +1,96 @@
 package handlers
 
 import (
-	"encoding/json"
-	"log"
+	"context"
+	"errors"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/database"
 	"github.com/quangd42/meal-planner/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/services"
 	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
-func createUserHandler(w http.ResponseWriter, r *http.Request) {
-	type Parameters struct {
-		Name     string `json:"name"`
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-	decoder := json.NewDecoder(r.Body)
-	params := &Parameters{}
-	err := decoder.Decode(params)
-	if err != nil {
-		respondMalformedRequestError(w)
-		return
-	}
-
-	hash, err := auth.HashPassword([]byte(params.Password))
-	if err != nil {
-		log.Printf("error hashing password: %s\n", err)
-		respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
-		return
-	}
-
-	user, err := store.Q.CreateUser(r.Context(), database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Name:      params.Name,
-		Username:  params.Username,
-		Hash:      string(hash),
-	})
-	if err != nil {
-		log.Printf("error creating new user: %s\n", err)
-		respondUniqueValueError(w, err, "username")
-		return
-	}
-
-	jwt, refreshToken, err := generateAndSaveAuthTokens(r, user)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	respondJSON(w, http.StatusCreated, createUserResponseWithToken(user, jwt, refreshToken))
+type UserService interface {
+	CreateUser(ctx context.Context, ur models.CreateUserRequest) (models.User, error)
+	// GetUserByID() (models.User, error)
+	UpdateUserByID(ctx context.Context, userID uuid.UUID, ur models.UpdateUserRequest) (models.User, error)
+	DeleteUserByID(ctx context.Context, userID uuid.UUID) error
 }
 
-func updateUserHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-	if !ok {
-		respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
-		return
-	}
+func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ur, err := decodeValidate[models.CreateUserRequest](r)
+		if err != nil {
+			respondMalformedRequestError(w)
+			return
+		}
 
-	decoder := json.NewDecoder(r.Body)
-	type Parameters struct {
-		Name     string `json:"name"`
-		Password string `json:"password"`
-	}
-	params := &Parameters{}
-	err := decoder.Decode(params)
-	if err != nil {
-		log.Printf("error decoding: %s\n", err.Error())
-		respondMalformedRequestError(w)
-		return
-	}
+		user, err := us.CreateUser(r.Context(), ur)
+		if err != nil {
+			if errors.Is(err, services.ErrHashPassword) {
+				respondInternalServerError(w)
+				return
+			}
+			respondDBConstraintsError(w, err, "username")
+			return
+		}
 
-	hash, err := auth.HashPassword([]byte(params.Password))
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
-	}
+		jwt, err := as.GenerateAccessToken(r.Context(), user.ID)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
 
-	user, err := store.Q.UpdateUserByID(r.Context(), database.UpdateUserByIDParams{
-		ID:        userID,
-		UpdatedAt: time.Now().UTC(),
-		Name:      params.Name,
-		Hash:      string(hash),
-	})
-	if err != nil {
-		respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-		return
-	}
+		refreshToken, err := as.GenerateAndSaveRefreshToken(r.Context(), user.ID)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
 
-	respondJSON(w, http.StatusOK, createUserResponse(user))
+		respondJSON(w, http.StatusCreated, user.WithToken(jwt, refreshToken))
+	}
 }
 
-func forgetMeHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-	if !ok {
-		respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
-		return
-	}
+func updateUserHandler(us UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+		if !ok {
+			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+			return
+		}
 
-	err := store.Q.DeleteUser(r.Context(), userID)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
+		ur, err := decodeValidate[models.UpdateUserRequest](r)
+		if err != nil {
+			respondMalformedRequestError(w)
+			return
+		}
 
-	respondJSON(w, http.StatusNoContent, "user deleted")
+		user, err := us.UpdateUserByID(r.Context(), userID, ur)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
+
+		respondJSON(w, http.StatusOK, user)
+	}
+}
+
+func forgetMeHandler(us UserService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
+		if !ok {
+			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+			return
+		}
+
+		err := us.DeleteUserByID(r.Context(), userID)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
+
+		respondJSON(w, http.StatusNoContent, "user deleted")
+	}
 }

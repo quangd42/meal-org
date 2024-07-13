@@ -7,7 +7,10 @@ import (
 	"github.com/quangd42/meal-planner/internal/middleware"
 )
 
-func AddRoutes(r *chi.Mux) {
+func AddRoutes(r *chi.Mux,
+	us UserService,
+	as AuthService,
+) {
 	r.Get("/", r.NotFoundHandler())
 
 	// API router
@@ -15,8 +18,8 @@ func AddRoutes(r *chi.Mux) {
 		r.Get("/healthz", readinessHandler)
 		r.Get("/err", errorHandler)
 
-		r.Mount("/users", usersAPIRouter())
-		r.Mount("/auth", authRouter())
+		r.Mount("/users", usersAPIRouter(us, as))
+		r.Mount("/auth", authRouter(as))
 		r.Mount("/recipes", recipesAPIRouter())
 		r.Mount("/ingredients", ingredientsAPIRouter())
 		r.Mount("/cuisines", cuisinesAPIRouter())
@@ -24,26 +27,26 @@ func AddRoutes(r *chi.Mux) {
 }
 
 // usersAPIRouter
-func usersAPIRouter() http.Handler {
+func usersAPIRouter(us UserService, as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/", createUserHandler)
+	r.Post("/", createUserHandler(us, as))
 	r.Group(func(r chi.Router) {
 		r.Use(middleware.AuthVerifier())
-		r.Put("/", updateUserHandler)
-		r.Delete("/", forgetMeHandler)
+		r.Put("/", updateUserHandler(us))
+		r.Delete("/", forgetMeHandler(us))
 	})
 
 	return r
 }
 
 // authRouter
-func authRouter() http.Handler {
+func authRouter(as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/login", loginHandler)
-	r.Post("/refresh", refreshJWTHandler)
-	r.Post("/revoke", revokeJWTHandler)
+	r.Post("/login", loginHandler(as))
+	r.Post("/refresh", refreshAccessHandler(as))
+	r.Post("/revoke", revokeRefreshTokenHandler(as))
 
 	return r
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/database"
 )
 
 type UserClaims struct {
@@ -21,10 +20,10 @@ func (uc *UserClaims) GetUserID() uuid.UUID {
 	return uc.UserID
 }
 
-func CreateJWT(user database.User, d time.Duration) (string, error) {
+func CreateJWT(userID uuid.UUID, d time.Duration) (string, error) {
 	now := time.Now().UTC()
 	claims := UserClaims{
-		user.ID,
+		userID,
 		jwt.RegisteredClaims{
 			Issuer:    JWTIssuer,
 			IssuedAt:  jwt.NewNumericDate(now),

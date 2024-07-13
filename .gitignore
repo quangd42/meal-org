@@ -3,6 +3,7 @@
 
 # binary related
 bin
+tmp
 
 # other
 supabase

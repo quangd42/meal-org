@@ -1,128 +1,106 @@
 package handlers
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
 	"net/http"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var ErrAuthenticationFailed = errors.New("incorrect username or password")
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		Username string
-		Password string
-	}
-	params := &parameters{}
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(params)
-	if err != nil {
-		respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
-		return
-	}
-
-	user, err := store.Q.GetUserByUsername(r.Context(), params.Username)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			respondError(w, http.StatusNotFound, ErrAuthenticationFailed.Error())
-			return
-		}
-
-		respondInternalServerError(w)
-		return
-	}
-
-	// compare password and hash
-	err = auth.ValidateHash([]byte(user.Hash), []byte(params.Password))
-	if err != nil {
-		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			respondError(w, http.StatusUnauthorized, ErrAuthenticationFailed.Error())
-			return
-		}
-		respondInternalServerError(w)
-		return
-	}
-
-	jwt, refreshToken, err := generateAndSaveAuthTokens(r, user)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
-
-	respondJSON(w, http.StatusOK, createUserResponseWithToken(user, jwt, refreshToken))
+type AuthService interface {
+	GenerateAccessToken(ctx context.Context, userID uuid.UUID) (string, error)
+	GenerateAndSaveRefreshToken(ctx context.Context, userID uuid.UUID) (string, error)
+	ValidateRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error)
+	RevokeRefreshToken(ctx context.Context, refreshToken string) error
+	Login(ctx context.Context, lr models.LoginRequest) (models.User, error)
 }
 
-func refreshJWTHandler(w http.ResponseWriter, r *http.Request) {
-	paramToken, err := auth.GetHeaderToken(r)
-	if err != nil {
-		http.Error(w, auth.ErrTokenNotFound.Error(), http.StatusUnauthorized)
-		return
-	}
+func loginHandler(as AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lr, err := decodeValidate[models.LoginRequest](r)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			return
+		}
 
-	token, err := store.Q.GetTokenByValue(r.Context(), paramToken)
-	if err != nil {
-		respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-		return
-	}
+		user, err := as.Login(r.Context(), lr)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+				respondError(w, http.StatusUnauthorized, ErrAuthenticationFailed.Error())
+				return
+			}
 
-	if token.ExpiredAt.Before(time.Now().UTC()) {
-		token.IsRevoked = true
-		err = store.Q.RevokeToken(r.Context(), database.RevokeTokenParams{
-			Value:     paramToken,
-			IsRevoked: true,
-		})
+			respondInternalServerError(w)
+			return
+		}
+
+		jwt, err := as.GenerateAccessToken(r.Context(), user.ID)
 		if err != nil {
 			respondInternalServerError(w)
 			return
 		}
-	}
-	if token.IsRevoked {
-		respondError(w, http.StatusUnauthorized, auth.ErrTokenInvalid.Error())
-		return
-	}
 
-	jwt, err := auth.CreateJWT(database.User{ID: token.UserID}, auth.ExpirationDurationAccess)
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
+		refreshToken, err := as.GenerateAndSaveRefreshToken(r.Context(), user.ID)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
 
-	type response struct {
-		Token string `json:"token"`
+		respondJSON(w, http.StatusOK, user.WithToken(jwt, refreshToken))
 	}
-
-	respondJSON(w, http.StatusOK, response{
-		Token: jwt,
-	})
 }
 
-func revokeJWTHandler(w http.ResponseWriter, r *http.Request) {
-	paramToken, err := auth.GetHeaderToken(r)
-	if err != nil {
-		http.Error(w, auth.ErrTokenNotFound.Error(), http.StatusUnauthorized)
-		return
-	}
+func refreshAccessHandler(as AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		refreshToken, err := auth.GetHeaderToken(r)
+		if err != nil {
+			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+			return
+		}
 
-	_, err = store.Q.GetTokenByValue(r.Context(), paramToken)
-	if err != nil {
-		respondError(w, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-		return
-	}
+		userID, err := as.ValidateRefreshToken(r.Context(), refreshToken)
+		if err != nil {
+			respondError(w, http.StatusUnauthorized, err.Error())
+			return
+		}
 
-	err = store.Q.RevokeToken(r.Context(), database.RevokeTokenParams{
-		Value:     paramToken,
-		IsRevoked: true,
-	})
-	if err != nil {
-		respondInternalServerError(w)
-		return
-	}
+		jwt, err := as.GenerateAccessToken(r.Context(), userID)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
 
-	w.WriteHeader(http.StatusNoContent)
+		type response struct {
+			Token string `json:"token"`
+		}
+
+		respondJSON(w, http.StatusOK, response{
+			Token: jwt,
+		})
+	}
+}
+
+func revokeRefreshTokenHandler(as AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		refreshToken, err := auth.GetHeaderToken(r)
+		if err != nil {
+			http.Error(w, auth.ErrTokenNotFound.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		err = as.RevokeRefreshToken(r.Context(), refreshToken)
+		if err != nil {
+			respondInternalServerError(w)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
