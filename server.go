@@ -38,9 +38,10 @@ func run() error {
 
 	us := services.NewUserService(store)
 	ts := services.NewTokenService(store)
+	rs := services.NewRecipeService(store)
 
 	r := chi.NewRouter()
-	handlers.AddRoutes(r, us, ts)
+	handlers.AddRoutes(r, us, ts, rs)
 
 	server := &http.Server{
 		Addr:         ":" + port,

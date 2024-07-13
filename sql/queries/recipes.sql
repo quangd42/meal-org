@@ -32,12 +32,7 @@ WHERE id = $1
 RETURNING *;
 
 -- name: ListRecipesByUserID :many
-SELECT
-  name,
-  external_url,
-  updated_at,
-  servings,
-  cook_time_in_minutes
+SELECT *
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -47,4 +42,4 @@ LIMIT
 
 -- name: DeleteRecipe :exec
 DELETE FROM recipes
-WHERE user_id = $1 AND id = $2;
+WHERE id = $1;

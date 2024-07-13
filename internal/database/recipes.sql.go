@@ -73,16 +73,11 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 
 const deleteRecipe = `-- name: DeleteRecipe :exec
 DELETE FROM recipes
-WHERE user_id = $1 AND id = $2
+WHERE id = $1
 `
 
-type DeleteRecipeParams struct {
-	UserID uuid.UUID `json:"user_id"`
-	ID     uuid.UUID `json:"id"`
-}
-
-func (q *Queries) DeleteRecipe(ctx context.Context, arg DeleteRecipeParams) error {
-	_, err := q.db.Exec(ctx, deleteRecipe, arg.UserID, arg.ID)
+func (q *Queries) DeleteRecipe(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteRecipe, id)
 	return err
 }
 
@@ -110,12 +105,7 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 }
 
 const listRecipesByUserID = `-- name: ListRecipesByUserID :many
-SELECT
-  name,
-  external_url,
-  updated_at,
-  servings,
-  cook_time_in_minutes
+SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -130,29 +120,26 @@ type ListRecipesByUserIDParams struct {
 	Offset int32     `json:"offset"`
 }
 
-type ListRecipesByUserIDRow struct {
-	Name              string    `json:"name"`
-	ExternalUrl       *string   `json:"external_url"`
-	UpdatedAt         time.Time `json:"updated_at"`
-	Servings          int32     `json:"servings"`
-	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
-}
-
-func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]ListRecipesByUserIDRow, error) {
+func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUserIDParams) ([]Recipe, error) {
 	rows, err := q.db.Query(ctx, listRecipesByUserID, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListRecipesByUserIDRow
+	var items []Recipe
 	for rows.Next() {
-		var i ListRecipesByUserIDRow
+		var i Recipe
 		if err := rows.Scan(
-			&i.Name,
-			&i.ExternalUrl,
+			&i.ID,
+			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.ExternalUrl,
+			&i.Name,
+			&i.UserID,
 			&i.Servings,
+			&i.Yield,
 			&i.CookTimeInMinutes,
+			&i.Notes,
 		); err != nil {
 			return nil, err
 		}

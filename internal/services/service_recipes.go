@@ -1,7 +1,8 @@
-package handlers
+package services
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,21 +10,26 @@ import (
 	"github.com/quangd42/meal-planner/internal/models"
 )
 
-type CreateWholeRecipeParams struct {
-	UserID uuid.UUID `json:"user_id"`
-	models.RecipeRequest
+var ErrUnauthorized = errors.New("unauthorized")
+
+type RecipeService struct {
+	store *database.Store
 }
 
-func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWholeRecipeParams) (models.Recipe, error) {
+func NewRecipeService(store *database.Store) RecipeService {
+	return RecipeService{store: store}
+}
+
+func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg models.RecipeRequest) (models.Recipe, error) {
 	var r models.Recipe
 
-	tx, err := store.DB.Begin(ctx)
+	tx, err := rs.store.DB.Begin(ctx)
 	if err != nil {
-		return models.Recipe{}, err
+		return r, err
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := store.Q.WithTx(tx)
+	qtx := rs.store.Q.WithTx(tx)
 
 	// Create host Recipe
 	dbRecipe, err := qtx.CreateRecipe(ctx, database.CreateRecipeParams{
@@ -36,7 +42,7 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 		Yield:             arg.Yield,
 		CookTimeInMinutes: int32(arg.CookTimeInMinutes),
 		Notes:             arg.Notes,
-		UserID:            arg.UserID,
+		UserID:            userID,
 	})
 	if err != nil {
 		return r, err
@@ -110,24 +116,30 @@ func CreateWholeRecipe(ctx context.Context, store *database.Store, arg CreateWho
 	return r, tx.Commit(ctx)
 }
 
-type UpdateWholeRecipeParams struct {
-	ID uuid.UUID `json:"id"`
-	models.RecipeRequest
-}
-
-func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWholeRecipeParams) (models.Recipe, error) {
+func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID uuid.UUID, arg models.RecipeRequest) (models.Recipe, error) {
 	var r models.Recipe
-	tx, err := store.DB.Begin(ctx)
+
+	// Check if the recipe belongs to the user
+	// NOTE: this perhaps should be in a middleware
+	targetRecipe, err := rs.store.Q.GetRecipeByID(ctx, recipeID)
+	if err != nil {
+		return r, checkErrNoRows(err)
+	}
+	if targetRecipe.UserID != userID {
+		return r, ErrUnauthorized
+	}
+
+	tx, err := rs.store.DB.Begin(ctx)
 	if err != nil {
 		return r, err
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := store.Q.WithTx(tx)
+	qtx := rs.store.Q.WithTx(tx)
 
 	// Update host Recipe
 	dbRecipe, err := qtx.UpdateRecipeByID(ctx, database.UpdateRecipeByIDParams{
-		ID:                arg.ID,
+		ID:                recipeID,
 		UpdatedAt:         time.Now().UTC(),
 		Name:              arg.Name,
 		ExternalUrl:       arg.ExternalURL,
@@ -164,20 +176,48 @@ func UpdateWholeRecipe(ctx context.Context, store *database.Store, arg UpdateWho
 	return r, tx.Commit(ctx)
 }
 
-func GetWholeRecipe(ctx context.Context, store *database.Store, recipeID uuid.UUID) (models.Recipe, error) {
+func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error) {
+	var recipes []models.RecipeInList
+	dbRecipes, err := rs.store.Q.ListRecipesByUserID(ctx, database.ListRecipesByUserIDParams{
+		UserID: userID,
+		Limit:  pgn.Limit,
+		Offset: pgn.Offset,
+	})
+	if err != nil {
+		return recipes, err
+	}
+
+	for _, r := range dbRecipes {
+		recipes = append(recipes, models.RecipeInList{
+			ID:                r.ID,
+			CreatedAt:         r.CreatedAt,
+			UpdatedAt:         r.UpdatedAt,
+			Name:              r.Name,
+			ExternalUrl:       r.ExternalUrl,
+			UserID:            r.UserID,
+			Servings:          int(r.Servings),
+			Yield:             r.Yield,
+			CookTimeInMinutes: int(r.CookTimeInMinutes),
+		})
+	}
+
+	return recipes, nil
+}
+
+func (rs RecipeService) GetRecipeByID(ctx context.Context, recipeID uuid.UUID) (models.Recipe, error) {
 	var r models.Recipe
 
-	tx, err := store.DB.Begin(ctx)
+	tx, err := rs.store.DB.Begin(ctx)
 	if err != nil {
 		return models.Recipe{}, err
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := store.Q.WithTx(tx)
+	qtx := rs.store.Q.WithTx(tx)
 
 	dbRecipe, err := qtx.GetRecipeByID(ctx, recipeID)
 	if err != nil {
-		return r, err
+		return r, checkErrNoRows(err)
 	}
 
 	dbCuisines, err := qtx.ListCuisinesByRecipeID(ctx, dbRecipe.ID)
@@ -196,6 +236,14 @@ func GetWholeRecipe(ctx context.Context, store *database.Store, recipeID uuid.UU
 	}
 	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 	return r, tx.Commit(ctx)
+}
+
+func (rs RecipeService) DeleteRecipeByID(ctx context.Context, recipeID uuid.UUID) error {
+	err := rs.store.Q.DeleteRecipe(ctx, recipeID)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesByRecipeIDRow, dbIngredients []database.ListIngredientsByRecipeIDRow, dbInstructions []database.Instruction) models.Recipe {

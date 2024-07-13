@@ -10,6 +10,7 @@ import (
 func AddRoutes(r *chi.Mux,
 	us UserService,
 	as AuthService,
+	rs RecipeService,
 ) {
 	r.Get("/", r.NotFoundHandler())
 
@@ -20,7 +21,7 @@ func AddRoutes(r *chi.Mux,
 
 		r.Mount("/users", usersAPIRouter(us, as))
 		r.Mount("/auth", authRouter(as))
-		r.Mount("/recipes", recipesAPIRouter())
+		r.Mount("/recipes", recipesAPIRouter(rs))
 		r.Mount("/ingredients", ingredientsAPIRouter())
 		r.Mount("/cuisines", cuisinesAPIRouter())
 	})
@@ -52,16 +53,16 @@ func authRouter(as AuthService) http.Handler {
 }
 
 // recipesAPIRouter
-func recipesAPIRouter() http.Handler {
+func recipesAPIRouter(rs RecipeService) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.AuthVerifier())
-	r.Post("/", createRecipeHandler)
-	r.Get("/", listRecipesHandler)
+	r.Post("/", createRecipeHandler(rs))
+	r.Get("/", listRecipesHandler(rs))
 
-	r.Get("/{id}", getRecipeHandler)
-	r.Put("/{id}", updateRecipeHandler)
-	r.Delete("/{id}", deleteRecipeHandler)
+	r.Get("/{id}", getRecipeHandler(rs))
+	r.Put("/{id}", updateRecipeHandler(rs))
+	r.Delete("/{id}", deleteRecipeHandler(rs))
 
 	// TODO: add search & filter
 
