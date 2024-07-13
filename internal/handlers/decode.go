@@ -63,16 +63,6 @@ func respondMalformedRequestError(w http.ResponseWriter) {
 	respondError(w, http.StatusBadRequest, "malformed request body")
 }
 
-func createUserResponse(u database.User) models.User {
-	return models.User{
-		ID:        u.ID,
-		CreatedAt: u.CreatedAt,
-		UpdatedAt: u.UpdatedAt,
-		Name:      u.Name,
-		Username:  u.Username,
-	}
-}
-
 func createIngredientResponse(i database.Ingredient) models.Ingredient {
 	res := models.Ingredient{
 		ID:        i.ID,
