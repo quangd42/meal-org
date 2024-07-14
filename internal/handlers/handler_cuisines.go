@@ -1,139 +1,100 @@
 package handlers
 
 import (
-	"encoding/json"
+	"context"
 	"errors"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/services"
 )
 
-func createCuisineHandler(w http.ResponseWriter, r *http.Request) {
-	type parameters struct {
-		Name     string     `json:"name"`
-		ParentID *uuid.UUID `json:"parent_id"`
-	}
-	params := &parameters{}
-	err := json.NewDecoder(r.Body).Decode(params)
-	if err != nil {
-		respondMalformedRequestError(w)
-		return
-	}
+type CuisineService interface {
+	CreateCuisine(ctx context.Context, cr models.CuisineRequest) (models.Cuisine, error)
+	UpdateCuisineByID(ctx context.Context, cuisineID uuid.UUID, cr models.CuisineRequest) (models.Cuisine, error)
+	ListCuisines(ctx context.Context) ([]models.Cuisine, error)
+	DeleteCuisine(ctx context.Context, cuisineID uuid.UUID) error
+}
 
-	if params.ParentID != nil {
-		_, err = store.Q.GetCuisineByID(r.Context(), *params.ParentID)
+func createCuisineHandler(cs CuisineService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cr, err := decodeValidate[models.CuisineRequest](r)
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				respondError(w, http.StatusBadRequest, "parent cuisine does not exist")
+			respondMalformedRequestError(w)
+			return
+		}
+
+		cuisine, err := cs.CreateCuisine(r.Context(), cr)
+		if err != nil {
+			if errors.Is(err, services.ErrResourceNotFound) {
+				respondError(w, http.StatusBadRequest, "invalid parent cuisine")
 				return
 			}
+			respondDBConstraintsError(w, err, "cuisine name")
+			return
+		}
+
+		respondJSON(w, http.StatusCreated, cuisine)
+	}
+}
+
+func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cuisineIDString := chi.URLParam(r, "id")
+		cuisineID, err := uuid.Parse(cuisineIDString)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, "cuisine id not found")
+			return
+		}
+
+		cr, err := decodeValidate[models.CuisineRequest](r)
+		if err != nil {
+			respondMalformedRequestError(w)
+			return
+		}
+
+		cuisine, err := cs.UpdateCuisineByID(r.Context(), cuisineID, cr)
+		if err != nil {
+			if errors.Is(err, services.ErrResourceNotFound) {
+				respondError(w, http.StatusBadRequest, "invalid parent cuisine")
+				return
+			}
+			respondDBConstraintsError(w, err, "cuisine name")
+			return
+		}
+
+		respondJSON(w, http.StatusOK, cuisine)
+	}
+}
+
+func listCuisinesHandler(cs CuisineService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cuisines, err := cs.ListCuisines(r.Context())
+		if err != nil {
 			respondInternalServerError(w)
 			return
 		}
+		respondJSON(w, http.StatusOK, cuisines)
 	}
-
-	cuisine, err := store.Q.CreateCuisine(r.Context(), database.CreateCuisineParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		Name:      params.Name,
-		ParentID:  params.ParentID,
-	})
-	if err != nil {
-		log.Printf("error creating new cuisine: %s\n", err)
-		respondUniqueValueError(w, err, "cuisine name")
-		return
-	}
-
-	respondJSON(w, http.StatusCreated, createCuisineResponse(cuisine))
 }
 
-func updateCuisineHandler(w http.ResponseWriter, r *http.Request) {
-	cuisineIDString := chi.URLParam(r, "id")
-	cuisineID, err := uuid.Parse(cuisineIDString)
-	if err != nil {
-		respondError(w, http.StatusBadRequest, "cuisine id not found")
-		return
-	}
-
-	type parameters struct {
-		Name     string     `json:"name"`
-		ParentID *uuid.UUID `json:"parent_id"`
-	}
-	params := &parameters{}
-	err = json.NewDecoder(r.Body).Decode(params)
-	if err != nil {
-		respondMalformedRequestError(w)
-		return
-	}
-
-	if params.ParentID != nil {
-		_, err = store.Q.GetCuisineByID(r.Context(), *params.ParentID)
+func deleteCuisineHandler(cs CuisineService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cuisineIDString := chi.URLParam(r, "id")
+		cuisineID, err := uuid.Parse(cuisineIDString)
 		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				respondError(w, http.StatusBadRequest, "parent cuisine does not exist")
-				return
-			}
-			respondInternalServerError(w)
+			respondError(w, http.StatusBadRequest, "cuisine id not found")
 			return
 		}
-	}
 
-	cuisine, err := store.Q.UpdateCuisineByID(r.Context(), database.UpdateCuisineByIDParams{
-		ID:        cuisineID,
-		Name:      params.Name,
-		ParentID:  params.ParentID,
-		UpdatedAt: time.Now().UTC(),
-	})
-	if err != nil {
-		log.Printf("error updating cuisine: %s\n", err)
-		respondUniqueValueError(w, err, "cuisine name")
-		return
-	}
-
-	respondJSON(w, http.StatusOK, createCuisineResponse(cuisine))
-}
-
-func listCuisinesHandler(w http.ResponseWriter, r *http.Request) {
-	cuisines, err := store.Q.ListCuisines(r.Context())
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			respondError(w, http.StatusNotFound, "no cuisines found")
+		err = cs.DeleteCuisine(r.Context(), cuisineID)
+		if err != nil {
+			respondDBConstraintsError(w, err, "cuisine children")
 			return
 		}
-		respondInternalServerError(w)
-		return
+
+		respondJSON(w, http.StatusNoContent, http.StatusText(http.StatusNoContent))
 	}
-
-	respondJSON(w, http.StatusOK, cuisines)
-}
-
-func deleteCuisineHandler(w http.ResponseWriter, r *http.Request) {
-	cuisineIDString := chi.URLParam(r, "id")
-	cuisineID, err := uuid.Parse(cuisineIDString)
-	if err != nil {
-		respondError(w, http.StatusBadRequest, "cuisine id not found")
-		return
-	}
-
-	err = store.Q.DeleteCuisine(r.Context(), cuisineID)
-	if err != nil {
-
-		// Quick patch to pass tests
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code[0:2] == "23" {
-			respondError(w, http.StatusForbidden, "cuisine id")
-			return
-		}
-		respondInternalServerError(w)
-		return
-	}
-
-	respondJSON(w, http.StatusNoContent, http.StatusText(http.StatusNoContent))
 }

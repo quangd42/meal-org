@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/quangd42/meal-planner/internal/database"
-	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
 )
 
@@ -49,25 +47,6 @@ func respondDBConstraintsError(w http.ResponseWriter, err error, msg string) {
 	respondInternalServerError(w)
 }
 
-func respondUniqueValueError(w http.ResponseWriter, err error, msg string) {
-	if errors.Is(err, services.ErrUniqueValue) {
-		respondError(w, http.StatusBadRequest, "unique value constraint violated: "+msg)
-		return
-	}
-	respondError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
-}
-
 func respondMalformedRequestError(w http.ResponseWriter) {
 	respondError(w, http.StatusBadRequest, "malformed request body")
-}
-
-func createCuisineResponse(i database.Cuisine) models.Cuisine {
-	res := models.Cuisine{
-		ID:        i.ID,
-		Name:      i.Name,
-		CreatedAt: i.CreatedAt,
-		UpdatedAt: i.UpdatedAt,
-		ParentID:  i.ParentID,
-	}
-	return res
 }

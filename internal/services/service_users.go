@@ -14,15 +14,15 @@ import (
 
 var ErrHashPassword = errors.New("error hashing password")
 
-type User struct {
+type UserService struct {
 	store *database.Store
 }
 
-func NewUserService(store *database.Store) User {
-	return User{store: store}
+func NewUserService(store *database.Store) UserService {
+	return UserService{store: store}
 }
 
-func (us User) CreateUser(ctx context.Context, ur models.CreateUserRequest) (models.User, error) {
+func (us UserService) CreateUser(ctx context.Context, ur models.CreateUserRequest) (models.User, error) {
 	var u models.User
 	hash, err := auth.HashPassword([]byte(ur.Password))
 	if err != nil {
@@ -48,7 +48,7 @@ func (us User) CreateUser(ctx context.Context, ur models.CreateUserRequest) (mod
 	return u, nil
 }
 
-func (us User) UpdateUserByID(ctx context.Context, userID uuid.UUID, ur models.UpdateUserRequest) (models.User, error) {
+func (us UserService) UpdateUserByID(ctx context.Context, userID uuid.UUID, ur models.UpdateUserRequest) (models.User, error) {
 	var u models.User
 
 	hash, err := auth.HashPassword([]byte(ur.Password))
@@ -72,7 +72,7 @@ func (us User) UpdateUserByID(ctx context.Context, userID uuid.UUID, ur models.U
 	return u, nil
 }
 
-func (us User) DeleteUserByID(ctx context.Context, userID uuid.UUID) error {
+func (us UserService) DeleteUserByID(ctx context.Context, userID uuid.UUID) error {
 	err := us.store.Q.DeleteUser(ctx, userID)
 	if err != nil {
 		return err

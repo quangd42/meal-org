@@ -94,6 +94,7 @@ func deleteIngredientHandler(is IngredientService) http.HandlerFunc {
 		err = is.DeleteIngredient(r.Context(), ingredientID)
 		if err != nil {
 			respondDBConstraintsError(w, err, "ingredient children")
+			return
 		}
 
 		respondJSON(w, http.StatusNoContent, http.StatusText(http.StatusNoContent))

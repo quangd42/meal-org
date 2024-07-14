@@ -1,10 +1,20 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+type CuisineRequest struct {
+	Name     string     `json:"name" validate:"required"`
+	ParentID *uuid.UUID `json:"parent_id,omitempty"`
+}
+
+func (cr CuisineRequest) Validate(ctx context.Context) error {
+	return validate.Struct(cr)
+}
 
 type Cuisine struct {
 	ID        uuid.UUID  `json:"id"`
