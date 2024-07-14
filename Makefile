@@ -2,7 +2,10 @@
 MAIN_PACKAGE_PATH := .
 BINARY_NAME := planner_server
 SCHEMA_PATH := sql/schema
-# include .env
+ifneq (,$(wildcard ./.env))
+		include .env
+		export
+endif
 
 # ==================================================================================== #
 # HELPERS
