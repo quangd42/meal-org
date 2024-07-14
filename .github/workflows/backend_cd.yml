@@ -40,7 +40,7 @@ jobs:
         run: gcloud builds submit --tag us-central1-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal-planner:latest .
 
       - name: Run db migration
-        run: ./scripts/migrate_up.sh
+        run: make migrate/up
 
       - name: Deploy to Cloud run
         run: gcloud run deploy meal-planner --image us-central1-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal-planner:latest --region us-central1 --allow-unauthenticated --project meal-planner-426313 --max-instances=4
