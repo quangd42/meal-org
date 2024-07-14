@@ -47,15 +47,10 @@ audit:
 sqlc:
 	sqlc generate
 
-## migrate/up: goose migrate the DB to the most recent version available
-.PHONY: migrate/up
-migrate/up:
-	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" up
-
-## migrate/down: goose roll back the version by 1
-.PHONY: migrate/down
-migrate/down:
-	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" down
+## migrate/%: goose migrate
+.PHONY: migrate/%
+migrate/%:
+	goose -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" $(*)
 
 ## test: run all tests
 .PHONY: test
@@ -84,20 +79,3 @@ build/prod:
 air:
 	## Config is in .air.toml
 	go run github.com/air-verse/air@latest
-
-
-# ==================================================================================== #
-# OPERATIONS
-# ==================================================================================== #
-
-## push: push changes to the remote Git repository
-.PHONY: push
-push: tidy audit no-dirty
-	git push
-
-## production/deploy: deploy the application to production
-.PHONY: production/deploy
-production/deploy: confirm tidy audit no-dirty
-	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=/tmp/bin/linux_amd64/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
-	upx -5 /tmp/bin/linux_amd64/${BINARY_NAME}
-	# Include additional deployment steps here...
