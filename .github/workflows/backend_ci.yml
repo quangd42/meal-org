@@ -42,13 +42,13 @@ jobs:
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
       - name: Build app
-        run: ./scripts/build_prod.sh
+        run: make build/prod
 
       - name: Run the application
         run: ./bin/planner_server &
 
       - name: Run db migration
-        run: ./scripts/migrate_up.sh
+        run: make migrate/up
 
       - name: Populate the database with cuisines
         run: |
@@ -75,11 +75,30 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-
       - name: Run formatter
         run: test -z $(go fmt ./...)
 
+      - name: Run go vet
+        run: test -z $(go vet ./...)
+
       - name: Run staticcheck
-        run: staticcheck ./...
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
+
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
