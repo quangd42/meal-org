@@ -18,6 +18,7 @@ var (
 
 // TODO: split this into two: on to verify if token is good, one to
 // extract, verify and return user information
+
 func AuthVerifier() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {

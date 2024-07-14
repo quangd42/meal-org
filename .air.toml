@@ -7,7 +7,7 @@ args_bin = []
 bin = "./bin/planner-dev"
 cmd = "go build -o ./bin/planner-dev ."
 delay = 1000
-exclude_dir = ["assets", "tmp", "vendor", "testdata", "sql", "scripts"]
+exclude_dir = ["assets", "tmp", "vendor", "testdata", "sql", "scripts", "tests"]
 exclude_file = []
 exclude_regex = ["_test.go"]
 exclude_unchanged = false
@@ -39,7 +39,7 @@ main_only = false
 time = false
 
 [misc]
-clean_on_exit = false
+clean_on_exit = true
 
 [proxy]
 app_port = 0
