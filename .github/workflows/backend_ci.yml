@@ -89,5 +89,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Gosec
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...

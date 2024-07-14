@@ -2,7 +2,7 @@
 MAIN_PACKAGE_PATH := .
 BINARY_NAME := planner_server
 SCHEMA_PATH := sql/schema
-include .env
+# include .env
 
 # ==================================================================================== #
 # HELPERS
