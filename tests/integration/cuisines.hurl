@@ -16,6 +16,13 @@ HTTP 200
 token: jsonpath "$['token']"
 
 ### Tests
+# List Cuisines - expect existing cuisines
+GET {{host}}/v1/cuisines
+Authorization: Bearer {{token}}
+HTTP 200
+[Asserts]
+jsonpath "$" count == 23
+
 # Create Cuisine 1
 POST {{host}}/v1/cuisines
 Authorization: Bearer {{token}}

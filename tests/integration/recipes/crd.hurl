@@ -63,6 +63,14 @@ cuisine_id2: jsonpath "$[1].id"
 cuisine_id3: jsonpath "$[2].id"
 
 ### Tests
+# List Recipes - expect null result
+GET {{host}}/v1/recipes
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+HTTP 200
+[Asserts]
+jsonpath "$" == null
+
 # Create Recipe 1
 # Its 3rd ingredient has the same id as 2nd
 POST {{host}}/v1/recipes

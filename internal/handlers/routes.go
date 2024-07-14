@@ -11,6 +11,7 @@ func AddRoutes(r *chi.Mux,
 	us UserService,
 	as AuthService,
 	rs RecipeService,
+	is IngredientService,
 ) {
 	r.Get("/", r.NotFoundHandler())
 
@@ -22,7 +23,7 @@ func AddRoutes(r *chi.Mux,
 		r.Mount("/users", usersAPIRouter(us, as))
 		r.Mount("/auth", authRouter(as))
 		r.Mount("/recipes", recipesAPIRouter(rs))
-		r.Mount("/ingredients", ingredientsAPIRouter())
+		r.Mount("/ingredients", ingredientsAPIRouter(is))
 		r.Mount("/cuisines", cuisinesAPIRouter())
 	})
 }
@@ -69,15 +70,15 @@ func recipesAPIRouter(rs RecipeService) http.Handler {
 	return r
 }
 
-func ingredientsAPIRouter() http.Handler {
+func ingredientsAPIRouter(is IngredientService) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.AuthVerifier())
-	r.Post("/", createIngredientHandler)
-	r.Get("/", listIngredientsHandler)
+	r.Post("/", createIngredientHandler(is))
+	r.Get("/", listIngredientsHandler(is))
 
-	r.Put("/{id}", updateIngredientHandler)
-	r.Delete("/{id}", deleteIngredientHandler)
+	r.Put("/{id}", updateIngredientHandler(is))
+	r.Delete("/{id}", deleteIngredientHandler(is))
 
 	return r
 }

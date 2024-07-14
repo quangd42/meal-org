@@ -16,6 +16,13 @@ HTTP 200
 token: jsonpath "$['token']"
 
 ### Tests
+# List Ingredients - expect none
+GET {{host}}/v1/ingredients
+Authorization: Bearer {{token}}
+HTTP 200
+[Asserts]
+jsonpath "$" == null
+
 # Create Ingredient 1
 POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
@@ -57,7 +64,7 @@ POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {"name":"Asparagus"}
-HTTP 400
+HTTP 403
 [Asserts]
 jsonpath "$.error" exists
 
