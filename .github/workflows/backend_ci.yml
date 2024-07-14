@@ -42,13 +42,13 @@ jobs:
         run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
       - name: Build app
-        run: ./scripts/build_prod.sh
+        run: make build/prod
 
       - name: Run the application
         run: ./bin/planner_server &
 
       - name: Run db migration
-        run: ./scripts/migrate_up.sh
+        run: make migrate/up
 
       - name: Populate the database with cuisines
         run: |
@@ -90,4 +90,4 @@ jobs:
 
     steps:
       - name: Gosec
-        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
