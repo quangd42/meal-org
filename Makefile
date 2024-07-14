@@ -2,6 +2,7 @@
 MAIN_PACKAGE_PATH := .
 BINARY_NAME := planner_server
 SCHEMA_PATH := sql/schema
+PG_DATABASE_URL := postgres://quang-dang:@localhost:5432/postgres?sslmode=disable
 ifneq (,$(wildcard ./.env))
 		include .env
 		export
@@ -46,6 +47,22 @@ audit:
 .PHONY: sqlc
 sqlc:
 	sqlc generate
+
+## db/drop: drop local db
+.PHONY: sqlc
+db/drop:
+	psql ${PG_DATABASE_URL} -c "DROP DATABASE IF EXISTS meal_planner;"
+
+## db/create: create local db
+.PHONY: sqlc
+db/create:
+	psql ${PG_DATABASE_URL} -c "CREATE DATABASE meal_planner;"
+
+## db/reset
+.PHONY: db/reset
+db/reset: db/drop db/create
+	goose -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" up
+	./scripts/populate_cuisines/run-local.sh
 
 ## migrate/%: goose migrate
 .PHONY: migrate/%
