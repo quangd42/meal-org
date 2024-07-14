@@ -2,7 +2,7 @@ name: cd
 
 on:
   push:
-    branches: [main, ft/makefile]
+    branches: [main]
 
 jobs:
   deploy:
