@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 
+	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/internal/models"
 )
 
@@ -29,4 +33,24 @@ func getPaginationParams(r *http.Request) models.RecipesPagination {
 		Limit:  limit,
 		Offset: offset,
 	}
+}
+
+func disableCacheInDevMode(next http.Handler) http.Handler {
+	dev := false
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
+		log.Fatal("error loading env")
+	}
+
+	devStr := os.Getenv("DEV_MODE")
+	if strings.ToLower(devStr) == "true" {
+		dev = true
+	}
+
+	if !dev {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		next.ServeHTTP(w, r)
+	})
 }

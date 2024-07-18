@@ -5,7 +5,13 @@
 bin
 tmp
 
+# tailwind generated css
+styles.css
+
+# templ generated files
+*_templ.go
+*_templ.txt
+
 # other
 supabase
 .env
-bin

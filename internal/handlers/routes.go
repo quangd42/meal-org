@@ -16,6 +16,9 @@ func AddRoutes(r *chi.Mux,
 ) {
 	r.Get("/", r.NotFoundHandler())
 
+	fs := disableCacheInDevMode(http.FileServer(http.Dir("assets")))
+	r.Handle("/assets/*", http.StripPrefix("/assets", fs))
+
 	// API router
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/healthz", readinessHandler)
