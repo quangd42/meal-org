@@ -34,6 +34,7 @@ func run() error {
 		os.Exit(1)
 	}
 	defer db.Close()
+
 	store := database.NewStore(db)
 
 	us := services.NewUserService(store)

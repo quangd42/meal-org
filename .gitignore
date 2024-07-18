@@ -14,4 +14,4 @@ styles.css
 
 # other
 supabase
-.env
+node_modules
