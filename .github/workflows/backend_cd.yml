@@ -25,6 +25,9 @@ jobs:
       - name: Generate Go files from templ
         run: go run github.com/a-h/templ/cmd/templ@latest generate
 
+      - name: Generate tailwind css
+        run: ./tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify
+
       - name: Build app
         run: make build/prod
 

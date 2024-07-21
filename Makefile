@@ -112,7 +112,7 @@ live/server:
 ## live/tailwind: run the application with reloading on file changes
 .PHONY: live/tailwind
 live/tailwind:
-	./tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify --watch
+	npx tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify --watch
 
 ## live/assets: watch for any js or css change in the assets/ folder, then reload the browser via templ proxy.
 .PHONY: live/assets
