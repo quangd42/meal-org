@@ -2,7 +2,7 @@ package components
 
 import "github.com/google/uuid"
 
-templ Layout(title string, userID *uuid.UUID, navItems []NavItem) {
+templ Layout(title string, userID uuid.UUID, navItems []NavItem) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -13,7 +13,7 @@ templ Layout(title string, userID *uuid.UUID, navItems []NavItem) {
 		</head>
 		@navbar(userID, navItems)
 		<body>
-			<main class="sm:px-4 py-8 bg-gray-50">
+			<main class="bg-gray-50 py-8 sm:px-4">
 				{ children... }
 			</main>
 			<script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>

@@ -20,7 +20,6 @@ type AuthService interface {
 	ValidateRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error)
 	RevokeRefreshToken(ctx context.Context, refreshToken string) error
 	Login(ctx context.Context, lr models.LoginRequest) (models.User, error)
-	Register(ctx context.Context, lr models.UserRequest) (models.User, error)
 }
 
 func loginAPIHandler(as AuthService) http.HandlerFunc {

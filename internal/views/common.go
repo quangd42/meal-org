@@ -7,13 +7,15 @@ import (
 
 type CommonVM struct {
 	Title    string
-	UserID   *uuid.UUID
+	UserID   uuid.UUID
 	NavItems []components.NavItem
+	Errors   map[string]any
 }
 
-func NewCommonVM(userID *uuid.UUID, navItems []components.NavItem) CommonVM {
+func NewCommonVM(userID uuid.UUID, navItems []components.NavItem) CommonVM {
 	return CommonVM{
 		UserID:   userID,
 		NavItems: navItems,
+		Errors:   nil,
 	}
 }
