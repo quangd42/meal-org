@@ -1,15 +1,27 @@
 # Create user
 POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
-{"name":"julia","username":"{{username}}","password":"{{password}}"}
+{"name":"julia","email":"{{email}}","password":"{{password}}"}
 HTTP 201
 [Captures]
 user_id: jsonpath "$['id']"
 
+# Create user - duplicate email
+POST {{host}}/v1/users
+Content-Type: application/json; charset=utf-8
+{"name":"julia","email":"{{email}}","password":"{{password}}"}
+HTTP 403
+
+# Create user - wrong email format
+POST {{host}}/v1/users
+Content-Type: application/json; charset=utf-8
+{"name":"julia","email":"badEmail","password":"{{password}}"}
+HTTP 400
+
 # Login
 POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
-{"username":"{{username}}","password":"{{password}}"}
+{"email":"{{email}}","password":"{{password}}"}
 HTTP 200
 [Captures]
 token: jsonpath "$['token']"
@@ -23,7 +35,37 @@ Content-Type: text/plain; charset=utf-8
 variable: password2=verySafePassword101
 {
   "name": "julia2",
-  "username":"{{username}}",
+  "email":"{{email}}",
+  "password": "{{password2}}"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.name" == "julia2"
+
+# Update user - duplicate email: expect nothing to happen, email is not considered
+PUT {{host}}/v1/users
+Authorization: Bearer {{token}}
+Content-Type: text/plain; charset=utf-8
+[Options]
+variable: password2=verySafePassword101
+{
+  "name": "julia2",
+  "email":"{{email}}",
+  "password": "{{password2}}"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.name" == "julia2"
+
+# Update user - wrong email format: expect nothing to happen, email is not considered
+PUT {{host}}/v1/users
+Authorization: Bearer {{token}}
+Content-Type: text/plain; charset=utf-8
+[Options]
+variable: password2=verySafePassword101
+{
+  "name": "julia2",
+  "email":"badEmail",
   "password": "{{password2}}"
 }
 HTTP 200
@@ -33,7 +75,7 @@ jsonpath "$.name" == "julia2"
 # Login post update
 POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
-{"username":"{{username}}","password":"{{password2}}"}
+{"email":"{{email}}","password":"{{password2}}"}
 HTTP 200
 [Captures]
 token2: jsonpath "$['token']"

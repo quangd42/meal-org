@@ -34,13 +34,12 @@ func (us UserService) CreateUser(ctx context.Context, ur models.CreateUserReques
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Name:      ur.Name,
-		Username:  ur.Username,
+		Email:     ur.Email,
 		Hash:      string(hash),
 	})
 	if err != nil {
 		log.Printf("error creating new user: %s\n", err)
-		return u, err
+		return u, ErrDBConstraint
 	}
 
 	u = genUserResponse(user)
@@ -60,11 +59,10 @@ func (us UserService) UpdateUserByID(ctx context.Context, userID uuid.UUID, ur m
 	user, err := us.store.Q.UpdateUserByID(ctx, database.UpdateUserByIDParams{
 		ID:        userID,
 		UpdatedAt: time.Now().UTC(),
-		Name:      ur.Name,
 		Hash:      string(hash),
 	})
 	if err != nil {
-		return u, err
+		return u, ErrDBConstraint
 	}
 
 	u = genUserResponse(user)
@@ -86,6 +84,6 @@ func genUserResponse(u database.User) models.User {
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 		Name:      u.Name,
-		Username:  u.Username,
+		Email:     u.Email,
 	}
 }

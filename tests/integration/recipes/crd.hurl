@@ -2,7 +2,7 @@
 # Create user
 POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
-{"name":"julia","username":"{{username}}","password":"{{password}}"}
+{"name":"julia","email":"{{email}}","password":"{{password}}"}
 HTTP 201
 [Captures]
 user_id: jsonpath "$['id']"
@@ -10,7 +10,7 @@ user_id: jsonpath "$['id']"
 # Login
 POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
-{"username":"{{username}}","password":"{{password}}"}
+{"email":"{{email}}","password":"{{password}}"}
 HTTP 200
 [Captures]
 token: jsonpath "$['token']"

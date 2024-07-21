@@ -63,6 +63,12 @@ type RecipeIngredient struct {
 	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
+type Session struct {
+	Token  string    `json:"token"`
+	Data   []byte    `json:"data"`
+	Expiry time.Time `json:"expiry"`
+}
+
 type Token struct {
 	Value     string    `json:"value"`
 	CreatedAt time.Time `json:"created_at"`
@@ -76,6 +82,6 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
-	Username  string    `json:"username"`
+	Email     string    `json:"email"`
 	Hash      string    `json:"hash"`
 }

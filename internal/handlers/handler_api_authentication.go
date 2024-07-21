@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrAuthenticationFailed = errors.New("incorrect username or password")
+var ErrAuthenticationFailed = errors.New("incorrect email or password")
 
 type AuthService interface {
 	GenerateAccessToken(ctx context.Context, userID uuid.UUID) (string, error)

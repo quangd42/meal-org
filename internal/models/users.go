@@ -8,9 +8,9 @@ import (
 )
 
 type CreateUserRequest struct {
-	Name     string `json:"name" validate:"required"`
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Email           string `json:"email" form:"email" validate:"required,email"`
+	Password        string `json:"password" form:"password" validate:"required,min=10"`
+	ConfirmPassword string `json:"confirm_password,omitempty" form:"confirm_password" validate:"omitempty,eqfield=Password"`
 }
 
 func (ur CreateUserRequest) Validate(ctx context.Context) error {
@@ -18,7 +18,6 @@ func (ur CreateUserRequest) Validate(ctx context.Context) error {
 }
 
 type UpdateUserRequest struct {
-	Name     string `json:"name" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -27,7 +26,7 @@ func (ur UpdateUserRequest) Validate(ctx context.Context) error {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" form:"username" validate:"required"`
+	Email    string `json:"email" form:"email" validate:"required,email"`
 	Password string `json:"password" form:"password" validate:"required"`
 }
 
@@ -40,7 +39,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
-	Username  string    `json:"username"`
+	Email     string    `json:"email"`
 }
 
 type UserWithToken struct {

@@ -33,7 +33,7 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 				respondInternalServerError(w)
 				return
 			}
-			respondDBConstraintsError(w, err, "username")
+			respondDBConstraintsError(w, err, "email")
 			return
 		}
 
