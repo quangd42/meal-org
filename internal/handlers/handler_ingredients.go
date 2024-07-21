@@ -21,7 +21,7 @@ type IngredientService interface {
 // TODO: restrict operation on ingredients to admin
 func createIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		arg, err := decodeValidate[models.IngredientRequest](r)
+		arg, err := decodeJSONValidate[models.IngredientRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return
@@ -50,7 +50,7 @@ func updateIngredientHandler(is IngredientService) http.HandlerFunc {
 			return
 		}
 
-		arg, err := decodeValidate[models.IngredientRequest](r)
+		arg, err := decodeJSONValidate[models.IngredientRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return

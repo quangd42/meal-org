@@ -30,7 +30,7 @@ func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		rr, err := decodeValidate[models.RecipeRequest](r)
+		rr, err := decodeJSONValidate[models.RecipeRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return
@@ -61,7 +61,7 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		rr, err := decodeValidate[models.RecipeRequest](r)
+		rr, err := decodeJSONValidate[models.RecipeRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return

@@ -27,8 +27,8 @@ func (ur UpdateUserRequest) Validate(ctx context.Context) error {
 }
 
 type LoginRequest struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" form:"username" validate:"required"`
+	Password string `json:"password" form:"password" validate:"required"`
 }
 
 func (ur LoginRequest) Validate(ctx context.Context) error {

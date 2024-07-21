@@ -1,0 +1,28 @@
+package components
+
+import "github.com/google/uuid"
+
+templ Layout(title string, userID *uuid.UUID, navItems []NavItem) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ title }</title>
+			<link href="assets/css/styles.css" rel="stylesheet"/>
+		</head>
+		@navbar(userID, navItems)
+		<body>
+			<main class="sm:px-4 py-8 bg-gray-50">
+				{ children... }
+			</main>
+			<script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+		</body>
+	</html>
+}
+
+templ Hello() {
+	<h1 class="text-red-500">
+		Hello World!!
+	</h1>
+}

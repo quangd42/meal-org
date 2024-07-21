@@ -5,10 +5,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services/auth"
+	"github.com/quangd42/meal-planner/internal/views"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,9 +24,44 @@ type AuthService interface {
 	Login(ctx context.Context, lr models.LoginRequest) (models.User, error)
 }
 
-func loginHandler(as AuthService) http.HandlerFunc {
+func loginHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lr, err := decodeValidate[models.LoginRequest](r)
+		lr, err := decodeFormValidate[models.LoginRequest](r)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		user, err := as.Login(r.Context(), lr)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+				respondError(w, http.StatusUnauthorized, ErrAuthenticationFailed.Error())
+				return
+			}
+
+			respondInternalServerError(w)
+			return
+		}
+
+		sm.Put(r.Context(), "userID", &user.ID)
+
+		http.Redirect(w, r, "/", http.StatusOK)
+	}
+}
+
+func loginPageHandler(w http.ResponseWriter, r *http.Request) {
+	vm := views.NewLoginVM(navItems)
+	views.Login(vm).Render(r.Context(), w)
+}
+
+func registerPageHandler(w http.ResponseWriter, r *http.Request) {
+	vm := views.NewRegisterVM(navItems)
+	views.Register(vm).Render(r.Context(), w)
+}
+
+func loginAPIHandler(as AuthService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		lr, err := decodeJSONValidate[models.LoginRequest](r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return

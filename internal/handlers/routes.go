@@ -3,11 +3,15 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/quangd42/meal-planner/internal/middleware"
 )
 
 func AddRoutes(r *chi.Mux,
+func AddRoutes(
+	r *chi.Mux,
+	sm *scs.SessionManager,
 	us UserService,
 	as AuthService,
 	rs RecipeService,
@@ -16,8 +20,13 @@ func AddRoutes(r *chi.Mux,
 ) {
 	r.Get("/", r.NotFoundHandler())
 
+	// Static assets
 	fs := disableCacheInDevMode(http.FileServer(http.Dir("assets")))
 	r.Handle("/assets/*", http.StripPrefix("/assets", fs))
+
+	// Public pages
+	r.Get("/login", loginPageHandler)
+	r.Get("/register", registerPageHandler)
 
 	// API router
 	r.Route("/v1", func(r chi.Router) {
@@ -46,11 +55,11 @@ func usersAPIRouter(us UserService, as AuthService) http.Handler {
 	return r
 }
 
-// authRouter
-func authRouter(as AuthService) http.Handler {
+// authAPIRouter
+func authAPIRouter(as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Post("/login", loginHandler(as))
+	r.Post("/login", loginAPIHandler(as))
 	r.Post("/refresh", refreshAccessHandler(as))
 	r.Post("/revoke", revokeRefreshTokenHandler(as))
 
