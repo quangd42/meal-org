@@ -5,10 +5,10 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/quangd42/meal-planner/internal/middleware"
 )
 
-func AddRoutes(r *chi.Mux,
 func AddRoutes(
 	r *chi.Mux,
 	sm *scs.SessionManager,
@@ -18,15 +18,23 @@ func AddRoutes(
 	is IngredientService,
 	cs CuisineService,
 ) {
-	r.Get("/", r.NotFoundHandler())
+	// Top level middlewares
+	r.Use(chiMiddleware.StripSlashes)
+	r.Use(sm.LoadAndSave)
 
 	// Static assets
 	fs := disableCacheInDevMode(http.FileServer(http.Dir("assets")))
 	r.Handle("/assets/*", http.StripPrefix("/assets", fs))
 
 	// Public pages
-	r.Get("/login", loginPageHandler)
-	r.Get("/register", registerPageHandler)
+	r.Get("/login", loginPageHandler(sm, as))
+	r.Post("/login", loginPageHandler(sm, as))
+	r.Get("/register", registerPageHandler(sm, as))
+	r.Post("/register", registerPageHandler(sm, as))
+
+	// Private pages
+	r.Get("/", homeHandler(sm))
+	r.Get("/recipes", homeHandler(sm))
 
 	// API router
 	r.Route("/v1", func(r chi.Router) {
@@ -34,11 +42,20 @@ func AddRoutes(
 		r.Get("/err", errorHandler)
 
 		r.Mount("/users", usersAPIRouter(us, as))
-		r.Mount("/auth", authRouter(as))
+		r.Mount("/auth", authAPIRouter(as))
 		r.Mount("/recipes", recipesAPIRouter(rs))
 		r.Mount("/ingredients", ingredientsAPIRouter(is))
 		r.Mount("/cuisines", cuisinesAPIRouter(cs))
 	})
+}
+
+// authRouter
+func authRouter(as AuthService) http.Handler {
+	r := chi.NewRouter()
+
+	_ = as
+
+	return r
 }
 
 // usersAPIRouter
