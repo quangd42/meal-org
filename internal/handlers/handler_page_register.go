@@ -42,7 +42,7 @@ func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserSer
 			http.Redirect(w, r, fmt.Sprintf("http://%s/", r.Host), http.StatusSeeOther)
 			return
 		}
-		vm := views.NewRegisterVM(rds.GetNavItems(false), nil)
+		vm := views.NewRegisterVM(rds.GetNavItems(false, r.URL.Path), nil)
 		render(w, r, views.RegisterPage(vm))
 	}
 }

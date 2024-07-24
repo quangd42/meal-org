@@ -9,18 +9,18 @@ import (
 )
 
 type RendererService interface {
-	GetNavItems(isLoggedIn bool) []views.NavItem
+	GetNavItems(isLoggedIn bool, currentURL string) []views.NavItem
 }
 
 func homeHandler(sm *scs.SessionManager, rds RendererService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := sm.Get(r.Context(), "userID").(uuid.UUID)
-		if !ok || userID == uuid.Nil {
+		userID, err := getUserIDFromCtx(r.Context(), sm)
+		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil))
-		views.Home(homeVM).Render(r.Context(), w)
+		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
+		render(w, r, views.Home(homeVM))
 	}
 }

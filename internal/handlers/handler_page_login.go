@@ -17,7 +17,7 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 		if r.Method == http.MethodPost {
 			lr, err := decodeFormValidate[models.LoginRequest](r)
 			if err != nil {
-				vm := views.NewLoginVM(rds.GetNavItems(false), map[string]any{"email-password": true})
+				vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), map[string]any{"email-password": true})
 				render(w, r, views.LoginPage(vm))
 				return
 			}
@@ -25,7 +25,7 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 			user, err := as.Login(r.Context(), lr)
 			if err != nil {
 				if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-					vm := views.NewLoginVM(rds.GetNavItems(false), map[string]any{"email-password": true})
+					vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), map[string]any{"email-password": true})
 					render(w, r, views.LoginPage(vm))
 					return
 				}
@@ -37,7 +37,7 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 			http.Redirect(w, r, fmt.Sprintf("http://%s/", r.Host), http.StatusSeeOther)
 			return
 		}
-		vm := views.NewLoginVM(rds.GetNavItems(false), nil)
+		vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), nil)
 		render(w, r, views.LoginPage(vm))
 	}
 }

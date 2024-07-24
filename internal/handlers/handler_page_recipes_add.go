@@ -10,13 +10,13 @@ import (
 
 func addRecipePageHandler(sm *scs.SessionManager, rds RendererService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := sm.Get(r.Context(), "userID").(uuid.UUID)
-		if !ok || userID == uuid.Nil {
+		userID, err := getUserIDFromCtx(r.Context(), sm)
+		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil))
+		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
 		views.Home(homeVM).Render(r.Context(), w)
 	}
 }

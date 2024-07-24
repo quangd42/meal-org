@@ -1,8 +1,18 @@
 package views
 
 type NavItem struct {
-	Name string
-	URL  templ.SafeURL
+	Name          string
+	URL           string
+	IsButton      bool
+	IsCurrent     bool
+	IsPostRequest bool
+}
+
+func isCurrentMap(i NavItem) map[string]bool {
+	return map[string]bool{
+		"text-gray-700": !i.IsCurrent,
+		"text-blue-700": i.IsCurrent,
+	}
 }
 
 templ navbar(items []NavItem) {
@@ -25,7 +35,14 @@ templ navbar(items []NavItem) {
 					<ul class="mt-4 flex flex-col rounded-lg border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800 md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:text-sm md:font-medium md:dark:bg-gray-900">
 						for _, i := range items {
 							<li>
-								<a href={ i.URL } class="block rounded py-2 pl-3 pr-4 text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:bg-transparent md:dark:hover:text-white">{ i.Name }</a>
+								<a
+									if i.IsPostRequest {
+										hx-post={ string(templ.URL(i.URL)) }
+									} else {
+										href={ templ.URL(i.URL) }
+									}
+									class={ " block rounded py-2 pl-3 pr-4 font-semibold hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white md:border-0 md:p-0 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:bg-transparent md:dark:hover:text-white", isCurrentMap(i) }
+								>{ i.Name }</a>
 							</li>
 						}
 					</ul>

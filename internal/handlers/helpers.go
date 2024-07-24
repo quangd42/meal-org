@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -8,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/alexedwards/scs/v2"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/internal/models"
 )
@@ -58,4 +62,12 @@ func disableCacheInDevMode(next http.Handler) http.Handler {
 
 func render(w http.ResponseWriter, r *http.Request, c templ.Component) {
 	c.Render(r.Context(), w)
+}
+
+func getUserIDFromCtx(ctx context.Context, sm *scs.SessionManager) (uuid.UUID, error) {
+	userID, ok := sm.Get(ctx, "userID").(uuid.UUID)
+	if !ok || userID == uuid.Nil {
+		return userID, errors.New("userID could not be found")
+	}
+	return userID, nil
 }
