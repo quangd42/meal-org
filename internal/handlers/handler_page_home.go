@@ -6,11 +6,10 @@ import (
 	"github.com/a-h/templ"
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/components"
 	"github.com/quangd42/meal-planner/internal/views"
 )
 
-var navItems = []components.NavItem{
+var navItems = []views.NavItem{
 	{
 		Name: "Recipes",
 		URL:  templ.URL("/"),

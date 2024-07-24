@@ -1,4 +1,4 @@
-package components
+package views
 
 import "github.com/google/uuid"
 
@@ -10,6 +10,7 @@ templ Layout(title string, userID uuid.UUID, navItems []NavItem) {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ title }</title>
 			<link href="assets/css/styles.css" rel="stylesheet"/>
+			<script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
 		</head>
 		@navbar(userID, navItems)
 		<body>
@@ -19,10 +20,4 @@ templ Layout(title string, userID uuid.UUID, navItems []NavItem) {
 			<script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
 		</body>
 	</html>
-}
-
-templ Hello() {
-	<h1 class="text-red-500">
-		Hello World!!
-	</h1>
 }

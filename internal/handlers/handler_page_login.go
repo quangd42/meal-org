@@ -18,7 +18,7 @@ func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 			lr, err := decodeFormValidate[models.LoginRequest](r)
 			if err != nil {
 				vm := views.NewLoginVM(navItems, map[string]any{"email-password": true})
-				render(w, r, views.Login(vm))
+				render(w, r, views.LoginPage(vm))
 				return
 			}
 
@@ -26,7 +26,7 @@ func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 			if err != nil {
 				if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 					vm := views.NewLoginVM(navItems, map[string]any{"email-password": true})
-					render(w, r, views.Login(vm))
+					render(w, r, views.LoginPage(vm))
 					return
 				}
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -38,6 +38,6 @@ func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 			return
 		}
 		vm := views.NewLoginVM(navItems, nil)
-		render(w, r, views.Login(vm))
+		render(w, r, views.LoginPage(vm))
 	}
 }

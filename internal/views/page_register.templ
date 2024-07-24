@@ -1,0 +1,73 @@
+package views
+
+import "github.com/google/uuid"
+
+type RegisterVM struct {
+	CommonVM
+}
+
+func NewRegisterVM(navItems []NavItem, errs map[string]any) RegisterVM {
+	return RegisterVM{
+		CommonVM: CommonVM{Title: "Sign Up", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
+	}
+}
+
+templ RegisterPage(vm RegisterVM) {
+	@Layout(vm.Title, vm.UserID, vm.NavItems) {
+		<h1 class="mb-10 text-center">Sign Up</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<section class="col-span-1 px-4 md:col-span-1 md:col-start-2 md:col-end-2">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					@RegisterForm(vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}
+
+templ RegisterForm(errs map[string]any) {
+	<form hx-post="/register" class="space-y-4 md:space-y-6">
+		<div>
+			<label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Your email</label>
+			<input type="email" name="email" id="email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="name@example.com"/>
+			if _, ok := errs["email-duplicate"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Email is already taken!</p>
+			}
+			if _, ok := errs["email-required"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Email is required!</p>
+			}
+			if _, ok := errs["email-email"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Invalid email format</p>
+			}
+		</div>
+		<div>
+			<label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Password</label>
+			<input type="password" name="password" id="password" placeholder="••••••••" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"/>
+			if _, ok := errs["password-required"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Password is required!</p>
+			}
+			if _, ok := errs["password-min"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Password must be at least 10 characters long!</p>
+			}
+		</div>
+		<div>
+			<label for="confirm_password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
+			<input type="password" name="confirm_password" id="confirm_password" placeholder="••••••••" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"/>
+			if _, ok := errs["confirmpassword-eqfield"]; ok {
+				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Confirm password does not match!</p>
+			}
+		</div>
+		<div class="flex items-start">
+			<div class="flex h-5 items-center">
+				<input id="terms" aria-describedby="terms" type="checkbox" class="focus:ring-3 h-4 w-4 rounded border border-gray-300 bg-gray-50 focus:ring-blue-300 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800 dark:focus:ring-blue-600"/>
+			</div>
+			<div class="ml-3 text-sm">
+				<label for="terms" class="font-light text-gray-500 dark:text-gray-300">I accept the <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="#">Terms and Conditions</a></label>
+			</div>
+		</div>
+		<button type="submit" class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Create an account</button>
+		<p class="text-sm font-light text-gray-500 dark:text-gray-400">
+			Already have an account? <a href="/login" class="font-medium text-blue-600 hover:underline dark:text-blue-500">Login here</a>
+		</p>
+	</form>
+}

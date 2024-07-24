@@ -1,0 +1,21 @@
+package views
+
+import "github.com/google/uuid"
+
+type HomeVM struct {
+	CommonVM
+}
+
+func NewHomeVM(userID uuid.UUID, navItems []NavItem) HomeVM {
+	return HomeVM{
+		CommonVM{Title: "Homepage", UserID: userID, NavItems: navItems},
+	}
+}
+
+templ Home(vm HomeVM) {
+	@Layout(vm.Title, vm.UserID, vm.NavItems) {
+		<p>
+			Hello World!
+		</p>
+	}
+}

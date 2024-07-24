@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/internal/models"
 )
@@ -53,4 +54,8 @@ func disableCacheInDevMode(next http.Handler) http.Handler {
 		w.Header().Set("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func render(w http.ResponseWriter, r *http.Request, c templ.Component) {
+	c.Render(r.Context(), w)
 }
