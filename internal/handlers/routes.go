@@ -30,9 +30,10 @@ func AddRoutes(
 	// Public pages
 	r.Get("/login", loginPageHandler(sm, rds, as))
 	r.Post("/login", loginPageHandler(sm, rds, as))
+	r.Post("/logout", logoutHandler(sm))
 	r.Get("/register", registerPageHandler(sm, rds, us))
 	r.Post("/register", registerPageHandler(sm, rds, us))
-	r.Get("/", homeHandler(rds))
+	r.Get("/", homeHandler(sm, rds))
 
 	// Private pages
 	r.Get("/recipes/add", addRecipePageHandler(sm, rds))

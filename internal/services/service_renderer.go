@@ -17,8 +17,9 @@ var privateNavItems = []views.NavItem{
 		URL:  "/recipes/add",
 	},
 	{
-		Name: "Logout",
-		URL:  "#",
+		Name:          "Logout",
+		URL:           "/logout",
+		IsPostRequest: true,
 	},
 }
 
