@@ -12,12 +12,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
+func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			lr, err := decodeFormValidate[models.LoginRequest](r)
 			if err != nil {
-				vm := views.NewLoginVM(navItems, map[string]any{"email-password": true})
+				vm := views.NewLoginVM(rds.GetNavItems(false), map[string]any{"email-password": true})
 				render(w, r, views.LoginPage(vm))
 				return
 			}
@@ -25,7 +25,7 @@ func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 			user, err := as.Login(r.Context(), lr)
 			if err != nil {
 				if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-					vm := views.NewLoginVM(navItems, map[string]any{"email-password": true})
+					vm := views.NewLoginVM(rds.GetNavItems(false), map[string]any{"email-password": true})
 					render(w, r, views.LoginPage(vm))
 					return
 				}
@@ -37,7 +37,7 @@ func loginPageHandler(sm *scs.SessionManager, as AuthService) http.HandlerFunc {
 			http.Redirect(w, r, fmt.Sprintf("http://%s/", r.Host), http.StatusSeeOther)
 			return
 		}
-		vm := views.NewLoginVM(navItems, nil)
+		vm := views.NewLoginVM(rds.GetNavItems(false), nil)
 		render(w, r, views.LoginPage(vm))
 	}
 }

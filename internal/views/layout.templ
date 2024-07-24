@@ -1,8 +1,6 @@
 package views
 
-import "github.com/google/uuid"
-
-templ Layout(title string, userID uuid.UUID, navItems []NavItem) {
+templ Layout(title string, navItems []NavItem) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -12,7 +10,7 @@ templ Layout(title string, userID uuid.UUID, navItems []NavItem) {
 			<link href="assets/css/styles.css" rel="stylesheet"/>
 			<script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
 		</head>
-		@navbar(userID, navItems)
+		@navbar(navItems)
 		<body>
 			<main class="bg-gray-50 py-8 sm:px-4">
 				{ children... }

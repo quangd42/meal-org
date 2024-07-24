@@ -8,11 +8,7 @@ import (
 	"github.com/quangd42/meal-planner/internal/views"
 )
 
-type RendererService interface {
-	GetNavItems(isLoggedIn bool) []views.NavItem
-}
-
-func homeHandler(sm *scs.SessionManager, rds RendererService) http.HandlerFunc {
+func addRecipePageHandler(sm *scs.SessionManager, rds RendererService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := sm.Get(r.Context(), "userID").(uuid.UUID)
 		if !ok || userID == uuid.Nil {

@@ -13,9 +13,9 @@ func NewHomeVM(userID uuid.UUID, navItems []NavItem) HomeVM {
 }
 
 templ Home(vm HomeVM) {
-	@Layout(vm.Title, vm.UserID, vm.NavItems) {
-		<p>
+	@Layout(vm.Title, vm.NavItems) {
+		<h1>
 			Hello World!
-		</p>
+		</h1>
 	}
 }

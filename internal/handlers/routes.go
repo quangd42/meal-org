@@ -12,6 +12,7 @@ import (
 func AddRoutes(
 	r *chi.Mux,
 	sm *scs.SessionManager,
+	rds RendererService,
 	us UserService,
 	as AuthService,
 	rs RecipeService,
@@ -27,14 +28,14 @@ func AddRoutes(
 	r.Handle("/assets/*", http.StripPrefix("/assets", fs))
 
 	// Public pages
-	r.Get("/login", loginPageHandler(sm, as))
-	r.Post("/login", loginPageHandler(sm, as))
-	r.Get("/register", registerPageHandler(sm, us))
-	r.Post("/register", registerPageHandler(sm, us))
+	r.Get("/login", loginPageHandler(sm, rds, as))
+	r.Post("/login", loginPageHandler(sm, rds, as))
+	r.Get("/register", registerPageHandler(sm, rds, us))
+	r.Post("/register", registerPageHandler(sm, rds, us))
 
 	// Private pages
-	r.Get("/", homeHandler(sm))
-	r.Get("/recipes", homeHandler(sm))
+	r.Get("/", homeHandler(sm, rds))
+	r.Get("/recipes", homeHandler(sm, rds))
 
 	// API router
 	r.Route("/v1", func(r chi.Router) {

@@ -18,7 +18,7 @@ func NewLoginVM(navItems []NavItem, errs map[string]any) LoginVM {
 }
 
 templ LoginPage(vm LoginVM) {
-	@Layout(vm.Title, vm.UserID, vm.NavItems) {
+	@Layout(vm.Title, vm.NavItems) {
 		<h1 class="mb-10 text-center">Login</h1>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 			<section class="col-span-1 px-4 md:col-span-1 md:col-start-2 md:col-end-2">

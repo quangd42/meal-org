@@ -13,7 +13,7 @@ import (
 	"github.com/quangd42/meal-planner/internal/views"
 )
 
-func registerPageHandler(sm *scs.SessionManager, us UserService) http.HandlerFunc {
+func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			errs := make(map[string]any)
@@ -42,7 +42,7 @@ func registerPageHandler(sm *scs.SessionManager, us UserService) http.HandlerFun
 			http.Redirect(w, r, fmt.Sprintf("http://%s/", r.Host), http.StatusSeeOther)
 			return
 		}
-		vm := views.NewRegisterVM(navItems, nil)
+		vm := views.NewRegisterVM(rds.GetNavItems(false), nil)
 		render(w, r, views.RegisterPage(vm))
 	}
 }
