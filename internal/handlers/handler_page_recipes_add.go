@@ -16,7 +16,7 @@ func addRecipePageHandler(sm *scs.SessionManager, rds RendererService) http.Hand
 			return
 		}
 
-		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
-		views.Home(homeVM).Render(r.Context(), w)
+		homeVM := views.NewHomeVM(rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
+		render(w, r, views.Home(homeVM))
 	}
 }

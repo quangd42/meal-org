@@ -1,14 +1,12 @@
 package views
 
-import "github.com/google/uuid"
-
 type HomeVM struct {
 	CommonVM
 }
 
-func NewHomeVM(userID uuid.UUID, navItems []NavItem) HomeVM {
+func NewHomeVM(navItems []NavItem) HomeVM {
 	return HomeVM{
-		CommonVM{Title: "Homepage", UserID: userID, NavItems: navItems},
+		CommonVM{Title: "Homepage", NavItems: navItems},
 	}
 }
 
@@ -17,5 +15,8 @@ templ Home(vm HomeVM) {
 		<h1>
 			Hello World!
 		</h1>
+		<p>
+			Please <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="/login">sign in</a> to start organizing your meals!
+		</p>
 	}
 }

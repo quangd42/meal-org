@@ -14,13 +14,9 @@ type RendererService interface {
 
 func homeHandler(sm *scs.SessionManager, rds RendererService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := getUserIDFromCtx(r.Context(), sm)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
+		userID, _ := getUserIDFromCtx(r.Context(), sm)
 
-		homeVM := views.NewHomeVM(userID, rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
+		homeVM := views.NewHomeVM(rds.GetNavItems(userID != uuid.Nil, r.URL.Path))
 		render(w, r, views.Home(homeVM))
 	}
 }

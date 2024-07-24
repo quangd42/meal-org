@@ -32,10 +32,10 @@ func AddRoutes(
 	r.Post("/login", loginPageHandler(sm, rds, as))
 	r.Get("/register", registerPageHandler(sm, rds, us))
 	r.Post("/register", registerPageHandler(sm, rds, us))
+	r.Get("/", homeHandler(rds))
 
 	// Private pages
-	r.Get("/", homeHandler(sm, rds))
-	r.Get("/recipes", homeHandler(sm, rds))
+	r.Get("/recipes/add", addRecipePageHandler(sm, rds))
 
 	// API router
 	r.Route("/v1", func(r chi.Router) {
