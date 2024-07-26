@@ -18,6 +18,7 @@ INSERT INTO recipes (
   created_at,
   updated_at,
   name,
+  description,
   external_url,
   user_id,
   servings,
@@ -25,8 +26,8 @@ INSERT INTO recipes (
   cook_time_in_minutes,
   notes
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, created_at, updated_at, external_url, name, description, user_id, servings, yield, cook_time_in_minutes, notes
 `
 
 type CreateRecipeParams struct {
@@ -34,6 +35,7 @@ type CreateRecipeParams struct {
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 	Name              string    `json:"name"`
+	Description       *string   `json:"description"`
 	ExternalUrl       *string   `json:"external_url"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int32     `json:"servings"`
@@ -48,6 +50,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Name,
+		arg.Description,
 		arg.ExternalUrl,
 		arg.UserID,
 		arg.Servings,
@@ -62,6 +65,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
+		&i.Description,
 		&i.UserID,
 		&i.Servings,
 		&i.Yield,
@@ -82,7 +86,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id uuid.UUID) error {
 }
 
 const getRecipeByID = `-- name: GetRecipeByID :one
-SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes FROM recipes
+SELECT id, created_at, updated_at, external_url, name, description, user_id, servings, yield, cook_time_in_minutes, notes FROM recipes
 WHERE id = $1
 `
 
@@ -95,6 +99,7 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
+		&i.Description,
 		&i.UserID,
 		&i.Servings,
 		&i.Yield,
@@ -105,7 +110,7 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 }
 
 const listRecipesByUserID = `-- name: ListRecipesByUserID :many
-SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+SELECT id, created_at, updated_at, external_url, name, description, user_id, servings, yield, cook_time_in_minutes, notes
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -135,6 +140,7 @@ func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUser
 			&i.UpdatedAt,
 			&i.ExternalUrl,
 			&i.Name,
+			&i.Description,
 			&i.UserID,
 			&i.Servings,
 			&i.Yield,
@@ -156,13 +162,14 @@ UPDATE recipes
 SET
   name = $2,
   external_url = $3,
+  description = $9,
   updated_at = $4,
   servings = $5,
   yield = $6,
   cook_time_in_minutes = $7,
   notes = $8
 WHERE id = $1
-RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+RETURNING id, created_at, updated_at, external_url, name, description, user_id, servings, yield, cook_time_in_minutes, notes
 `
 
 type UpdateRecipeByIDParams struct {
@@ -174,6 +181,7 @@ type UpdateRecipeByIDParams struct {
 	Yield             *string   `json:"yield"`
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
+	Description       *string   `json:"description"`
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {
@@ -186,6 +194,7 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		arg.Yield,
 		arg.CookTimeInMinutes,
 		arg.Notes,
+		arg.Description,
 	)
 	var i Recipe
 	err := row.Scan(
@@ -194,6 +203,7 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
+		&i.Description,
 		&i.UserID,
 		&i.Servings,
 		&i.Yield,

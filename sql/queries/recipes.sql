@@ -4,6 +4,7 @@ INSERT INTO recipes (
   created_at,
   updated_at,
   name,
+  description,
   external_url,
   user_id,
   servings,
@@ -11,7 +12,7 @@ INSERT INTO recipes (
   cook_time_in_minutes,
   notes
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 RETURNING *;
 
 -- name: GetRecipeByID :one
@@ -23,6 +24,7 @@ UPDATE recipes
 SET
   name = $2,
   external_url = $3,
+  description = $9,
   updated_at = $4,
   servings = $5,
   yield = $6,

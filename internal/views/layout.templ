@@ -7,8 +7,9 @@ templ Layout(title string, navItems []NavItem) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ title }</title>
-			<link href="assets/css/styles.css" rel="stylesheet"/>
+			<link href="/assets/css/styles.css" rel="stylesheet"/>
 			<script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
+			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 		</head>
 		@navbar(navItems)
 		<body>

@@ -31,13 +31,10 @@ Content-Type: text/plain; charset=utf-8
 [Options]
 variable: password2=verySafePassword101
 {
-  "name": "julia2",
   "email":"{{email}}",
   "password": "{{password2}}"
 }
 HTTP 200
-[Asserts]
-jsonpath "$.name" == "julia2"
 
 # Revoke refresh token
 POST {{host}}/v1/auth/revoke

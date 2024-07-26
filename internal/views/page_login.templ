@@ -36,7 +36,7 @@ templ LoginForm(errs map[string]any) {
 			<label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Email</label>
 			<input type="email" name="email" id="email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="name@example.com" required/>
 			if _, ok := errs["email-password"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500"><span class="font-medium">Oops!</span> Invalid email and/or password</p>
+				<p class="mt-2 text-sm font-medium text-red-600 dark:text-red-500">Invalid email and/or password</p>
 			}
 		</div>
 		<div>

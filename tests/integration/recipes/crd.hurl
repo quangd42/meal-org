@@ -76,6 +76,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -120,6 +121,7 @@ ingre_in_re_id2: jsonpath "$.ingredients[2].id"
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -151,6 +153,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "cook_time_in_minutes": 60,
   "yield": "a whole pan of goodness",
@@ -192,6 +195,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "cook_time_in_minutes": 60,
   "yield": "a whole pan of goodness",
@@ -237,6 +241,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "yield": "a whole pan of goodness",
   "notes": "enjoy!",
   "cuisines": ["{{cuisine_id1}}", "{{cuisine_id2}}"],
@@ -276,6 +281,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "cook_time_in_minutes": 60,
   "yield": "a whole pan of goodness",
@@ -315,6 +321,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -347,6 +354,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -381,6 +389,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -427,6 +436,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "General Tso's Chicken",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -461,6 +471,7 @@ HTTP 201
 [Asserts]
 jsonpath "$.name" == "General Tso's Chicken"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20

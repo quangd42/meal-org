@@ -38,8 +38,9 @@ func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserSer
 				return
 			}
 
-			sm.Put(r.Context(), "userID", user.ID.String())
-			http.Redirect(w, r, fmt.Sprintf("http://%s/", r.Host), http.StatusSeeOther)
+			sm.Put(r.Context(), "userID", user.ID)
+			w.WriteHeader(http.StatusNoContent)
+			w.Header().Set("HX-Redirect", fmt.Sprintf("http://%s/", r.Host))
 			return
 		}
 		vm := views.NewRegisterVM(rds.GetNavItems(false, r.URL.Path), nil)

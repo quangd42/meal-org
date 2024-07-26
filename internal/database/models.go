@@ -39,6 +39,7 @@ type Recipe struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	ExternalUrl       *string   `json:"external_url"`
 	Name              string    `json:"name"`
+	Description       *string   `json:"description"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int32     `json:"servings"`
 	Yield             *string   `json:"yield"`

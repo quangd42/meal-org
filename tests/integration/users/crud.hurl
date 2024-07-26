@@ -34,13 +34,10 @@ Content-Type: text/plain; charset=utf-8
 [Options]
 variable: password2=verySafePassword101
 {
-  "name": "julia2",
   "email":"{{email}}",
   "password": "{{password2}}"
 }
 HTTP 200
-[Asserts]
-jsonpath "$.name" == "julia2"
 
 # Update user - duplicate email: expect nothing to happen, email is not considered
 PUT {{host}}/v1/users
@@ -54,8 +51,6 @@ variable: password2=verySafePassword101
   "password": "{{password2}}"
 }
 HTTP 200
-[Asserts]
-jsonpath "$.name" == "julia2"
 
 # Update user - wrong email format: expect nothing to happen, email is not considered
 PUT {{host}}/v1/users
@@ -69,8 +64,6 @@ variable: password2=verySafePassword101
   "password": "{{password2}}"
 }
 HTTP 200
-[Asserts]
-jsonpath "$.name" == "julia2"
 
 # Login post update
 POST {{host}}/v1/auth/login
