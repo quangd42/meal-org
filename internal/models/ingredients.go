@@ -8,8 +8,7 @@ import (
 )
 
 type IngredientRequest struct {
-	Name     string     `json:"name" validate:"required"`
-	ParentID *uuid.UUID `json:"parent_id,omitempty"`
+	Name string `json:"name" validate:"required"`
 }
 
 func (ingR IngredientRequest) Validate(ctx context.Context) error {
@@ -17,9 +16,8 @@ func (ingR IngredientRequest) Validate(ctx context.Context) error {
 }
 
 type Ingredient struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id,omitempty"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
 }

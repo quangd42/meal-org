@@ -19,11 +19,10 @@ type Cuisine struct {
 }
 
 type Ingredient struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
 }
 
 type Instruction struct {
@@ -55,13 +54,13 @@ type RecipeCuisine struct {
 }
 
 type RecipeIngredient struct {
+	Index        int32     `json:"index"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	Amount       string    `json:"amount"`
 	PrepNote     *string   `json:"prep_note"`
 	IngredientID uuid.UUID `json:"ingredient_id"`
 	RecipeID     uuid.UUID `json:"recipe_id"`
-	Index        int32     `json:"index"`
 }
 
 type Token struct {
