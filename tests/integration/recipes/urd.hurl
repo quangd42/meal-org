@@ -25,19 +25,17 @@ HTTP 201
 ingre_id1: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Beef"
-jsonpath "$.parent_id" not exists
 
 # Create Ingredient 2
 POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
-{"name":"Ground Beef", "parent_id":"{{ingre_id1}}"}
+{"name":"Ground Beef"}
 HTTP 201
 [Captures]
 ingre_id2: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Ground Beef"
-jsonpath "$.parent_id" == "{{ingre_id1}}"
 
 # Create Ingredient 3
 POST {{host}}/v1/ingredients
@@ -49,7 +47,6 @@ HTTP 201
 ingre_id3: jsonpath "$['id']"
 [Asserts]
 jsonpath "$.name" == "Asparagus"
-jsonpath "$.parent_id" not exists
 
 # List Cuisines
 GET {{host}}/v1/cuisines
@@ -121,7 +118,6 @@ jsonpath "$.notes" == "enjoy!"
 jsonpath "$.ingredients" count == 3
 jsonpath "$.ingredients[0].amount" == "1lb"
 jsonpath "$.ingredients[0].prep_note" == "seasoned with salt and pepper"
-jsonpath "$.ingredients[0].parent_id" not exists
 jsonpath "$.ingredients[0].index" == 1
 jsonpath "$.ingredients[1].amount" == "2lb"
 jsonpath "$.ingredients[1].prep_note" == "cut to bite size"

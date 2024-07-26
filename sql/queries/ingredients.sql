@@ -1,6 +1,6 @@
 -- name: CreateIngredient :one
-INSERT INTO ingredients (id, created_at, updated_at, name, parent_id)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO ingredients (id, created_at, updated_at, name)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 
 -- name: GetIngredientByID :one
@@ -12,8 +12,7 @@ WHERE id = $1;
 UPDATE ingredients
 SET
   name = $2,
-  parent_id = $3,
-  updated_at = $4
+  updated_at = $3
 WHERE id = $1
 RETURNING *;
 

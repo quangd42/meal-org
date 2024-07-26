@@ -13,17 +13,16 @@ import (
 )
 
 const createIngredient = `-- name: CreateIngredient :one
-INSERT INTO ingredients (id, created_at, updated_at, name, parent_id)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, created_at, updated_at, name, parent_id
+INSERT INTO ingredients (id, created_at, updated_at, name)
+VALUES ($1, $2, $3, $4)
+RETURNING id, created_at, updated_at, name
 `
 
 type CreateIngredientParams struct {
-	ID        uuid.UUID  `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Name      string    `json:"name"`
 }
 
 func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientParams) (Ingredient, error) {
@@ -32,7 +31,6 @@ func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientPara
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Name,
-		arg.ParentID,
 	)
 	var i Ingredient
 	err := row.Scan(
@@ -40,7 +38,6 @@ func (q *Queries) CreateIngredient(ctx context.Context, arg CreateIngredientPara
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Name,
-		&i.ParentID,
 	)
 	return i, err
 }
@@ -56,7 +53,7 @@ func (q *Queries) DeleteIngredient(ctx context.Context, id uuid.UUID) error {
 }
 
 const getIngredientByID = `-- name: GetIngredientByID :one
-SELECT id, created_at, updated_at, name, parent_id
+SELECT id, created_at, updated_at, name
 FROM ingredients
 WHERE id = $1
 `
@@ -69,13 +66,12 @@ func (q *Queries) GetIngredientByID(ctx context.Context, id uuid.UUID) (Ingredie
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Name,
-		&i.ParentID,
 	)
 	return i, err
 }
 
 const listIngredients = `-- name: ListIngredients :many
-SELECT id, created_at, updated_at, name, parent_id
+SELECT id, created_at, updated_at, name
 FROM ingredients
 ORDER BY name
 `
@@ -94,7 +90,6 @@ func (q *Queries) ListIngredients(ctx context.Context) ([]Ingredient, error) {
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Name,
-			&i.ParentID,
 		); err != nil {
 			return nil, err
 		}
@@ -110,33 +105,25 @@ const updateIngredientByID = `-- name: UpdateIngredientByID :one
 UPDATE ingredients
 SET
   name = $2,
-  parent_id = $3,
-  updated_at = $4
+  updated_at = $3
 WHERE id = $1
-RETURNING id, created_at, updated_at, name, parent_id
+RETURNING id, created_at, updated_at, name
 `
 
 type UpdateIngredientByIDParams struct {
-	ID        uuid.UUID  `json:"id"`
-	Name      string     `json:"name"`
-	ParentID  *uuid.UUID `json:"parent_id"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) UpdateIngredientByID(ctx context.Context, arg UpdateIngredientByIDParams) (Ingredient, error) {
-	row := q.db.QueryRow(ctx, updateIngredientByID,
-		arg.ID,
-		arg.Name,
-		arg.ParentID,
-		arg.UpdatedAt,
-	)
+	row := q.db.QueryRow(ctx, updateIngredientByID, arg.ID, arg.Name, arg.UpdatedAt)
 	var i Ingredient
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Name,
-		&i.ParentID,
 	)
 	return i, err
 }
