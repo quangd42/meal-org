@@ -12,3 +12,51 @@ Current goal - A web app that helps with meal planning with the following featur
 - Groceries list: groceries for the week will be generated based on the ingredients required in the meal plan.
 
 Built with Go, Templ, HTMX, Tailwind CSS.
+
+## Installation
+
+### Prerequisites
+
+- [Go 1.22 and above](https://go.dev/doc/install)
+- [Postgresql](https://www.postgresql.org/download/)
+- [Goose](https://github.com/pressly/goose)
+- [sqlc](https://github.com/sqlc-dev/sqlc)
+
+### Setup
+
+Clone and cd into the project to install dependencies.
+
+```sh
+git clone https://github.com/quangd42/meal-planner.git
+cd meal-planner
+go mod tidy
+```
+
+Create a .env file. Here's an example:
+
+```sh
+PORT=8080
+DATABASE_URL=postgres://[db-user]:@localhost:5432/[db-name]?sslmode=disable
+JWT_SECRET=IpRoF6GpEewWJcHr8QqI5g4nj6RkKvaVYMNMJFa6svOgDbLWwyDg1jDictjfBIzY
+```
+
+You can generate JWT_SECRET with a command like this:
+
+```sh
+openssl rand -base64 64
+```
+
+### Local development
+
+To start the server locally:
+
+```sh
+# setup the database
+make db/reset
+# generate the db connection code
+make sqlc
+# build and run the binary
+make run
+```
+
+`make help` for more details.

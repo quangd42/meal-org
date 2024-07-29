@@ -49,16 +49,16 @@ sqlc:
 	sqlc generate
 
 ## db/drop: drop local db
-.PHONY: sqlc
+.PHONY: db/drop
 db/drop:
 	psql ${PG_DATABASE_URL} -c "DROP DATABASE IF EXISTS meal_planner;"
 
 ## db/create: create local db
-.PHONY: sqlc
+.PHONY: db/create
 db/create:
 	psql ${PG_DATABASE_URL} -c "CREATE DATABASE meal_planner;"
 
-## db/reset
+## db/reset: reset the local db and setup fresh
 .PHONY: db/reset
 db/reset: db/drop db/create
 	goose -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" up
@@ -77,13 +77,11 @@ test:
 ## build: build the application locally
 .PHONY: build
 build:
-	# Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
 	go build -o=/tmp/bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
 ## build/prod: build prod binary
 .PHONY: build/prod
 build/prod:
-	# Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
 ## run: run the application locally
