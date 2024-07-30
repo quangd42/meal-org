@@ -78,6 +78,9 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Generate Go files from templ
+        run: go run github.com/a-h/templ/cmd/templ@latest generate
+
       - name: Run formatter
         run: test -z $(go fmt ./...)
 
@@ -99,6 +102,9 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+
+      - name: Generate Go files from templ
+        run: go run github.com/a-h/templ/cmd/templ@latest generate
 
       - name: Govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
