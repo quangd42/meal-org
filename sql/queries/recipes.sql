@@ -42,6 +42,24 @@ LIMIT
   $2
   OFFSET $3;
 
+-- name: ListRecipesWithCuisinesByUserID :many
+SELECT
+  r.*,
+  string_agg(c.name, ', ') AS cuisines
+FROM
+  recipes r
+LEFT JOIN
+  recipe_cuisine rc ON r.id = rc.recipe_id
+LEFT JOIN
+  cuisines c ON rc.cuisine_id = c.id
+WHERE
+  r.user_id = $1
+GROUP BY
+  r.id
+LIMIT
+  $2
+  OFFSET $3;
+
 -- name: DeleteRecipe :exec
 DELETE FROM recipes
 WHERE id = $1;

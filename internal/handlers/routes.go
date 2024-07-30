@@ -36,8 +36,16 @@ func AddRoutes(
 	r.Get("/", homeHandler(sm, rds))
 
 	// Private pages
+	// Add
 	r.Get("/recipes/add", addRecipePageHandler(sm, rds, rs))
 	r.Post("/recipes", addRecipePageHandler(sm, rds, rs))
+	// List
+	r.Get("/recipes", listRecipesPageHandler(sm, rds, rs))
+	// Edit
+	r.Post("/recipes/{recipeID}", editRecipePageHandler(sm, rds, rs))
+	r.Get("/recipes/{recipeID}", editRecipePageHandler(sm, rds, rs))
+	// Delete
+	r.Delete("/recipes/{recipeID}", deleteRecipePageHandler(sm, rs))
 
 	// API router
 	r.Route("/v1", func(r chi.Router) {

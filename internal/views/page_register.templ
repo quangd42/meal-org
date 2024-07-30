@@ -1,12 +1,15 @@
 package views
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
 
 type RegisterVM struct {
 	CommonVM
 }
 
-func NewRegisterVM(navItems []NavItem, errs map[string]any) RegisterVM {
+func NewRegisterVM(navItems []models.NavItem, errs map[string]any) RegisterVM {
 	return RegisterVM{
 		CommonVM: CommonVM{Title: "Sign Up", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
 	}

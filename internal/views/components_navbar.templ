@@ -1,21 +1,15 @@
 package views
 
-type NavItem struct {
-	Name          string
-	URL           string
-	IsButton      bool
-	IsCurrent     bool
-	IsPostRequest bool
-}
+import "github.com/quangd42/meal-planner/internal/models"
 
-func isCurrentMap(i NavItem) map[string]bool {
+func isCurrentMap(i models.NavItem) map[string]bool {
 	return map[string]bool{
 		"text-gray-700": !i.IsCurrent,
 		"text-blue-700": i.IsCurrent,
 	}
 }
 
-templ navbar(items []NavItem) {
+templ navbar(items []models.NavItem) {
 	<header class="antialiased">
 		<nav class="rounded border-b border-gray-200 bg-white px-2 py-2.5 shadow-sm dark:bg-gray-900 sm:px-4">
 			<div class="container mx-auto flex flex-wrap items-center justify-between">

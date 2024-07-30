@@ -40,11 +40,11 @@ type Recipe struct {
 	ExternalUrl       *string   `json:"external_url"`
 	Name              string    `json:"name"`
 	Description       *string   `json:"description"`
-	UserID            uuid.UUID `json:"user_id"`
 	Servings          int32     `json:"servings"`
 	Yield             *string   `json:"yield"`
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
+	UserID            uuid.UUID `json:"user_id"`
 }
 
 type RecipeCuisine struct {

@@ -1,12 +1,15 @@
 package views
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
 
 type LoginVM struct {
 	CommonVM
 }
 
-func NewLoginVM(navItems []NavItem, errs map[string]any) LoginVM {
+func NewLoginVM(navItems []models.NavItem, errs map[string]any) LoginVM {
 	return LoginVM{
 		CommonVM: CommonVM{
 			Title:    "Login",

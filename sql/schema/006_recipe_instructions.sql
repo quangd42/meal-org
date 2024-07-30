@@ -1,11 +1,4 @@
 -- +goose Up
-ALTER TABLE recipes
-ADD COLUMN servings INT NOT NULL DEFAULT 0,
-ADD COLUMN yield TEXT,
-ADD COLUMN cook_time_in_minutes INT NOT NULL DEFAULT 0,
-ADD COLUMN notes TEXT,
-ALTER COLUMN external_url DROP NOT NULL;
-
 CREATE TABLE instructions (
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
@@ -16,11 +9,4 @@ CREATE TABLE instructions (
 );
 
 -- +goose Down
-ALTER TABLE recipes
-DROP COLUMN servings,
-DROP COLUMN yield,
-DROP COLUMN cook_time_in_minutes,
-DROP COLUMN notes,
-ALTER COLUMN external_url SET NOT NULL;
-
 DROP TABLE instructions;

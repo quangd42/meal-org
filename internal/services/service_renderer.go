@@ -2,35 +2,58 @@ package services
 
 import (
 	"github.com/a-h/templ"
-	"github.com/quangd42/meal-planner/internal/views"
+	"github.com/quangd42/meal-planner/internal/models"
 )
 
 type Renderer struct{}
 
-var privateNavItems = []views.NavItem{
-	{
+var nav = models.NavItem{
+	Link: models.Link{
 		Name: "Home",
 		URL:  "/",
 	},
+}
+
+var privateNavItems = []models.NavItem{
 	{
-		Name: "Add Recipe",
-		URL:  "/recipes/add",
+		Link: models.Link{
+			Name: "Home",
+			URL:  "/",
+		},
 	},
 	{
-		Name:          "Logout",
-		URL:           "/logout",
+		Link: models.Link{
+			Name: "All Recipes",
+			URL:  "/recipes",
+		},
+	},
+	{
+		Link: models.Link{
+			Name: "Add Recipe",
+			URL:  "/recipes/add",
+		},
+	},
+	{
+		Link: models.Link{
+			Name: "Logout",
+			URL:  "/logout",
+		},
 		IsPostRequest: true,
 	},
 }
 
-var publicNavItems = []views.NavItem{
+var publicNavItems = []models.NavItem{
 	{
-		Name: "Login",
-		URL:  "/login",
+		Link: models.Link{
+			Name: "Login",
+			URL:  "/login",
+		},
 	},
 	{
-		Name: "Register",
-		URL:  "/register",
+		Link: models.Link{
+			Name: "Register",
+			URL:  "/register",
+		},
 	},
 }
 
@@ -38,9 +61,9 @@ func NewRendererService() Renderer {
 	return Renderer{}
 }
 
-func (rs Renderer) GetNavItems(isLoggedIn bool, url string) []views.NavItem {
-	var srcItems []views.NavItem
-	var items []views.NavItem
+func (rs Renderer) GetNavItems(isLoggedIn bool, url string) []models.NavItem {
+	var srcItems []models.NavItem
+	var items []models.NavItem
 
 	if isLoggedIn {
 		srcItems = privateNavItems

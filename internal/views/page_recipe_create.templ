@@ -1,12 +1,15 @@
 package views
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
 
 type AddRecipeVM struct {
 	CommonVM
 }
 
-func NewAddRecipeVM(userID uuid.UUID, navItems []NavItem, errs map[string]any) AddRecipeVM {
+func NewAddRecipeVM(userID uuid.UUID, navItems []models.NavItem, errs map[string]any) AddRecipeVM {
 	return AddRecipeVM{
 		CommonVM{
 			Title:    "Submit a Recipe",

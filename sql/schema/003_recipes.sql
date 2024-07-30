@@ -6,6 +6,10 @@ CREATE TABLE recipes (
   external_url TEXT,
   name TEXT NOT NULL,
   description TEXT,
+  servings INT NOT NULL DEFAULT 0,
+  yield TEXT,
+  cook_time_in_minutes INT NOT NULL DEFAULT 0,
+  notes TEXT,
   user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE
 );
 

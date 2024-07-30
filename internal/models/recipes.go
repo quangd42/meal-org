@@ -66,6 +66,7 @@ type RecipeInList struct {
 	Name              string    `json:"name"`
 	ExternalURL       *string   `json:"external_url"`
 	Description       *string   `json:"description"`
+	Cuisines          string    `json:"cuisines"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int       `json:"servings"`
 	Yield             *string   `json:"yield"`

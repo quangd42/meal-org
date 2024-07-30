@@ -206,6 +206,36 @@ func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUI
 	return recipes, nil
 }
 
+func (rs RecipeService) ListRecipesWithCuisinesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error) {
+	var recipes []models.RecipeInList
+	dbRecipes, err := rs.store.Q.ListRecipesWithCuisinesByUserID(ctx, database.ListRecipesWithCuisinesByUserIDParams{
+		UserID: userID,
+		Limit:  pgn.Limit,
+		Offset: pgn.Offset,
+	})
+	if err != nil {
+		return recipes, err
+	}
+
+	for _, r := range dbRecipes {
+		recipes = append(recipes, models.RecipeInList{
+			ID:                r.ID,
+			CreatedAt:         r.CreatedAt,
+			UpdatedAt:         r.UpdatedAt,
+			Name:              r.Name,
+			ExternalURL:       r.ExternalUrl,
+			Description:       r.Description,
+			UserID:            r.UserID,
+			Servings:          int(r.Servings),
+			Yield:             r.Yield,
+			CookTimeInMinutes: int(r.CookTimeInMinutes),
+			Cuisines:          string(r.Cuisines),
+		})
+	}
+
+	return recipes, nil
+}
+
 func (rs RecipeService) GetRecipeByID(ctx context.Context, recipeID uuid.UUID) (models.Recipe, error) {
 	var r models.Recipe
 
