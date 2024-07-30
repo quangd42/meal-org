@@ -44,7 +44,11 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 
 func logoutHandler(sm *scs.SessionManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sm.Destroy(r.Context())
+		err := sm.Destroy(r.Context())
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("HX-Redirect", fmt.Sprintf("http://%s/", r.Host))
 	}
 }

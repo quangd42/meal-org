@@ -61,7 +61,7 @@ func disableCacheInDevMode(next http.Handler) http.Handler {
 }
 
 func render(w http.ResponseWriter, r *http.Request, c templ.Component) {
-	c.Render(r.Context(), w)
+	c.Render(r.Context(), w) // #nosec G104
 }
 
 func getUserIDFromCtx(ctx context.Context, sm *scs.SessionManager) (uuid.UUID, error) {
