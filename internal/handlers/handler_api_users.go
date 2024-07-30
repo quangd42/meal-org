@@ -21,7 +21,7 @@ type UserService interface {
 
 func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ur, err := decodeValidate[models.CreateUserRequest](r)
+		ur, err := decodeJSONValidate[models.CreateUserRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return
@@ -33,7 +33,7 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 				respondInternalServerError(w)
 				return
 			}
-			respondDBConstraintsError(w, err, "username")
+			respondDBConstraintsError(w, err, "email")
 			return
 		}
 
@@ -61,7 +61,7 @@ func updateUserHandler(us UserService) http.HandlerFunc {
 			return
 		}
 
-		ur, err := decodeValidate[models.UpdateUserRequest](r)
+		ur, err := decodeJSONValidate[models.UpdateUserRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return

@@ -20,7 +20,7 @@ type CuisineService interface {
 
 func createCuisineHandler(cs CuisineService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cr, err := decodeValidate[models.CuisineRequest](r)
+		cr, err := decodeJSONValidate[models.CuisineRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return
@@ -49,7 +49,7 @@ func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
 			return
 		}
 
-		cr, err := decodeValidate[models.CuisineRequest](r)
+		cr, err := decodeJSONValidate[models.CuisineRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return

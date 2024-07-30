@@ -1,0 +1,80 @@
+package views
+
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
+
+type AddRecipeVM struct {
+	CommonVM
+}
+
+func NewAddRecipeVM(userID uuid.UUID, navItems []models.NavItem, errs map[string]any) AddRecipeVM {
+	return AddRecipeVM{
+		CommonVM{
+			Title:    "Submit a Recipe",
+			UserID:   userID,
+			NavItems: navItems,
+			Errors:   errs,
+		},
+	}
+}
+
+templ AddRecipePage(vm AddRecipeVM) {
+	@Layout(vm.Title, vm.NavItems) {
+		<h1 class="mb-5 text-center">Add a Recipe</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+			<section class="col-span-1 px-4 md:col-span-2 md:col-start-2 md:col-end-4">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					<p class="mb-6">
+						Uploading personal recipes is easy! Add yours to your favorites, share with friends, family!
+					</p>
+					@AddRecipeForm(vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}
+
+templ AddRecipeForm(errs map[string]any) {
+	<form hx-post="/recipes" hx-swap="outerHTML" class="space-y-4 md:space-y-6">
+		<div class="space-y-4 pb-4 md:space-y-6">
+			<hr/>
+			<div>
+				<label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Title</label>
+				<input type="text" name="name" id="name" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="Give your recipe a title" required/>
+			</div>
+			<div>
+				<label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description (Optional)</label>
+				<textarea type="text" name="description" id="description" placeholder="Share the story behind your recipe and what makes it special" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"></textarea>
+			</div>
+			<div>
+				<label for="external_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">External URL (Optional)</label>
+				<input type="text" name="external_url" id="external_url" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="Link to your recipe from a different source"/>
+			</div>
+		</div>
+		<div class="flex flex-row">
+			<button type="submit" class="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
+			<p id="error-msg" class="ml-2"></p>
+		</div>
+	</form>
+}
+
+templ RecipePostResponse(title string) {
+	<div class="space-y-4 pb-4 md:space-y-6">
+		<hr/>
+		<h2 class="text-xl font-semibold dark:text-white">
+			Recipe saved!
+		</h2>
+		<p class="mb-8">
+			Your recipe <strong><em>{ title }</em></strong> was saved successfully. What would you like to do next?
+		</p>
+		<a href="/recipes/add" class="mb-2 me-2 rounded-lg border border-blue-700 px-5 py-2.5 text-center text-sm font-medium text-blue-700 hover:bg-blue-800 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-500 dark:hover:text-white dark:focus:ring-blue-800">Add Another Recipe</a>
+		<a href="/recipes" class="inline-flex items-center rounded-lg text-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
+			See All Recipes
+			<svg class="ms-2 h-3.5 w-3.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"></path>
+			</svg>
+		</a>
+	</div>
+}

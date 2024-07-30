@@ -2,7 +2,7 @@
 # Create user
 POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
-{"name":"julia","username":"{{username}}","password":"{{password}}"}
+{"name":"julia","email":"{{email}}","password":"{{password}}"}
 HTTP 201
 [Captures]
 user_id: jsonpath "$['id']"
@@ -10,7 +10,7 @@ user_id: jsonpath "$['id']"
 # Login
 POST {{host}}/v1/auth/login
 Content-Type: application/json; charset=utf-8
-{"username":"{{username}}","password":"{{password}}"}
+{"email":"{{email}}","password":"{{password}}"}
 HTTP 200
 [Captures]
 token: jsonpath "$['token']"
@@ -67,6 +67,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -111,6 +112,7 @@ ingre_in_re_id2: jsonpath "$.ingredients[2].id"
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -142,6 +144,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -186,6 +189,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -218,6 +222,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "cook_time_in_minutes": 60,
   "yield": "a whole pan of goodness",
@@ -266,6 +271,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -298,6 +304,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -350,6 +357,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -381,6 +389,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json; charset=utf-8
 {
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -433,6 +442,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -465,6 +475,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -498,6 +509,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20
@@ -530,6 +542,7 @@ Content-Type: application/json; charset=utf-8
 {
   "name": "Beef and Broccoli Spaghetti back to 1",
   "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
   "servings": 4,
   "yield": "a whole pan of goodness",
   "cook_time_in_minutes": 20,
@@ -569,6 +582,7 @@ HTTP 200
 [Asserts]
 jsonpath "$.name" == "Beef and Broccoli Spaghetti"
 jsonpath "$.external_url" == "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929"
+jsonpath "$.description" == "You only need 10 minutes to prep these saucy noodles."
 jsonpath "$.servings" == 4
 jsonpath "$.yield" == "a whole pan of goodness"
 jsonpath "$.cook_time_in_minutes" == 20

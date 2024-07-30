@@ -38,6 +38,7 @@ func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg 
 		UpdatedAt:         time.Now().UTC(),
 		Name:              arg.Name,
 		ExternalUrl:       arg.ExternalURL,
+		Description:       arg.Description,
 		Servings:          int32(arg.Servings),
 		Yield:             arg.Yield,
 		CookTimeInMinutes: int32(arg.CookTimeInMinutes),
@@ -142,6 +143,7 @@ func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID u
 		UpdatedAt:         time.Now().UTC(),
 		Name:              arg.Name,
 		ExternalUrl:       arg.ExternalURL,
+		Description:       arg.Description,
 		Servings:          int32(arg.Servings),
 		Yield:             arg.Yield,
 		CookTimeInMinutes: int32(arg.CookTimeInMinutes),
@@ -193,10 +195,41 @@ func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUI
 			UpdatedAt:         r.UpdatedAt,
 			Name:              r.Name,
 			ExternalURL:       r.ExternalUrl,
+			Description:       r.Description,
 			UserID:            r.UserID,
 			Servings:          int(r.Servings),
 			Yield:             r.Yield,
 			CookTimeInMinutes: int(r.CookTimeInMinutes),
+		})
+	}
+
+	return recipes, nil
+}
+
+func (rs RecipeService) ListRecipesWithCuisinesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error) {
+	var recipes []models.RecipeInList
+	dbRecipes, err := rs.store.Q.ListRecipesWithCuisinesByUserID(ctx, database.ListRecipesWithCuisinesByUserIDParams{
+		UserID: userID,
+		Limit:  pgn.Limit,
+		Offset: pgn.Offset,
+	})
+	if err != nil {
+		return recipes, err
+	}
+
+	for _, r := range dbRecipes {
+		recipes = append(recipes, models.RecipeInList{
+			ID:                r.ID,
+			CreatedAt:         r.CreatedAt,
+			UpdatedAt:         r.UpdatedAt,
+			Name:              r.Name,
+			ExternalURL:       r.ExternalUrl,
+			Description:       r.Description,
+			UserID:            r.UserID,
+			Servings:          int(r.Servings),
+			Yield:             r.Yield,
+			CookTimeInMinutes: int(r.CookTimeInMinutes),
+			Cuisines:          string(r.Cuisines),
 		})
 	}
 
@@ -279,6 +312,7 @@ func assembleWholeRecipe(dr database.Recipe, dbCuisines []database.ListCuisinesB
 		UpdatedAt:         dr.UpdatedAt,
 		Name:              dr.Name,
 		ExternalURL:       dr.ExternalUrl,
+		Description:       dr.Description,
 		UserID:            dr.UserID,
 		Servings:          int(dr.Servings),
 		Yield:             dr.Yield,

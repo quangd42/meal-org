@@ -1,0 +1,60 @@
+package views
+
+import (
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
+
+type EditRecipeVM struct {
+	CommonVM
+	Recipe models.Recipe
+}
+
+func NewEditRecipeVM(userID uuid.UUID, navItems []models.NavItem, recipe models.Recipe, errs map[string]any) EditRecipeVM {
+	return EditRecipeVM{
+		CommonVM: CommonVM{
+			Title:    "Submit a Recipe",
+			UserID:   userID,
+			NavItems: navItems,
+			Errors:   errs,
+		},
+		Recipe: recipe,
+	}
+}
+
+templ EditRecipePage(vm EditRecipeVM) {
+	@Layout(vm.Title, vm.NavItems) {
+		<h1 class="mb-5 text-center">Update Recipe</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+			<section class="col-span-1 px-4 md:col-span-2 md:col-start-2 md:col-end-4">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					@EditRecipeForm(vm.Recipe, vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}
+
+templ EditRecipeForm(recipe models.Recipe, errs map[string]any) {
+	<form hx-post={ string(templ.URL(fmt.Sprintf("/recipes/%s", recipe.ID.String()))) } hx-swap="outerHTML" class="space-y-4 md:space-y-6">
+		<div class="space-y-4 pb-4 md:space-y-6">
+			<div>
+				<label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Title</label>
+				<input type="text" name="name" id="name" value={ recipe.Name } class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="Give your recipe a title" required/>
+			</div>
+			<div>
+				<label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description</label>
+				<textarea type="text" name="description" id="description" value={ *recipe.Description } placeholder="Share the story behind your recipe and what makes it special" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"></textarea>
+			</div>
+			<div>
+				<label for="external_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">External URL</label>
+				<input type="text" name="external_url" id="external_url" value={ *recipe.ExternalURL } class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="Link to your recipe from a different source"/>
+			</div>
+		</div>
+		<div class="flex flex-row">
+			<button type="submit" class="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
+			<p id="error-msg" class="ml-2"></p>
+		</div>
+	</form>
+}

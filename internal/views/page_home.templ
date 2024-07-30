@@ -1,0 +1,33 @@
+package views
+
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
+
+type HomeVM struct {
+	CommonVM
+}
+
+func NewHomeVM(userID uuid.UUID, navItems []models.NavItem) HomeVM {
+	return HomeVM{
+		CommonVM{Title: "Homepage", UserID: userID, NavItems: navItems},
+	}
+}
+
+templ Home(vm HomeVM) {
+	@Layout(vm.Title, vm.NavItems) {
+		<h1>
+			Hello World!
+		</h1>
+		if vm.UserID != uuid.Nil {
+			<p>
+				View <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="/recipes">your recipes</a> or <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="/recipes/add">add a new one</a>.
+			</p>
+		} else {
+			<p>
+				Please <a class="font-medium text-blue-600 hover:underline dark:text-blue-500" href="/login">sign in</a> to start organizing your meals!
+			</p>
+		}
+	}
+}

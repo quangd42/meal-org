@@ -39,11 +39,12 @@ type Recipe struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	ExternalUrl       *string   `json:"external_url"`
 	Name              string    `json:"name"`
-	UserID            uuid.UUID `json:"user_id"`
+	Description       *string   `json:"description"`
 	Servings          int32     `json:"servings"`
 	Yield             *string   `json:"yield"`
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
+	UserID            uuid.UUID `json:"user_id"`
 }
 
 type RecipeCuisine struct {
@@ -63,6 +64,12 @@ type RecipeIngredient struct {
 	RecipeID     uuid.UUID `json:"recipe_id"`
 }
 
+type Session struct {
+	Token  string    `json:"token"`
+	Data   []byte    `json:"data"`
+	Expiry time.Time `json:"expiry"`
+}
+
 type Token struct {
 	Value     string    `json:"value"`
 	CreatedAt time.Time `json:"created_at"`
@@ -76,6 +83,6 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Name      string    `json:"name"`
-	Username  string    `json:"username"`
+	Email     string    `json:"email"`
 	Hash      string    `json:"hash"`
 }

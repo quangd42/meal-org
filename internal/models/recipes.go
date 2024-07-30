@@ -10,6 +10,7 @@ import (
 type RecipeRequest struct {
 	Name              string                `json:"name" validate:"required"`
 	ExternalURL       *string               `json:"external_url"`
+	Description       *string               `json:"description"`
 	Servings          int                   `json:"servings" validate:"required"`
 	Yield             *string               `json:"yield"`
 	CookTimeInMinutes int                   `json:"cook_time_in_minutes" validate:"required"`
@@ -29,6 +30,7 @@ type Recipe struct {
 	UpdatedAt         time.Time             `json:"updated_at"`
 	Name              string                `json:"name"`
 	ExternalURL       *string               `json:"external_url"`
+	Description       *string               `json:"description"`
 	UserID            uuid.UUID             `json:"user_id"`
 	Servings          int                   `json:"servings"`
 	Yield             *string               `json:"yield"`
@@ -63,6 +65,8 @@ type RecipeInList struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	Name              string    `json:"name"`
 	ExternalURL       *string   `json:"external_url"`
+	Description       *string   `json:"description"`
+	Cuisines          string    `json:"cuisines"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int       `json:"servings"`
 	Yield             *string   `json:"yield"`

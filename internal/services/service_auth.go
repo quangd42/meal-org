@@ -90,7 +90,7 @@ func (as Auth) RevokeRefreshToken(ctx context.Context, refreshToken string) erro
 
 func (as Auth) Login(ctx context.Context, lr models.LoginRequest) (models.User, error) {
 	var u models.User
-	user, err := as.store.Q.GetUserByUsername(ctx, lr.Username)
+	user, err := as.store.Q.GetUserByEmail(ctx, lr.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return u, pgx.ErrNoRows

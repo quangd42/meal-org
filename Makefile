@@ -89,8 +89,42 @@ build/prod:
 run: build
 	/tmp/bin/${BINARY_NAME}
 
-## air: run the application with reloading on file changes
-.PHONY: air
-air:
+## live/templ: run templ generation in watch mode to derect all .templ changes
+.PHONY: live/templ
+live/templ:
+	templ generate --watch --proxy="http://localhost:8080" --open-browser=false
+
+## live/server: run the application with reloading on file changes
+.PHONY: live/server
+live/server:
 	## Config is in .air.toml
-	go run github.com/air-verse/air@latest
+	go run github.com/air-verse/air@v1.52.3 \
+  --build.cmd "go build -o tmp/bin/main && templ generate --notify-proxy" --build.bin "tmp/bin/main" --build.delay "100" \
+  --build.exclude_dir "node_modules,sql,scripts,tests" \
+  --build.include_ext "go" \
+  --build.exclude_regex "" \
+  --build.stop_on_error "false" \
+  --build.post_cmd "pkill main" \
+  --misc.clean_on_exit true
+
+## live/tailwind: run the application with reloading on file changes
+.PHONY: live/tailwind
+live/tailwind:
+	npx tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify --watch
+
+## live/assets: watch for any js or css change in the assets/ folder, then reload the browser via templ proxy.
+.PHONY: live/assets
+live/assets:
+	# Perhaps not necessary unless I have a separate js/css compilation process
+	go run github.com/air-verse/air@v1.52.3 \
+	--build.cmd "templ generate --notify-proxy" \
+	--build.bin "true" \
+	--build.delay "100" \
+	--build.exclude_dir "" \
+	--build.include_dir "assets" \
+	--build.include_ext "js,css"
+
+## live: start all watch processes in parallel
+.PHONY: live
+live:
+	make -j4 live/templ live/server live/tailwind live/assets

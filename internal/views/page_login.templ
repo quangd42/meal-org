@@ -1,0 +1,54 @@
+package views
+
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+)
+
+type LoginVM struct {
+	CommonVM
+}
+
+func NewLoginVM(navItems []models.NavItem, errs map[string]any) LoginVM {
+	return LoginVM{
+		CommonVM: CommonVM{
+			Title:    "Login",
+			UserID:   uuid.Nil,
+			NavItems: navItems,
+			Errors:   errs,
+		},
+	}
+}
+
+templ LoginPage(vm LoginVM) {
+	@Layout(vm.Title, vm.NavItems) {
+		<h1 class="mb-10 text-center">Login</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+			<section class="col-span-1 px-4 md:col-span-1 md:col-start-2 md:col-end-2">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					@LoginForm(vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}
+
+templ LoginForm(errs map[string]any) {
+	<form action="/login" method="POST" class="space-y-4 md:space-y-6">
+		<div>
+			<label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Email</label>
+			<input type="email" name="email" id="email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="name@example.com" required/>
+			if _, ok := errs["email-password"]; ok {
+				<p class="mt-2 text-sm font-medium text-red-600 dark:text-red-500">Invalid email and/or password</p>
+			}
+		</div>
+		<div>
+			<label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Password</label>
+			<input type="password" name="password" id="password" placeholder="••••••••" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" required/>
+		</div>
+		<button type="submit" class="w-full rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Sign in</button>
+		<p class="text-sm font-light text-gray-500 dark:text-gray-400">
+			Don’t have an account yet? <a href="/register" class="font-medium text-blue-600 hover:underline dark:text-blue-500">Sign Up</a>
+		</p>
+	</form>
+}

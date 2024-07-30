@@ -19,6 +19,7 @@ type RecipeService interface {
 	GetRecipeByID(ctx context.Context, recipeID uuid.UUID) (models.Recipe, error)
 	ListRecipesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error)
 	DeleteRecipeByID(ctx context.Context, recipeID uuid.UUID) error
+	ListRecipesWithCuisinesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error)
 }
 
 // TODO: allow for uploading images
@@ -30,7 +31,7 @@ func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		rr, err := decodeValidate[models.RecipeRequest](r)
+		rr, err := decodeJSONValidate[models.RecipeRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return
@@ -61,7 +62,7 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		rr, err := decodeValidate[models.RecipeRequest](r)
+		rr, err := decodeJSONValidate[models.RecipeRequest](r)
 		if err != nil {
 			respondMalformedRequestError(w)
 			return

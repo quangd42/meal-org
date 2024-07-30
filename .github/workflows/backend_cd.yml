@@ -22,8 +22,11 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Install Goose
-        run: go install github.com/pressly/goose/v3/cmd/goose@latest
+      - name: Generate Go files from templ
+        run: go run github.com/a-h/templ/cmd/templ@latest generate
+
+      - name: Generate tailwind css
+        run: ./tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify
 
       - name: Build app
         run: make build/prod
@@ -38,6 +41,9 @@ jobs:
 
       - name: Run gcloud build
         run: gcloud builds submit --tag us-central1-docker.pkg.dev/meal-planner-426313/meal-planner-ar-repo/meal-planner:latest .
+
+      - name: Install Goose
+        run: go install github.com/pressly/goose/v3/cmd/goose@latest
 
       - name: Run db migration
         run: make migrate/up

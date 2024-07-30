@@ -12,7 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ErrAuthenticationFailed = errors.New("incorrect username or password")
+var ErrAuthenticationFailed = errors.New("incorrect email or password")
 
 type AuthService interface {
 	GenerateAccessToken(ctx context.Context, userID uuid.UUID) (string, error)
@@ -22,9 +22,9 @@ type AuthService interface {
 	Login(ctx context.Context, lr models.LoginRequest) (models.User, error)
 }
 
-func loginHandler(as AuthService) http.HandlerFunc {
+func loginAPIHandler(as AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lr, err := decodeValidate[models.LoginRequest](r)
+		lr, err := decodeJSONValidate[models.LoginRequest](r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return

@@ -18,6 +18,7 @@ INSERT INTO recipes (
   created_at,
   updated_at,
   name,
+  description,
   external_url,
   user_id,
   servings,
@@ -25,8 +26,8 @@ INSERT INTO recipes (
   cook_time_in_minutes,
   notes
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
 `
 
 type CreateRecipeParams struct {
@@ -34,6 +35,7 @@ type CreateRecipeParams struct {
 	CreatedAt         time.Time `json:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at"`
 	Name              string    `json:"name"`
+	Description       *string   `json:"description"`
 	ExternalUrl       *string   `json:"external_url"`
 	UserID            uuid.UUID `json:"user_id"`
 	Servings          int32     `json:"servings"`
@@ -48,6 +50,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Name,
+		arg.Description,
 		arg.ExternalUrl,
 		arg.UserID,
 		arg.Servings,
@@ -62,11 +65,12 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
-		&i.UserID,
+		&i.Description,
 		&i.Servings,
 		&i.Yield,
 		&i.CookTimeInMinutes,
 		&i.Notes,
+		&i.UserID,
 	)
 	return i, err
 }
@@ -82,7 +86,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id uuid.UUID) error {
 }
 
 const getRecipeByID = `-- name: GetRecipeByID :one
-SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes FROM recipes
+SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id FROM recipes
 WHERE id = $1
 `
 
@@ -95,17 +99,18 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
-		&i.UserID,
+		&i.Description,
 		&i.Servings,
 		&i.Yield,
 		&i.CookTimeInMinutes,
 		&i.Notes,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const listRecipesByUserID = `-- name: ListRecipesByUserID :many
-SELECT id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -135,11 +140,85 @@ func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUser
 			&i.UpdatedAt,
 			&i.ExternalUrl,
 			&i.Name,
-			&i.UserID,
+			&i.Description,
 			&i.Servings,
 			&i.Yield,
 			&i.CookTimeInMinutes,
 			&i.Notes,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listRecipesWithCuisinesByUserID = `-- name: ListRecipesWithCuisinesByUserID :many
+SELECT
+  r.id, r.created_at, r.updated_at, r.external_url, r.name, r.description, r.servings, r.yield, r.cook_time_in_minutes, r.notes, r.user_id,
+  string_agg(c.name, ', ') AS cuisines
+FROM
+  recipes r
+LEFT JOIN
+  recipe_cuisine rc ON r.id = rc.recipe_id
+LEFT JOIN
+  cuisines c ON rc.cuisine_id = c.id
+WHERE
+  r.user_id = $1
+GROUP BY
+  r.id
+LIMIT
+  $2
+  OFFSET $3
+`
+
+type ListRecipesWithCuisinesByUserIDParams struct {
+	UserID uuid.UUID `json:"user_id"`
+	Limit  int32     `json:"limit"`
+	Offset int32     `json:"offset"`
+}
+
+type ListRecipesWithCuisinesByUserIDRow struct {
+	ID                uuid.UUID `json:"id"`
+	CreatedAt         time.Time `json:"created_at"`
+	UpdatedAt         time.Time `json:"updated_at"`
+	ExternalUrl       *string   `json:"external_url"`
+	Name              string    `json:"name"`
+	Description       *string   `json:"description"`
+	Servings          int32     `json:"servings"`
+	Yield             *string   `json:"yield"`
+	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
+	Notes             *string   `json:"notes"`
+	UserID            uuid.UUID `json:"user_id"`
+	Cuisines          []byte    `json:"cuisines"`
+}
+
+func (q *Queries) ListRecipesWithCuisinesByUserID(ctx context.Context, arg ListRecipesWithCuisinesByUserIDParams) ([]ListRecipesWithCuisinesByUserIDRow, error) {
+	rows, err := q.db.Query(ctx, listRecipesWithCuisinesByUserID, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListRecipesWithCuisinesByUserIDRow
+	for rows.Next() {
+		var i ListRecipesWithCuisinesByUserIDRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ExternalUrl,
+			&i.Name,
+			&i.Description,
+			&i.Servings,
+			&i.Yield,
+			&i.CookTimeInMinutes,
+			&i.Notes,
+			&i.UserID,
+			&i.Cuisines,
 		); err != nil {
 			return nil, err
 		}
@@ -156,13 +235,14 @@ UPDATE recipes
 SET
   name = $2,
   external_url = $3,
+  description = $9,
   updated_at = $4,
   servings = $5,
   yield = $6,
   cook_time_in_minutes = $7,
   notes = $8
 WHERE id = $1
-RETURNING id, created_at, updated_at, external_url, name, user_id, servings, yield, cook_time_in_minutes, notes
+RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
 `
 
 type UpdateRecipeByIDParams struct {
@@ -174,6 +254,7 @@ type UpdateRecipeByIDParams struct {
 	Yield             *string   `json:"yield"`
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
+	Description       *string   `json:"description"`
 }
 
 func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDParams) (Recipe, error) {
@@ -186,6 +267,7 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		arg.Yield,
 		arg.CookTimeInMinutes,
 		arg.Notes,
+		arg.Description,
 	)
 	var i Recipe
 	err := row.Scan(
@@ -194,11 +276,12 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		&i.UpdatedAt,
 		&i.ExternalUrl,
 		&i.Name,
-		&i.UserID,
+		&i.Description,
 		&i.Servings,
 		&i.Yield,
 		&i.CookTimeInMinutes,
 		&i.Notes,
+		&i.UserID,
 	)
 	return i, err
 }
