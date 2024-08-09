@@ -53,9 +53,9 @@ To start the server locally:
 ```sh
 # setup the database
 make db/reset
-# generate the db connection code
-make sqlc
-# build and run the binary
+# generate code and build server binary
+make build
+# run the binary
 make run
 ```
 

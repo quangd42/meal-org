@@ -74,14 +74,24 @@ migrate/%:
 test:
 	./scripts/test_integration.sh
 
+## templ: generate templ code
+.PHONY: templ
+templ:
+	templ generate
+
+## tailwind: compile tailwind css
+.PHONY: tailwind
+tailwind:
+	npx tailwindcss -i ./assets/css/input.css -o ./assets/css/styles.css --minify
+
 ## build: build the application locally
 .PHONY: build
-build:
+build: sqlc templ tailwind
 	go build -o=/tmp/bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
 ## build/prod: build prod binary
 .PHONY: build/prod
-build/prod:
+build/prod: templ tailwind
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
 ## run: run the application locally
