@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
@@ -22,14 +21,14 @@ func createCuisineHandler(cs CuisineService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cr, err := decodeJSONValidate[models.CuisineRequest](r)
 		if err != nil {
-			respondMalformedRequestError(w)
+			respondError(w, http.StatusBadRequest, err)
 			return
 		}
 
 		cuisine, err := cs.CreateCuisine(r.Context(), cr)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
-				respondError(w, http.StatusBadRequest, "invalid parent cuisine")
+				respondError(w, http.StatusBadRequest, map[string]string{"parent_id": "parent does not exist"})
 				return
 			}
 			respondDBConstraintsError(w, err, "cuisine name")
@@ -42,23 +41,22 @@ func createCuisineHandler(cs CuisineService) http.HandlerFunc {
 
 func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cuisineIDString := chi.URLParam(r, "id")
-		cuisineID, err := uuid.Parse(cuisineIDString)
+		cuisineID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "cuisine id not found")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		cr, err := decodeJSONValidate[models.CuisineRequest](r)
 		if err != nil {
-			respondMalformedRequestError(w)
+			respondError(w, http.StatusBadRequest, err)
 			return
 		}
 
 		cuisine, err := cs.UpdateCuisineByID(r.Context(), cuisineID, cr)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
-				respondError(w, http.StatusBadRequest, "invalid parent cuisine")
+				respondError(w, http.StatusBadRequest, map[string]string{"parent_id": "parent does not exist"})
 				return
 			}
 			respondDBConstraintsError(w, err, "cuisine name")
@@ -82,10 +80,9 @@ func listCuisinesHandler(cs CuisineService) http.HandlerFunc {
 
 func deleteCuisineHandler(cs CuisineService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cuisineIDString := chi.URLParam(r, "id")
-		cuisineID, err := uuid.Parse(cuisineIDString)
+		cuisineID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "cuisine id not found")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 

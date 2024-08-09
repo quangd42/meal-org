@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/middleware"
 	"github.com/quangd42/meal-planner/internal/models"
@@ -55,10 +54,9 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		recipeIDString := chi.URLParam(r, "id")
-		recipeID, err := uuid.Parse(recipeIDString)
+		recipeID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid recipe id")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -71,7 +69,7 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 		recipe, err := rs.UpdateRecipeByID(r.Context(), userID, recipeID, rr)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
-				respondError(w, http.StatusNotFound, services.ErrResourceNotFound.Error())
+				respondError(w, http.StatusBadRequest, map[string]string{"id": err.Error()})
 				return
 			}
 			if errors.Is(err, services.ErrUnauthorized) {
@@ -112,10 +110,9 @@ func getRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		recipeIDString := chi.URLParam(r, "id")
-		recipeID, err := uuid.Parse(recipeIDString)
+		recipeID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid recipe id")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -143,10 +140,9 @@ func deleteRecipeHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		recipeIDString := chi.URLParam(r, "id")
-		recipeID, err := uuid.Parse(recipeIDString)
+		recipeID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid recipe id")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
