@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models/validator"
 )
 
 type CuisineRequest struct {
@@ -13,7 +14,7 @@ type CuisineRequest struct {
 }
 
 func (cr CuisineRequest) Validate(ctx context.Context) error {
-	return validate.Struct(cr)
+	return validator.ValidateStruct(cr)
 }
 
 type Cuisine struct {

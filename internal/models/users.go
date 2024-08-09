@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models/validator"
 )
 
 type CreateUserRequest struct {
@@ -14,24 +15,24 @@ type CreateUserRequest struct {
 }
 
 func (ur CreateUserRequest) Validate(ctx context.Context) error {
-	return validate.Struct(ur)
+	return validator.ValidateStruct(ur)
 }
 
 type UpdateUserRequest struct {
-	Password string `json:"password" validate:"required"`
+	Password string `json:"password" validate:"required,min=10"`
 }
 
 func (ur UpdateUserRequest) Validate(ctx context.Context) error {
-	return validate.Struct(ur)
+	return validator.ValidateStruct(ur)
 }
 
 type LoginRequest struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`
-	Password string `json:"password" form:"password" validate:"required"`
+	Password string `json:"password" form:"password" validate:"required,min=10"`
 }
 
 func (ur LoginRequest) Validate(ctx context.Context) error {
-	return validate.Struct(ur)
+	return validator.ValidateStruct(ur)
 }
 
 type User struct {
