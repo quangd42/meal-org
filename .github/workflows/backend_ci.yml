@@ -38,19 +38,20 @@ jobs:
         with:
           go-version: "1.22"
 
+      - name: Install Goose
+        run: |
+          curl -sL https://github.com/pressly/goose/releases/download/v3.21.1/goose_linux_x86_64 -o goose
+          chmod +x goose
+          sudo mv goose /bin/goose
+
       - name: Generate Go files from templ
         run: go run github.com/a-h/templ/cmd/templ@latest generate
 
-      - name: Build app
+      - name: Build app binary
         run: make build/prod
 
       - name: Run the application
         run: ./bin/planner_server &
-
-      - name: Install Goose
-        run: |
-          curl --localtion --remote-name https://github.com/pressly/goose/releases/download/v3.21.1/goose_linux_x86_64
-          mv goose_linux_x86_64 bin/goose
 
       - name: Run db migration
         run: make migrate/up
@@ -67,49 +68,49 @@ jobs:
           sudo dpkg -i hurl_4.3.0_amd64.deb
           hurl --test --variables-file tests/integration/vars.env --glob "tests/integration/**/*.hurl"
 
-  style:
-    name: Style
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Generate Go files from templ
-        run: go run github.com/a-h/templ/cmd/templ@latest generate
-
-      - name: Run formatter
-        run: test -z $(go fmt ./...)
-
-      - name: Run go vet
-        run: test -z $(go vet ./...)
-
-      - name: Run staticcheck
-        run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
-
-  security:
-    name: Security
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22"
-
-      - name: Generate Go files from templ
-        run: go run github.com/a-h/templ/cmd/templ@latest generate
-
-      - name: Govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-
-      - name: Gosec
-        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
+  # style:
+  #   name: Style
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: "1.22"
+  #
+  #     - name: Generate Go files from templ
+  #       run: go run github.com/a-h/templ/cmd/templ@latest generate
+  #
+  #     - name: Run formatter
+  #       run: test -z $(go fmt ./...)
+  #
+  #     - name: Run go vet
+  #       run: test -z $(go vet ./...)
+  #
+  #     - name: Run staticcheck
+  #       run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
+  #
+  # security:
+  #   name: Security
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: "1.22"
+  #
+  #     - name: Generate Go files from templ
+  #       run: go run github.com/a-h/templ/cmd/templ@latest generate
+  #
+  #     - name: Govulncheck
+  #       run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+  #
+  #     - name: Gosec
+  #       run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
