@@ -35,7 +35,7 @@ func (rs RecipeService) UpdateIngredientByID(ctx context.Context, ingredientID u
 		UpdatedAt: time.Now().UTC(),
 	})
 	if err != nil {
-		return ing, checkErrDBConstraint(err)
+		return ing, customDBErr(err)
 	}
 
 	ing = createIngredientResponse(ingredient)

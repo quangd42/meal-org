@@ -27,3 +27,14 @@ func checkErrDBConstraint(err error) error {
 	}
 	return err
 }
+
+func customDBErr(err error) error {
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ErrResourceNotFound
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code[0:2] == "23" {
+		return ErrDBConstraint
+	}
+	return err
+}
