@@ -33,7 +33,11 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 				respondInternalServerError(w)
 				return
 			}
-			respondDBConstraintsError(w, err, "email")
+			if errors.Is(err, services.ErrDBConstraint) {
+				respondError(w, http.StatusForbidden, "email already taken")
+				return
+			}
+			respondInternalServerError(w)
 			return
 		}
 
