@@ -7,6 +7,7 @@ on:
 env:
   DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb?sslmode=disable
   JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
+  SCHEMA_PATH: sql/schema
   PORT: 8080
 
 jobs:
@@ -38,12 +39,6 @@ jobs:
         with:
           go-version: "1.22"
 
-      - name: Install Goose
-        run: |
-          curl -sL https://github.com/pressly/goose/releases/download/v3.21.1/goose_linux_x86_64 -o goose
-          chmod +x goose
-          sudo mv goose /bin/goose
-
       - name: Generate Go files from templ
         run: go run github.com/a-h/templ/cmd/templ@latest generate
 
@@ -54,7 +49,7 @@ jobs:
         run: ./bin/planner_server &
 
       - name: Run db migration
-        run: make migrate/up
+        run: go run github.com/pressly/goose/v3/cmd/goose@latest -dir $SCHEMA_PATH postgres "$DATABASE_URL" up
 
       - name: Populate the database with cuisines
         run: |
