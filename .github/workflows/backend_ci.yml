@@ -7,7 +7,6 @@ on:
 env:
   DATABASE_URL: postgres://testuser:testpassword@localhost:5432/testdb?sslmode=disable
   JWT_SECRET: xoEuGejzRwfkgr26Qq3oLZh6vFwaJbGvC2xzlJj8R3+w9WmV9kTiT1rKDyov89lf+OreU3kCTEbict7dsSNKAA==
-  SCHEMA_PATH: sql/schema
   PORT: 8080
 
 jobs:
@@ -49,7 +48,10 @@ jobs:
         run: ./bin/planner_server &
 
       - name: Run db migration
-        run: go run github.com/pressly/goose/v3/cmd/goose@latest -dir $SCHEMA_PATH postgres "$DATABASE_URL" up
+        run: |
+          cd sql/schema
+          go run github.com/pressly/goose/v3/cmd/goose@latest fix
+          go run github.com/pressly/goose/v3/cmd/goose@latest postgres "$DATABASE_URL" up
 
       - name: Populate the database with cuisines
         run: |
@@ -63,49 +65,49 @@ jobs:
           sudo dpkg -i hurl_4.3.0_amd64.deb
           hurl --test --variables-file tests/integration/vars.env --glob "tests/integration/**/*.hurl"
 
-  # style:
-  #   name: Style
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version: "1.22"
-  #
-  #     - name: Generate Go files from templ
-  #       run: go run github.com/a-h/templ/cmd/templ@latest generate
-  #
-  #     - name: Run formatter
-  #       run: test -z $(go fmt ./...)
-  #
-  #     - name: Run go vet
-  #       run: test -z $(go vet ./...)
-  #
-  #     - name: Run staticcheck
-  #       run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
-  #
-  # security:
-  #   name: Security
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version: "1.22"
-  #
-  #     - name: Generate Go files from templ
-  #       run: go run github.com/a-h/templ/cmd/templ@latest generate
-  #
-  #     - name: Govulncheck
-  #       run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
-  #
-  #     - name: Gosec
-  #       run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
+  style:
+    name: Style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Generate Go files from templ
+        run: go run github.com/a-h/templ/cmd/templ@latest generate
+
+      - name: Run formatter
+        run: test -z $(go fmt ./...)
+
+      - name: Run go vet
+        run: test -z $(go vet ./...)
+
+      - name: Run staticcheck
+        run: go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
+
+  security:
+    name: Security
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Generate Go files from templ
+        run: go run github.com/a-h/templ/cmd/templ@latest generate
+
+      - name: Govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+      - name: Gosec
+        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
