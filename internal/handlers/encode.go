@@ -23,15 +23,15 @@ func respondJSON[T any](w http.ResponseWriter, code int, v T) {
 	w.Write(data) // #nosec G104
 }
 
-func respondError(w http.ResponseWriter, code int, msg string) {
+func respondError(w http.ResponseWriter, code int, value any) {
 	if code > 499 {
-		log.Printf("Responding with 5xx error: %s\n", msg)
+		log.Printf("Responding with 5xx error: %s\n", value)
 	}
 	type response struct {
-		Error string `json:"error"`
+		Error any `json:"error"`
 	}
 	respondJSON(w, code, response{
-		Error: msg,
+		Error: value,
 	})
 }
 

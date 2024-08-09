@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -11,9 +10,11 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/alexedwards/scs/v2"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/models/validator"
 )
 
 func getPaginationParamValue(r *http.Request, name string, defaultValue int32) int32 {
@@ -67,7 +68,20 @@ func render(w http.ResponseWriter, r *http.Request, c templ.Component) {
 func getUserIDFromCtx(ctx context.Context, sm *scs.SessionManager) (uuid.UUID, error) {
 	userID, ok := sm.Get(ctx, "userID").(uuid.UUID)
 	if !ok || userID == uuid.Nil {
-		return userID, errors.New("userID could not be found")
+		err := validator.NewValidationErrors()
+		err["id"] = []string{"invalid user id"}
+		return userID, err
 	}
 	return userID, nil
+}
+
+func getResourceIDFromURL(r *http.Request) (uuid.UUID, error) {
+	resourceIDString := chi.URLParam(r, "id")
+	resourceID, err := uuid.Parse(resourceIDString)
+	if err != nil {
+		err := validator.NewValidationErrors()
+		err["id"] = []string{"invalid"}
+		return uuid.UUID{}, err
+	}
+	return resourceID, nil
 }

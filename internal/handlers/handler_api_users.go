@@ -23,7 +23,7 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ur, err := decodeJSONValidate[models.CreateUserRequest](r)
 		if err != nil {
-			respondMalformedRequestError(w)
+			respondError(w, http.StatusBadRequest, err)
 			return
 		}
 

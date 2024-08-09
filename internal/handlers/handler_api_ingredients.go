@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
@@ -23,16 +22,12 @@ func createIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		arg, err := decodeJSONValidate[models.IngredientRequest](r)
 		if err != nil {
-			respondMalformedRequestError(w)
+			respondError(w, http.StatusBadRequest, err)
 			return
 		}
 
 		ingredient, err := is.CreateIngredient(r.Context(), arg)
 		if err != nil {
-			if errors.Is(err, services.ErrResourceNotFound) {
-				respondError(w, http.StatusBadRequest, "invalid parent ingredient")
-				return
-			}
 			respondDBConstraintsError(w, err, "ingredient name")
 			return
 		}
@@ -43,23 +38,22 @@ func createIngredientHandler(is IngredientService) http.HandlerFunc {
 
 func updateIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ingredientIDString := chi.URLParam(r, "id")
-		ingredientID, err := uuid.Parse(ingredientIDString)
+		ingredientID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid ingredient id")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		arg, err := decodeJSONValidate[models.IngredientRequest](r)
 		if err != nil {
-			respondMalformedRequestError(w)
+			respondError(w, http.StatusBadRequest, err)
 			return
 		}
 
 		ingredient, err := is.UpdateIngredientByID(r.Context(), ingredientID, arg)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
-				respondError(w, http.StatusBadRequest, "invalid parent ingredient")
+				respondError(w, http.StatusBadRequest, map[string]string{"id": err.Error()})
 				return
 			}
 			respondDBConstraintsError(w, err, "ingredient name")
@@ -84,10 +78,9 @@ func listIngredientsHandler(is IngredientService) http.HandlerFunc {
 
 func deleteIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ingredientIDString := chi.URLParam(r, "id")
-		ingredientID, err := uuid.Parse(ingredientIDString)
+		ingredientID, err := getResourceIDFromURL(r)
 		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid ingredient id")
+			respondError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
