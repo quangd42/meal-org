@@ -21,6 +21,7 @@ Built with Go, Templ, HTMX, Tailwind CSS.
 - [Postgresql](https://www.postgresql.org/download/)
 - [Goose](https://github.com/pressly/goose)
 - [sqlc](https://github.com/sqlc-dev/sqlc)
+- [templ](https://templ.guide/quick-start/installation)
 
 ### Setup
 

@@ -46,7 +46,7 @@ audit:
 ## sqlc: generate database code with sqlc
 .PHONY: sqlc
 sqlc:
-	sqlc generate
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
 
 ## db/drop: drop local db
 .PHONY: db/drop
@@ -77,7 +77,7 @@ test:
 ## templ: generate templ code
 .PHONY: templ
 templ:
-	templ generate
+	go run github.com/a-h/templ/cmd/templ@latest generate
 
 ## tailwind: compile tailwind css
 .PHONY: tailwind
@@ -91,7 +91,7 @@ build: sqlc templ tailwind
 
 ## build/prod: build prod binary
 .PHONY: build/prod
-build/prod: templ tailwind
+build/prod:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/${BINARY_NAME} ${MAIN_PACKAGE_PATH}
 
 ## run: run the application locally
@@ -99,10 +99,10 @@ build/prod: templ tailwind
 run: build
 	/tmp/bin/${BINARY_NAME}
 
-## live/templ: run templ generation in watch mode to derect all .templ changes
+## live/templ: run templ generation in watch mode to detect all .templ changes
 .PHONY: live/templ
 live/templ:
-	templ generate --watch --proxy="http://localhost:8080" --open-browser=false
+	go run github.com/a-h/templ/cmd/templ@latest generate --watch --proxy="http://localhost:8080" --open-browser=false
 
 ## live/server: run the application with reloading on file changes
 .PHONY: live/server
