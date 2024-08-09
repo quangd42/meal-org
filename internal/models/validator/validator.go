@@ -30,7 +30,8 @@ func NewValidationErrors() ValidationErrors {
 	return make(ValidationErrors)
 }
 
-// Mostly only to adhere to error interface and internal error reporting
+// Error is intended for use in development + debugging and not intended to be a production error message.
+// It allows ValidationErrors to subscribe to the Error interface.
 func (e ValidationErrors) Error() string {
 	indent, err := json.MarshalIndent(e, "", "  ")
 	if err != nil {
