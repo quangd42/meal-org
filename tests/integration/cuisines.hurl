@@ -23,6 +23,15 @@ HTTP 200
 [Asserts]
 jsonpath "$" count == 23
 
+# Create Cuisine empty - expect validation error
+POST {{host}}/v1/cuisines
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name":""}
+HTTP 400
+[Asserts]
+jsonpath "$.error.name" exists
+
 # Create Cuisine 1
 POST {{host}}/v1/cuisines
 Authorization: Bearer {{token}}
@@ -68,6 +77,15 @@ HTTP 400
 [Asserts]
 jsonpath "$.error" exists
 
+# Create Cuisine - name empty
+POST {{host}}/v1/cuisines
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name":""}
+HTTP 400
+[Asserts]
+jsonpath "$.error.name" exists
+
 # Create Cuisine 4
 POST {{host}}/v1/cuisines
 Authorization: Bearer {{token}}
@@ -97,7 +115,16 @@ Content-Type: application/json; charset=utf-8
 {"name":"Pork", "parent_id": "c624bce3-2d1b-4ae8-87e2-af775be70077"}
 HTTP 400
 [Asserts]
-jsonpath "$.error" exists
+jsonpath "$.error.parent_id" exists
+
+# Update Cuisine - name empty
+PUT {{host}}/v1/cuisines/{{id3}}
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name":""}
+HTTP 400
+[Asserts]
+jsonpath "$.error.name" exists
 
 # List Cuisines
 GET {{host}}/v1/cuisines

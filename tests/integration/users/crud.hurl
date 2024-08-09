@@ -17,6 +17,16 @@ POST {{host}}/v1/users
 Content-Type: application/json; charset=utf-8
 {"name":"julia","email":"badEmail","password":"{{password}}"}
 HTTP 400
+[Asserts]
+jsonpath "$.error.email" exists
+
+# Create user - password shorter than 10 char
+POST {{host}}/v1/users
+Content-Type: application/json; charset=utf-8
+{"name":"julia","email":"{{email}}","password":"short"}
+HTTP 400
+[Asserts]
+jsonpath "$.error.password" exists
 
 # Login
 POST {{host}}/v1/auth/login

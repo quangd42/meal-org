@@ -215,6 +215,58 @@ jsonpath "$.cuisines" count == 2
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id2}}"
 jsonpath "$.cuisines[*].id" includes "{{cuisine_id3}}"
 
+# Update Recipe - fake id
+PUT {{host}}/v1/recipes/b3758249-4141-4f5e-9165-f51d20dea222
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{
+  "name": "Beef and Broccoli Spaghetti",
+  "external_url": "cooked.wiki/https://www.thekitchn.com/beef-and-broccoli-noodles-recipe-23656929",
+  "description": "You only need 10 minutes to prep these saucy noodles.",
+  "servings": 4,
+  "yield": "a whole pan of goodness",
+  "cook_time_in_minutes": 20,
+  "notes": "enjoy!",
+  "cuisines": ["{{cuisine_id2}}", "{{cuisine_id3}}"],
+  "ingredients": [
+    {
+      "id": "{{ingre_id2}}",
+      "amount": "1lb",
+      "prep_note": "seasoned with salt and pepper",
+      "index": 2
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "2lb",
+      "prep_note": "cut to bite size",
+      "index": 3
+    },
+    {
+      "id": "{{ingre_id3}}",
+      "amount": "1lb",
+      "prep_note": "leave as is for decoration",
+      "index": 4
+    }
+  ],
+  "instructions": [
+    {
+      "step_no": 2,
+      "instruction": "cook the meat till brown"
+    },
+    {
+      "step_no": 3,
+      "instruction": "put the broccoli in, stir then steam"
+    },
+    {
+      "step_no": 4,
+      "instruction": "put some garnish on"
+    }
+  ]
+}
+HTTP 400
+[Asserts]
+jsonpath "$.error.id" exists
+
 # Update Recipe - ingredient_id does not exist
 PUT {{host}}/v1/recipes/{{id1}}
 Authorization: Bearer {{token}}

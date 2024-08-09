@@ -23,6 +23,15 @@ HTTP 200
 [Asserts]
 jsonpath "$" == null
 
+# Create empty ingredient - expect validation error
+POST {{host}}/v1/ingredients
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name": ""}
+HTTP 400
+[Asserts]
+jsonpath "$.error.name" exists
+
 # Create Ingredient 1
 POST {{host}}/v1/ingredients
 Authorization: Bearer {{token}}
@@ -73,6 +82,24 @@ Content-Type: application/json; charset=utf-8
 HTTP 200
 [Asserts]
 jsonpath "$.name" == "Asparagus"
+
+# Update Ingredient with empty name - expect validation error
+PUT {{host}}/v1/ingredients/{{id3}}
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name":""}
+HTTP 400
+[Asserts]
+jsonpath "$.error.name" exists
+
+# Update Ingredient with fake id
+PUT {{host}}/v1/ingredients/eb1e69eb-9c79-4c2b-af32-d97153751571
+Authorization: Bearer {{token}}
+Content-Type: application/json; charset=utf-8
+{"name":"Asparagus"}
+HTTP 400
+[Asserts]
+jsonpath "$.error.id" exists
 
 # List Ingredients
 GET {{host}}/v1/ingredients
