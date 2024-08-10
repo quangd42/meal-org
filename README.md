@@ -29,6 +29,7 @@ Create a .env file. Here's an example:
 
 ```sh
 PORT=8080
+
 # Generate a random string for jwt-secret
 JWT_SECRET=[jwt-secret]
 
@@ -50,8 +51,10 @@ To start the server locally:
 ```sh
 # setup the database
 make db/reset
+
 # generate code and build server binary
 make build
+
 # run the binary
 make run
 ```
@@ -88,7 +91,7 @@ make live
 I'm currently testing the APIs with [hurl](https://hurl.dev/docs/installation.html). Make sure to have it installed.
 Test setup and tear down are done in [test_integration.sh](https://github.com/quangd42/meal-org/blob/main/scripts/test_integration.sh)
 
-To start, create a new .env in the scripts/ dir:
+To start, create a new .env in the [scripts](scripts) dir:
 
 ```sh
 # Replace [db-user] with your postgres user
