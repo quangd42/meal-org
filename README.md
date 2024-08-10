@@ -63,13 +63,13 @@ make run
 
 ### APIs
 
-Exposed APIs can be found in the [tests](https://github.com/quangd42/meal-org/tree/main/tests/integration) in form of [hurl files](https://hurl.dev/docs/hurl-file.html).
+Exposed APIs can be found in the [tests](tests/integration) in form of [hurl files](https://hurl.dev/docs/hurl-file.html).
 
 ## 🛠️ Local development
 
 ### Live reloading
 
-After setting up the local environment per [quick start](#🚀-quick-start), to develop locally with live reloading on the server:
+After setting up the local environment per [quick start](#-quick-start), to develop locally with live reloading on the server:
 
 ```sh
 make live/server
@@ -89,7 +89,7 @@ make live
 ### Run the tests
 
 I'm currently testing the APIs with [hurl](https://hurl.dev/docs/installation.html). Make sure to have it installed.
-Test setup and tear down are done in [test_integration.sh](https://github.com/quangd42/meal-org/blob/main/scripts/test_integration.sh)
+Test setup and tear down are done in [test_integration.sh](scripts/test_integration.sh)
 
 To start, create a new .env in the [scripts](scripts) dir:
 
