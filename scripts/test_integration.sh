@@ -2,18 +2,15 @@
 
 # Exit immediately if a command exits with a non-zero status
 set -e
+set -a && source .env && set +a
 
 # Database credentials
 DB_NAME="testdb"
-DB_USER="quang-dang"
 DB_PASSWORD=""
 DB_HOST="localhost"
 DB_PORT="5432"
 PORT="3000"
 DATABASE_URL="postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable"
-
-# Export environment variables
-export DB_NAME DB_USER DB_PASSWORD DB_HOST DB_PORT DATABASE_URL PORT
 
 # Function to drop the test database
 cleanup() {

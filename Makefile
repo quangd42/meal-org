@@ -2,7 +2,6 @@
 MAIN_PACKAGE_PATH := .
 BINARY_NAME := planner_server
 SCHEMA_PATH := sql/schema
-PG_DATABASE_URL := postgres://quang-dang:@localhost:5432/postgres?sslmode=disable
 ifneq (,$(wildcard ./.env))
 		include .env
 		export
@@ -51,23 +50,23 @@ sqlc:
 ## db/drop: drop local db
 .PHONY: db/drop
 db/drop:
-	psql ${PG_DATABASE_URL} -c "DROP DATABASE IF EXISTS meal_planner;"
+	psql -h localhost -d postgres -c "DROP DATABASE IF EXISTS ${DB_NAME};"
 
 ## db/create: create local db
 .PHONY: db/create
 db/create:
-	psql ${PG_DATABASE_URL} -c "CREATE DATABASE meal_planner;"
+	psql -h localhost -d postgres -c "CREATE DATABASE ${DB_NAME};"
 
 ## db/reset: reset the local db and setup fresh
 .PHONY: db/reset
 db/reset: db/drop db/create
-	goose -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" up
+	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres ${DATABASE_URL} up
 	./scripts/populate_cuisines/run-local.sh
 
 ## migrate/%: goose migrate
 .PHONY: migrate/%
 migrate/%:
-	goose -dir ${SCHEMA_PATH} postgres "${DATABASE_URL}" $(*)
+	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres ${DATABASE_URL} $(*)
 
 ## test: run all tests
 .PHONY: test
