@@ -1,6 +1,6 @@
 # Change these variables as necessary.
 MAIN_PACKAGE_PATH := .
-BINARY_NAME := planner_server
+BINARY_NAME := mealorg_server
 SCHEMA_PATH := sql/schema
 ifneq (,$(wildcard ./.env))
 		include .env
@@ -45,7 +45,7 @@ audit:
 ## sqlc: generate database code with sqlc
 .PHONY: sqlc
 sqlc:
-	go run github.com/sqlc-dev/sqlc/cmd/sqlc@latest generate
+	go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.26.0 generate
 
 ## db/drop: drop local db
 .PHONY: db/drop
@@ -60,13 +60,13 @@ db/create:
 ## db/reset: reset the local db and setup fresh
 .PHONY: db/reset
 db/reset: db/drop db/create
-	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres ${DATABASE_URL} up
+	./scripts/goose.sh up
 	./scripts/populate_cuisines/run-local.sh
 
 ## migrate/%: goose migrate
 .PHONY: migrate/%
 migrate/%:
-	go run github.com/pressly/goose/v3/cmd/goose@latest -dir ${SCHEMA_PATH} postgres ${DATABASE_URL} $(*)
+	./scripts/goose.sh $(*)
 
 ## test: run all tests
 .PHONY: test
@@ -108,12 +108,14 @@ live/templ:
 live/server:
 	## Config is in .air.toml
 	go run github.com/air-verse/air@v1.52.3 \
-  --build.cmd "go build -o tmp/bin/main && templ generate --notify-proxy" --build.bin "tmp/bin/main" --build.delay "100" \
+  --build.cmd "go build -o tmp/bin/${BINARY_NAME} && templ generate --notify-proxy" \
+	--build.bin "tmp/bin/${BINARY_NAME}" \
+	--build.delay "100" \
   --build.exclude_dir "node_modules,sql,scripts,tests" \
   --build.include_ext "go" \
   --build.exclude_regex "" \
   --build.stop_on_error "false" \
-  --build.post_cmd "pkill main" \
+  --build.post_cmd "pkill ${BINARY_NAME}" \
   --misc.clean_on_exit true
 
 ## live/tailwind: run the application with reloading on file changes
@@ -136,4 +138,4 @@ live/assets:
 ## live: start all watch processes in parallel
 .PHONY: live
 live:
-	make -j4 live/templ live/server live/tailwind live/assets
+	make -j3 live/templ live/server live/tailwind

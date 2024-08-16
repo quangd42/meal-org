@@ -2,6 +2,7 @@
 
 # Exit immediately if a command exits with a non-zero status
 set -e
+# Export all variables from the .env file to the current shell environment
 set -a && source .env && set +a
 
 # Database credentials

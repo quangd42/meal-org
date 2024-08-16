@@ -34,10 +34,9 @@ PORT=8080
 JWT_SECRET=[jwt-secret]
 
 # Replace [db-user] and [db-name] with your local postgres info
-# Note the "" and ${} on DATABASE_URL
 DB_USER=[db-user]
 DB_NAME=[db-name]
-DATABASE_URL="postgres://${DB_USER}:@localhost:5432/${DB_NAME}?sslmode=disable"
+DATABASE_URL=postgres://${DB_USER}:@localhost:5432/${DB_NAME}?sslmode=disable
 ```
 
 You can generate your own JWT_SECRET with a command like this:
