@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/recipes/forms"
 )
 
 templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
@@ -30,47 +31,32 @@ templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 	</form>
 }
 
-templ rowBasicInfo(recipe *models.Recipe) {
+templ basicInfoRow(recipe *models.Recipe) {
 	<div class="space-y-4 pb-4 md:space-y-6">
-		<div>
-			<label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Title</label>
-			<input
-				type="text"
-				name="name"
-				id="name"
-				value={ recipe.Name }
-				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-				placeholder="Give your recipe a title"
-				required
-			/>
-		</div>
-		<div>
-			<label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description (Optional)</label>
-			<textarea
-				name="description"
-				id="description"
-				placeholder="Share the story behind your recipe and what makes it special"
-				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-			>
-				if recipe.Description != nil {
-					{ *recipe.Description }
-				}
-			</textarea>
-		</div>
-		<div>
-			<label for="external_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">External URL (Optional)</label>
-			<input
-				type="text"
-				name="external_url"
-				id="external_url"
-				if recipe.ExternalURL != nil {
-					value={ *recipe.ExternalURL }
-				} else {
-					value=""
-				}
-				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-				placeholder="Link to your recipe from a different source"
-			/>
-		</div>
+		@forms.InputText{
+			Label:       "Title",
+			Name:        "name",
+			Value:       &recipe.Name,
+			Placeholder: "Give your recipe a title",
+			Required:    true,
+		}.Render()
+		@forms.Textarea{
+			Label:       "Description",
+			Name:        "description",
+			Value:       recipe.Description,
+			Placeholder: "Share the story behind your recipe and what makes it special",
+			Required:    false,
+		}.Render()
+		@forms.InputText{
+			Label:       "External URL",
+			Name:        "external_url",
+			Value:       recipe.ExternalURL,
+			Placeholder: "Link to your recipe from a different source",
+			Required:    false,
+		}.Render()
 	</div>
+}
+
+templ metadataRow(recipe *models.Recipe) {
+	<div class="space-y-4 pb-4 md:space-y-6"></div>
 }
