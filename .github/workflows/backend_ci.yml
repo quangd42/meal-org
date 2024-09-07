@@ -45,7 +45,7 @@ jobs:
         run: make build/prod
 
       - name: Run the application
-        run: ./bin/planner_server &
+        run: make run/prod &
 
       - name: Run db migration
         run: |

@@ -96,7 +96,12 @@ build/prod:
 ## run: run the application locally
 .PHONY: run
 run: build
-	/tmp/bin/${BINARY_NAME}
+	./tmp/bin/${BINARY_NAME}
+
+## run/prod: run command for prod
+.PHONY: run/prod
+run/prod: build/prod
+	./bin/${BINARY_NAME}
 
 ## live/templ: run templ generation in watch mode to detect all .templ changes
 .PHONY: live/templ
