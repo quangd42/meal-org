@@ -1,0 +1,37 @@
+package recipes
+
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
+)
+
+type EditRecipeVM struct {
+	shared.CommonVM
+	Recipe models.Recipe
+}
+
+func NewEditRecipeVM(userID uuid.UUID, navItems []models.NavItem, recipe models.Recipe, errs map[string]any) EditRecipeVM {
+	return EditRecipeVM{
+		CommonVM: shared.CommonVM{
+			Title:    "Submit a Recipe",
+			UserID:   userID,
+			NavItems: navItems,
+			Errors:   errs,
+		},
+		Recipe: recipe,
+	}
+}
+
+templ EditRecipePage(vm EditRecipeVM) {
+	@shared.Layout(vm.Title, vm.NavItems) {
+		<h1 class="mb-5 text-center">Update Recipe</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+			<section class="col-span-1 px-4 md:col-span-2 md:col-start-2 md:col-end-4">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					@RecipeForm(&vm.Recipe, vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}

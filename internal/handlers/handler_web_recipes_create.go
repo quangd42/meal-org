@@ -9,7 +9,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/views"
+	views "github.com/quangd42/meal-planner/internal/views/recipes"
 )
 
 func addRecipePageHandler(sm *scs.SessionManager, rds RendererService, rs RecipeService) http.HandlerFunc {
@@ -33,7 +33,7 @@ func addRecipePageHandler(sm *scs.SessionManager, rds RendererService, rs Recipe
 				return
 			}
 
-			render(w, r, views.RecipePostResponse(recipe.Name))
+			render(w, r, views.RecipePostResponse(recipe.Name, true))
 			return
 		}
 

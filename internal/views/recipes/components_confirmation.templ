@@ -1,0 +1,27 @@
+package recipes
+
+templ RecipePostResponse(title string, isNew bool) {
+	<div class="space-y-4 pb-4 md:space-y-6">
+		<hr/>
+		<h2 class="text-xl font-semibold dark:text-white capitalize">
+			Recipe { textSavedUpdate(isNew) }!
+		</h2>
+		<p class="mb-8">
+			Your recipe <strong><em>{ title }</em></strong> was { textSavedUpdate(isNew) } successfully. What would you like to do next?
+		</p>
+		<a href="/recipes/add" class="mb-2 me-2 rounded-lg border border-blue-700 px-5 py-2.5 text-center text-sm font-medium text-blue-700 hover:bg-blue-800 hover:text-white focus:outline-none focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:bg-blue-500 dark:hover:text-white dark:focus:ring-blue-800">Add Another Recipe</a>
+		<a href="/recipes" class="inline-flex items-center rounded-lg text-center text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
+			See All Recipes
+			<svg class="ms-2 h-3.5 w-3.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+				<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"></path>
+			</svg>
+		</a>
+	</div>
+}
+
+func textSavedUpdate(isNew bool) string {
+	if isNew {
+		return "saved"
+	}
+	return "updated"
+}

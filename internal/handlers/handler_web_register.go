@@ -10,7 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
-	"github.com/quangd42/meal-planner/internal/views"
+	views "github.com/quangd42/meal-planner/internal/views/auth"
 )
 
 func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserService) http.HandlerFunc {

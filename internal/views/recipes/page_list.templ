@@ -1,24 +1,25 @@
-package views
+package recipes
 
 import (
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
 )
 
 type ListRecipesVM struct {
-	CommonVM
+	shared.CommonVM
 	Recipes []models.RecipeInList
 }
 
 func NewListRecipesVM(navItems []models.NavItem, recipes []models.RecipeInList, errs map[string]any) ListRecipesVM {
 	return ListRecipesVM{
-		CommonVM: CommonVM{Title: "All Recipes", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
+		CommonVM: shared.CommonVM{Title: "All Recipes", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
 		Recipes:  recipes,
 	}
 }
 
 templ ListRecipesPage(vm ListRecipesVM) {
-	@Layout(vm.Title, vm.NavItems) {
+	@shared.Layout(vm.Title, vm.NavItems) {
 		<h1 class="text-center">All Recipes</h1>
 		@RecipeGrid(vm.Recipes)
 	}

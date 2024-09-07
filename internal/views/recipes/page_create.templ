@@ -1,0 +1,38 @@
+package recipes
+
+import (
+	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
+)
+
+type AddRecipeVM struct {
+	shared.CommonVM
+}
+
+func NewAddRecipeVM(userID uuid.UUID, navItems []models.NavItem, errs map[string]any) AddRecipeVM {
+	return AddRecipeVM{
+		shared.CommonVM{
+			Title:    "Submit a Recipe",
+			UserID:   userID,
+			NavItems: navItems,
+			Errors:   errs,
+		},
+	}
+}
+
+templ AddRecipePage(vm AddRecipeVM) {
+	@shared.Layout(vm.Title, vm.NavItems) {
+		<h1 class="mb-5 text-center">Add a Recipe</h1>
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+			<section class="col-span-1 px-4 md:col-span-2 md:col-start-2 md:col-end-4">
+				<div class="bg-white p-6 shadow-md sm:rounded-lg">
+					<p class="mb-6">
+						Uploading personal recipes is easy! Add yours to your favorites, share with friends, family!
+					</p>
+					@RecipeForm(nil, vm.Errors)
+				</div>
+			</section>
+		</div>
+	}
+}
