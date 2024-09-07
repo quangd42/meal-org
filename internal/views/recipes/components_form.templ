@@ -17,7 +17,7 @@ templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 		hx-swap="outerHTML"
 		class="space-y-4 md:space-y-6"
 	>
-		@rowBasicInfo(recipe)
+		@basicInfoRow(recipe)
 		<div class="flex flex-row">
 			<button type="submit" class="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
 				if recipe.ID != uuid.Nil {
@@ -34,25 +34,31 @@ templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 templ basicInfoRow(recipe *models.Recipe) {
 	<div class="space-y-4 pb-4 md:space-y-6">
 		@forms.InputText{
-			Label:       "Title",
-			Name:        "name",
-			Value:       &recipe.Name,
-			Placeholder: "Give your recipe a title",
-			Required:    true,
+			InputBase: forms.InputBase{
+				Label:       "Title",
+				Name:        "name",
+				Placeholder: "Give your recipe a title",
+				Required:    true,
+			},
+			Value: &recipe.Name,
 		}.Render()
 		@forms.Textarea{
-			Label:       "Description",
-			Name:        "description",
-			Value:       recipe.Description,
-			Placeholder: "Share the story behind your recipe and what makes it special",
-			Required:    false,
+			InputBase: forms.InputBase{
+				Label:       "Description",
+				Name:        "description",
+				Placeholder: "Share the story behind your recipe and what makes it special",
+				Required:    false,
+			},
+			Value: recipe.Description,
 		}.Render()
 		@forms.InputText{
-			Label:       "External URL",
-			Name:        "external_url",
-			Value:       recipe.ExternalURL,
-			Placeholder: "Link to your recipe from a different source",
-			Required:    false,
+			InputBase: forms.InputBase{
+				Label:       "External URL",
+				Name:        "external_url",
+				Placeholder: "Link to your recipe from a different source",
+				Required:    false,
+			},
+			Value: recipe.ExternalURL,
 		}.Render()
 	</div>
 }
