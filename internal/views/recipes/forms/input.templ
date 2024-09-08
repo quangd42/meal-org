@@ -14,21 +14,12 @@ type InputText struct {
 	Value *string
 }
 
-type InputNumInt struct {
-	InputBase
-	Value *int
-}
-
-type InputNumFloat struct {
-	InputBase
-	Value *float32
-}
-
+// HACK: instead of isRequiredStyling for label, using direct templ.KV() so that tailwind will gen correct css.
 templ (params InputText) Render() {
 	<div>
 		<label
 			for={ params.Name }
-			class={ "mb-2 block text-sm font-medium text-gray-900 dark:text-white", isRequiredStyling(params.Required) }
+			class={ "mb-2 block text-sm font-medium text-gray-900 dark:text-white", templ.KV("after:content-['_*'] after:text-red-500", params.Required) }
 		>{ params.Label }</label>
 		<input
 			type="text"
@@ -44,6 +35,11 @@ templ (params InputText) Render() {
 			required?={ params.Required }
 		/>
 	</div>
+}
+
+type InputNumInt struct {
+	InputBase
+	Value *int
 }
 
 templ (params InputNumInt) Render() {
@@ -64,6 +60,11 @@ templ (params InputNumInt) Render() {
 			required?={ params.Required }
 		/>
 	</div>
+}
+
+type InputNumFloat struct {
+	InputBase
+	Value *float32
 }
 
 templ (params InputNumFloat) Render() {
