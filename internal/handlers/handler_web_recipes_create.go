@@ -33,6 +33,8 @@ func addRecipePageHandler(sm *scs.SessionManager, rds RendererService, rs Recipe
 				return
 			}
 
+			go rs.SaveExternalImage(recipe.ID, recipe.ExternalURL)
+
 			render(w, r, views.RecipePostResponse(recipe.Name, true))
 			return
 		}
