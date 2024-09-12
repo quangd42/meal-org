@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -200,6 +199,7 @@ func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUI
 			UpdatedAt:         r.UpdatedAt,
 			Name:              r.Name,
 			ExternalURL:       r.ExternalUrl,
+			ExternalImageURL:  r.ExternalImageUrl,
 			Description:       r.Description,
 			UserID:            r.UserID,
 			Servings:          int(r.Servings),
@@ -229,6 +229,7 @@ func (rs RecipeService) ListRecipesWithCuisinesByUserID(ctx context.Context, use
 			UpdatedAt:         r.UpdatedAt,
 			Name:              r.Name,
 			ExternalURL:       r.ExternalUrl,
+			ExternalImageURL:  r.ExternalImageUrl,
 			Description:       r.Description,
 			UserID:            r.UserID,
 			Servings:          int(r.Servings),
@@ -495,22 +496,19 @@ func updateInstructionsInRecipe(ctx context.Context, qtx *database.Queries, para
 func (rs RecipeService) SaveExternalImage(recipeID uuid.UUID, url *string) {
 	ctx := context.Background()
 	if url == nil {
-		fmt.Println("url is nil")
 		return
 	}
 	imageURL, err := fetchOGImage(*url)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err, url)
 	}
-	fmt.Println(imageURL)
 	err = rs.store.Q.SaveExternalImageURL(ctx, database.SaveExternalImageURLParams{
 		ID:               recipeID,
 		ExternalImageUrl: &imageURL,
 	})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err, url)
 	}
-	fmt.Println("done")
 }
 
 func fetchOGImage(url string) (string, error) {
@@ -521,7 +519,7 @@ func fetchOGImage(url string) (string, error) {
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	// req.Header.Set("User-Agent", agent)
@@ -538,23 +536,16 @@ func fetchOGImage(url string) (string, error) {
 	// make the http request
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
-		fmt.Println(err)
+		log.Println(err, url)
 	}
 	defer resp.Body.Close()
 
 	// decompress the response
 	reader, err := gzip.NewReader(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err, url)
 	}
 	defer reader.Close()
-
-	// read the decompressed resp body
-	// body, err := io.ReadAll(reader)
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
 
 	err = og.ProcessHTML(reader)
 	if err != nil {
@@ -562,7 +553,6 @@ func fetchOGImage(url string) (string, error) {
 	}
 
 	if len(og.Images) == 0 {
-		fmt.Println("no images")
 		return "", errors.New("no OG image")
 	}
 

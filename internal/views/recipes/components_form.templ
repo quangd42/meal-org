@@ -2,12 +2,13 @@ package recipes
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 )
 
 templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 	<form
-		if recipe != nil {
+		if recipe.ID != uuid.Nil {
 			hx-post={ string(templ.URL(fmt.Sprintf("/recipes/%s", recipe.ID.String()))) }
 		} else {
 			hx-post={ string(templ.URL("/recipes")) }
@@ -15,13 +16,13 @@ templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 		hx-swap="outerHTML"
 		class="space-y-4 md:space-y-6"
 	>
-	   @rowBasicInfo(recipe)
+		@rowBasicInfo(recipe)
 		<div class="flex flex-row">
 			<button type="submit" class="rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-				if recipe != nil {
-					Save
-				} else {
+				if recipe.ID != uuid.Nil {
 					Update
+				} else {
+					Save
 				}
 			</button>
 			<p id="error-msg" class="ml-2"></p>
@@ -30,46 +31,46 @@ templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
 }
 
 templ rowBasicInfo(recipe *models.Recipe) {
-    <div class="space-y-4 pb-4 md:space-y-6">
-			<div>
-				<label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Title</label>
-				<input
-					type="text"
-					name="name"
-					id="name"
-					value={ recipe.Name }
-					class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-					placeholder="Give your recipe a title"
-					required
-				/>
-			</div>
-			<div>
-				<label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description (Optional)</label>
-				<textarea
-					name="description"
-					id="description"
-					placeholder="Share the story behind your recipe and what makes it special"
-					class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-				>
-					if recipe.Description != nil {
-						{ *recipe.Description }
-					}
-				</textarea>
-			</div>
-			<div>
-				<label for="external_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">External URL (Optional)</label>
-				<input
-					type="text"
-					name="external_url"
-					id="external_url"
-					if recipe.ExternalURL != nil {
-						value={ *recipe.ExternalURL }
-					} else {
-						value=""
-					}
-					class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
-					placeholder="Link to your recipe from a different source"
-				/>
-			</div>
+	<div class="space-y-4 pb-4 md:space-y-6">
+		<div>
+			<label for="name" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Title</label>
+			<input
+				type="text"
+				name="name"
+				id="name"
+				value={ recipe.Name }
+				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+				placeholder="Give your recipe a title"
+				required
+			/>
 		</div>
+		<div>
+			<label for="description" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Description (Optional)</label>
+			<textarea
+				name="description"
+				id="description"
+				placeholder="Share the story behind your recipe and what makes it special"
+				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+			>
+				if recipe.Description != nil {
+					{ *recipe.Description }
+				}
+			</textarea>
+		</div>
+		<div>
+			<label for="external_url" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">External URL (Optional)</label>
+			<input
+				type="text"
+				name="external_url"
+				id="external_url"
+				if recipe.ExternalURL != nil {
+					value={ *recipe.ExternalURL }
+				} else {
+					value=""
+				}
+				class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+				placeholder="Link to your recipe from a different source"
+			/>
+		</div>
+	</div>
 }

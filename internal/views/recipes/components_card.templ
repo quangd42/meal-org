@@ -1,10 +1,18 @@
 package recipes
 
-templ RecipeCard(id, name, url, cuisines string) {
+templ RecipeCard(id, name, url string, imageURL *string, cuisines string) {
 	<div hx-target="closest .recipe-card" hx-swap="outerHTML" class="recipe-card rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
 		<div class="h-56 w-full">
 			<a href={ templ.URL(url) } target="_blank">
-				<img class="mx-auto h-full object-cover dark:hidden" src="/assets/img/mise-en-plase.jpg" alt="recipe"/>
+				<img
+					class="mx-auto h-full object-cover dark:hidden"
+					if imageURL != nil {
+						src={ string(templ.URL(*imageURL)) }
+					} else {
+						src="/assets/img/mise-en-plase.jpg"
+						alt="recipe"
+					}
+				/>
 			</a>
 		</div>
 		<div class="pt-6">

@@ -7,7 +7,7 @@ templ RecipeGrid(recipes []models.RecipeInList) {
 		<div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
 			<div class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
 				for _, r := range recipes {
-					@RecipeCard(r.ID.String(), r.Name, *r.ExternalURL, r.Cuisines)
+					@RecipeCard(r.ID.String(), r.Name, *r.ExternalURL, r.ExternalImageURL, r.Cuisines)
 				}
 			</div>
 		</div>
