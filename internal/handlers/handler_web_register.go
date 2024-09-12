@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/go-playground/validator/v10"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/models/validator"
 	"github.com/quangd42/meal-planner/internal/services"
 	views "github.com/quangd42/meal-planner/internal/views/auth"
 )
@@ -19,9 +18,10 @@ func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserSer
 			errs := make(map[string]any)
 			ur, err := decodeFormValidate[models.CreateUserRequest](r)
 			if err != nil {
-				for _, err := range err.(validator.ValidationErrors) {
-					errName := strings.ToLower(fmt.Sprintf("%s-%s", err.Field(), err.Tag()))
-					errs[errName] = true
+				for errName, errMsg := range err.(validator.ValidationErrors) {
+					// errName := strings.ToLower(fmt.Sprintf("%s-%s", err.Field(), err.Tag()))
+					fmt.Println(errName)
+					errs[errName] = errMsg
 				}
 				render(w, r, views.RegisterForm(errs))
 				return
@@ -39,7 +39,6 @@ func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserSer
 			}
 
 			sm.Put(r.Context(), "userID", user.ID)
-			w.WriteHeader(http.StatusNoContent)
 			w.Header().Set("HX-Redirect", fmt.Sprintf("http://%s/", r.Host))
 			return
 		}

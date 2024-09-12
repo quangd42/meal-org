@@ -60,7 +60,7 @@ func ValidateStruct(s interface{}) error {
 			default:
 				msg = err.Tag()
 			}
-			valErrs[err.Field()] = append(valErrs[err.Field()], msg)
+			valErrs[fmt.Sprintf("%s-%s", err.Field(), err.Tag())] = append(valErrs[err.Field()], msg)
 		}
 
 		return valErrs
