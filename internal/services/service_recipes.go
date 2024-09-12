@@ -1,10 +1,14 @@
 package services
 
 import (
+	"compress/gzip"
 	"context"
 	"errors"
+	"log"
+	"net/http"
 	"time"
 
+	"github.com/dyatlov/go-opengraph/opengraph"
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/database"
 	"github.com/quangd42/meal-planner/internal/models"
@@ -195,6 +199,7 @@ func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUI
 			UpdatedAt:         r.UpdatedAt,
 			Name:              r.Name,
 			ExternalURL:       r.ExternalUrl,
+			ExternalImageURL:  r.ExternalImageUrl,
 			Description:       r.Description,
 			UserID:            r.UserID,
 			Servings:          int(r.Servings),
@@ -224,6 +229,7 @@ func (rs RecipeService) ListRecipesWithCuisinesByUserID(ctx context.Context, use
 			UpdatedAt:         r.UpdatedAt,
 			Name:              r.Name,
 			ExternalURL:       r.ExternalUrl,
+			ExternalImageURL:  r.ExternalImageUrl,
 			Description:       r.Description,
 			UserID:            r.UserID,
 			Servings:          int(r.Servings),
@@ -485,4 +491,70 @@ func updateInstructionsInRecipe(ctx context.Context, qtx *database.Queries, para
 	}
 
 	return dbInstructions, nil
+}
+
+func (rs RecipeService) SaveExternalImage(recipeID uuid.UUID, url *string) {
+	ctx := context.Background()
+	if url == nil {
+		return
+	}
+	imageURL, err := fetchOGImage(*url)
+	if err != nil {
+		log.Println(err, url)
+	}
+	err = rs.store.Q.SaveExternalImageURL(ctx, database.SaveExternalImageURLParams{
+		ID:               recipeID,
+		ExternalImageUrl: &imageURL,
+	})
+	if err != nil {
+		log.Println(err, url)
+	}
+}
+
+func fetchOGImage(url string) (string, error) {
+	og := opengraph.NewOpenGraph()
+
+	agent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0"
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// req.Header.Set("User-Agent", agent)
+	// req.Header.Set("Accept-Encoding", "gzip, deflate")
+	// req.Header.Set("Accept", "*/*")
+	// req.Header.Set("Connection", "keep-alive")
+	req.Header = http.Header{
+		"User-Agent":      {agent},
+		"Accept-Encoding": {"gzip, deflate"},
+		"Accept":          {"*/*"},
+		"Connection":      {"keep-alive"},
+	}
+
+	// make the http request
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Println(err, url)
+	}
+	defer resp.Body.Close()
+
+	// decompress the response
+	reader, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		log.Println(err, url)
+	}
+	defer reader.Close()
+
+	err = og.ProcessHTML(reader)
+	if err != nil {
+		return "", errors.New("html cannot be processed")
+	}
+
+	if len(og.Images) == 0 {
+		return "", errors.New("no OG image")
+	}
+
+	return og.Images[0].URL, nil
 }

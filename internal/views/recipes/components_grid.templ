@@ -1,0 +1,16 @@
+package recipes
+
+import "github.com/quangd42/meal-planner/internal/models"
+
+templ RecipeGrid(recipes []models.RecipeInList) {
+	<section class="bg-gray-50 py-8 antialiased dark:bg-gray-900 md:py-12">
+		<div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
+			<div class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
+				for _, r := range recipes {
+					@RecipeCard(r.ID.String(), r.Name, *r.ExternalURL, r.ExternalImageURL, r.Cuisines)
+				}
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	</section>
+}

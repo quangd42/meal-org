@@ -45,6 +45,7 @@ type Recipe struct {
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
 	UserID            uuid.UUID `json:"user_id"`
+	ExternalImageUrl  *string   `json:"external_image_url"`
 }
 
 type RecipeCuisine struct {

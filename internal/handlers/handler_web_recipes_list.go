@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/quangd42/meal-planner/internal/views"
+	views "github.com/quangd42/meal-planner/internal/views/recipes"
 )
 
 func listRecipesPageHandler(sm *scs.SessionManager, rds RendererService, rs RecipeService) http.HandlerFunc {

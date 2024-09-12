@@ -1,22 +1,23 @@
-package views
+package auth
 
 import (
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
 )
 
 type RegisterVM struct {
-	CommonVM
+	shared.CommonVM
 }
 
 func NewRegisterVM(navItems []models.NavItem, errs map[string]any) RegisterVM {
 	return RegisterVM{
-		CommonVM: CommonVM{Title: "Sign Up", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
+		CommonVM: shared.CommonVM{Title: "Sign Up", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
 	}
 }
 
 templ RegisterPage(vm RegisterVM) {
-	@Layout(vm.Title, vm.NavItems) {
+	@shared.Layout(vm.Title, vm.NavItems) {
 		<h1 class="mb-10 text-center">Sign Up</h1>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 			<section class="col-span-1 px-4 md:col-span-1 md:col-start-2 md:col-end-2">

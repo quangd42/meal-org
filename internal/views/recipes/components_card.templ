@@ -1,12 +1,18 @@
-package views
+package recipes
 
-import "github.com/quangd42/meal-planner/internal/models"
-
-templ RecipeCard(id, name, url, cuisines string) {
+templ RecipeCard(id, name, url string, imageURL *string, cuisines string) {
 	<div hx-target="closest .recipe-card" hx-swap="outerHTML" class="recipe-card rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
 		<div class="h-56 w-full">
 			<a href={ templ.URL(url) } target="_blank">
-				<img class="mx-auto h-full object-cover dark:hidden" src="/assets/img/mise-en-plase.jpg" alt="recipe"/>
+				<img
+					class="mx-auto h-full object-cover dark:hidden"
+					if imageURL != nil {
+						src={ string(templ.URL(*imageURL)) }
+					} else {
+						src="/assets/img/mise-en-plase.jpg"
+						alt="recipe"
+					}
+				/>
 			</a>
 		</div>
 		<div class="pt-6">
@@ -24,24 +30,11 @@ templ RecipeCard(id, name, url, cuisines string) {
 				hx-trigger="confirmed"
 				onClick="Swal.fire({title: 'Confirm', text:'Are you sure?'}).then((result)=>{
             if(result.isConfirmed){
-              htmx.trigger(this, 'confirmed');  
-            } 
+              htmx.trigger(this, 'confirmed');
+            }
         })"
 				class="ms-2 rounded-lg border border-red-700 px-4 py-2 text-center text-sm font-medium text-red-700 hover:bg-red-800 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-300 dark:border-red-500 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-900"
 			>Delete</button>
 		</div>
 	</div>
-}
-
-templ RecipeGrid(recipes []models.RecipeInList) {
-	<section class="bg-gray-50 py-8 antialiased dark:bg-gray-900 md:py-12">
-		<div class="mx-auto max-w-screen-xl px-4 2xl:px-0">
-			<div class="mb-4 grid gap-4 sm:grid-cols-2 md:mb-8 lg:grid-cols-3 xl:grid-cols-4">
-				for _, r := range recipes {
-					@RecipeCard(r.ID.String(), r.Name, *r.ExternalURL, r.Cuisines)
-				}
-			</div>
-		</div>
-		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	</section>
 }

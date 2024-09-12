@@ -1,17 +1,18 @@
-package views
+package auth
 
 import (
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
 )
 
 type LoginVM struct {
-	CommonVM
+	shared.CommonVM
 }
 
 func NewLoginVM(navItems []models.NavItem, errs map[string]any) LoginVM {
 	return LoginVM{
-		CommonVM: CommonVM{
+		CommonVM: shared.CommonVM{
 			Title:    "Login",
 			UserID:   uuid.Nil,
 			NavItems: navItems,
@@ -21,7 +22,7 @@ func NewLoginVM(navItems []models.NavItem, errs map[string]any) LoginVM {
 }
 
 templ LoginPage(vm LoginVM) {
-	@Layout(vm.Title, vm.NavItems) {
+	@shared.Layout(vm.Title, vm.NavItems) {
 		<h1 class="mb-10 text-center">Login</h1>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 			<section class="col-span-1 px-4 md:col-span-1 md:col-start-2 md:col-end-2">

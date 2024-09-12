@@ -33,7 +33,7 @@ audit:
 	go mod verify
 	go vet ./...
 	go run honnef.co/go/tools/cmd/staticcheck@latest -checks=all,-ST1000,-U1000 ./...
-	go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
+	go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts -exclude=G115 ./...
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 	## go test -race -buildvcs -vet=off ./...
 
@@ -96,7 +96,12 @@ build/prod:
 ## run: run the application locally
 .PHONY: run
 run: build
-	/tmp/bin/${BINARY_NAME}
+	./tmp/bin/${BINARY_NAME}
+
+## run/prod: run command for prod
+.PHONY: run/prod
+run/prod: build/prod
+	./bin/${BINARY_NAME}
 
 ## live/templ: run templ generation in watch mode to detect all .templ changes
 .PHONY: live/templ

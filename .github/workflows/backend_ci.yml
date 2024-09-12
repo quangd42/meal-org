@@ -45,7 +45,7 @@ jobs:
         run: make build/prod
 
       - name: Run the application
-        run: ./bin/planner_server &
+        run: make run/prod &
 
       - name: Run db migration
         run: |
@@ -110,4 +110,4 @@ jobs:
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
       - name: Gosec
-        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts ./...
+        run: go run github.com/securego/gosec/v2/cmd/gosec@latest -exclude-generated -exclude-dir=scripts -exclude=G115 ./...

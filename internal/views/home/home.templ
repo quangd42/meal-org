@@ -1,22 +1,23 @@
-package views
+package home
 
 import (
 	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-planner/internal/views/shared"
 )
 
 type HomeVM struct {
-	CommonVM
+	shared.CommonVM
 }
 
 func NewHomeVM(userID uuid.UUID, navItems []models.NavItem) HomeVM {
 	return HomeVM{
-		CommonVM{Title: "Homepage", UserID: userID, NavItems: navItems},
+		shared.CommonVM{Title: "Homepage", UserID: userID, NavItems: navItems},
 	}
 }
 
 templ Home(vm HomeVM) {
-	@Layout(vm.Title, vm.NavItems) {
+	@shared.Layout(vm.Title, vm.NavItems) {
 		<h1>
 			Hello World!
 		</h1>
