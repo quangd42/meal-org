@@ -63,3 +63,8 @@ LIMIT
 -- name: DeleteRecipe :exec
 DELETE FROM recipes
 WHERE id = $1;
+
+-- name: SaveExternalImageURL :exec
+UPDATE recipes
+SET external_image_url = $2
+WHERE id = $1;

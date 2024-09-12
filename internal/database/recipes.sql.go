@@ -27,7 +27,7 @@ INSERT INTO recipes (
   notes
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
+RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id, external_image_url
 `
 
 type CreateRecipeParams struct {
@@ -71,6 +71,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		&i.CookTimeInMinutes,
 		&i.Notes,
 		&i.UserID,
+		&i.ExternalImageUrl,
 	)
 	return i, err
 }
@@ -86,7 +87,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id uuid.UUID) error {
 }
 
 const getRecipeByID = `-- name: GetRecipeByID :one
-SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id FROM recipes
+SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id, external_image_url FROM recipes
 WHERE id = $1
 `
 
@@ -105,12 +106,13 @@ func (q *Queries) GetRecipeByID(ctx context.Context, id uuid.UUID) (Recipe, erro
 		&i.CookTimeInMinutes,
 		&i.Notes,
 		&i.UserID,
+		&i.ExternalImageUrl,
 	)
 	return i, err
 }
 
 const listRecipesByUserID = `-- name: ListRecipesByUserID :many
-SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
+SELECT id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id, external_image_url
 FROM recipes
 WHERE user_id = $1
 ORDER BY name
@@ -146,6 +148,7 @@ func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUser
 			&i.CookTimeInMinutes,
 			&i.Notes,
 			&i.UserID,
+			&i.ExternalImageUrl,
 		); err != nil {
 			return nil, err
 		}
@@ -159,7 +162,7 @@ func (q *Queries) ListRecipesByUserID(ctx context.Context, arg ListRecipesByUser
 
 const listRecipesWithCuisinesByUserID = `-- name: ListRecipesWithCuisinesByUserID :many
 SELECT
-  r.id, r.created_at, r.updated_at, r.external_url, r.name, r.description, r.servings, r.yield, r.cook_time_in_minutes, r.notes, r.user_id,
+  r.id, r.created_at, r.updated_at, r.external_url, r.name, r.description, r.servings, r.yield, r.cook_time_in_minutes, r.notes, r.user_id, r.external_image_url,
   string_agg(c.name, ', ') AS cuisines
 FROM
   recipes r
@@ -194,6 +197,7 @@ type ListRecipesWithCuisinesByUserIDRow struct {
 	CookTimeInMinutes int32     `json:"cook_time_in_minutes"`
 	Notes             *string   `json:"notes"`
 	UserID            uuid.UUID `json:"user_id"`
+	ExternalImageUrl  *string   `json:"external_image_url"`
 	Cuisines          []byte    `json:"cuisines"`
 }
 
@@ -218,6 +222,7 @@ func (q *Queries) ListRecipesWithCuisinesByUserID(ctx context.Context, arg ListR
 			&i.CookTimeInMinutes,
 			&i.Notes,
 			&i.UserID,
+			&i.ExternalImageUrl,
 			&i.Cuisines,
 		); err != nil {
 			return nil, err
@@ -228,6 +233,22 @@ func (q *Queries) ListRecipesWithCuisinesByUserID(ctx context.Context, arg ListR
 		return nil, err
 	}
 	return items, nil
+}
+
+const saveExternalImageURL = `-- name: SaveExternalImageURL :exec
+UPDATE recipes
+SET external_image_url = $2
+WHERE id = $1
+`
+
+type SaveExternalImageURLParams struct {
+	ID               uuid.UUID `json:"id"`
+	ExternalImageUrl *string   `json:"external_image_url"`
+}
+
+func (q *Queries) SaveExternalImageURL(ctx context.Context, arg SaveExternalImageURLParams) error {
+	_, err := q.db.Exec(ctx, saveExternalImageURL, arg.ID, arg.ExternalImageUrl)
+	return err
 }
 
 const updateRecipeByID = `-- name: UpdateRecipeByID :one
@@ -242,7 +263,7 @@ SET
   cook_time_in_minutes = $7,
   notes = $8
 WHERE id = $1
-RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id
+RETURNING id, created_at, updated_at, external_url, name, description, servings, yield, cook_time_in_minutes, notes, user_id, external_image_url
 `
 
 type UpdateRecipeByIDParams struct {
@@ -282,6 +303,7 @@ func (q *Queries) UpdateRecipeByID(ctx context.Context, arg UpdateRecipeByIDPara
 		&i.CookTimeInMinutes,
 		&i.Notes,
 		&i.UserID,
+		&i.ExternalImageUrl,
 	)
 	return i, err
 }

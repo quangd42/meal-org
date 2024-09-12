@@ -31,6 +31,7 @@ type Recipe struct {
 	UpdatedAt         time.Time             `json:"updated_at"`
 	Name              string                `json:"name"`
 	ExternalURL       *string               `json:"external_url"`
+	ExternalImageURL  *string               `json:"external_image_url"`
 	Description       *string               `json:"description"`
 	UserID            uuid.UUID             `json:"user_id"`
 	Servings          int                   `json:"servings"`
@@ -66,6 +67,7 @@ type RecipeInList struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 	Name              string    `json:"name"`
 	ExternalURL       *string   `json:"external_url"`
+	ExternalImageURL  *string   `json:"external_image_url"`
 	Description       *string   `json:"description"`
 	Cuisines          string    `json:"cuisines"`
 	UserID            uuid.UUID `json:"user_id"`
