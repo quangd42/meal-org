@@ -56,13 +56,9 @@ templ basicInfoRow(recipe *models.Recipe) {
 				Label:       "External URL",
 				Name:        "external_url",
 				Placeholder: "Link to your recipe from a different source",
-				Required:    false,
+				Required:    true,
 			},
 			Value: recipe.ExternalURL,
 		}.Render()
 	</div>
-}
-
-templ metadataRow(recipe *models.Recipe) {
-	<div class="space-y-4 pb-4 md:space-y-6"></div>
 }

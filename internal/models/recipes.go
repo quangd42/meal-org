@@ -10,7 +10,7 @@ import (
 
 type RecipeRequest struct {
 	Name              string                `json:"name" validate:"required"`
-	ExternalURL       *string               `json:"external_url"`
+	ExternalURL       *string               `json:"external_url" validate:"required"`
 	Description       *string               `json:"description"`
 	Servings          int                   `json:"servings" validate:"required"`
 	Yield             *string               `json:"yield"`
