@@ -1,0 +1,28 @@
+package forms
+
+type InputDuration struct {
+	InputBase
+	Value *int
+}
+
+templ (params InputDuration) Render() {
+	<div class="flex flex-row space-x-2">
+		@InputNumInt{
+			InputBase: params.InputBase,
+			Value:     params.Value,
+		}.Render()
+		<div class="pt-5">
+			@Dropdown{
+				InputBase: InputBase{
+					Label: "",
+					Name:  params.Name + "_unit",
+				},
+				Options: DropdownOptions{
+					"minutes": "Minutes",
+					"hours":   "Hours",
+					"days":    "Days",
+				},
+			}.Render()
+		</div>
+	</div>
+}

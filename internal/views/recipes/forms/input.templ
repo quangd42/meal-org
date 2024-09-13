@@ -1,0 +1,91 @@
+package forms
+
+import "strconv"
+
+type InputBase struct {
+	Label       string
+	Name        string
+	Placeholder string
+	Required    bool
+}
+
+type InputText struct {
+	InputBase
+	Value *string
+}
+
+// HACK: instead of isRequiredStyling for label, using direct templ.KV() so that tailwind will gen correct css.
+templ (params InputText) Render() {
+	<div>
+		<label
+			for={ params.Name }
+			class={ "mb-2 block text-sm font-medium text-gray-900 dark:text-white", templ.KV("after:content-['_*'] after:text-red-500", params.Required) }
+		>{ params.Label }</label>
+		<input
+			type="text"
+			name={ params.Name }
+			id={ params.Name }
+			if params.Value != nil {
+				value={ *params.Value }
+			} else {
+				value=""
+			}
+			class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+			placeholder={ params.Placeholder }
+			required?={ params.Required }
+		/>
+	</div>
+}
+
+type InputNumInt struct {
+	InputBase
+	Value *int
+}
+
+templ (params InputNumInt) Render() {
+	<div>
+		<label
+			for={ params.Name }
+			class={ "mb-2 block text-sm font-medium text-gray-900 dark:text-white", isRequiredStyling(params.Required) }
+		>{ params.Label }</label>
+		<input
+			type="number"
+			name={ params.Name }
+			id={ params.Name }
+			if params.Value != nil && *params.Value != 0 {
+				value={ strconv.FormatInt(int64(*params.Value), 10) }
+			}
+			class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+			placeholder={ params.Placeholder }
+			required?={ params.Required }
+		/>
+	</div>
+}
+
+type InputNumFloat struct {
+	InputBase
+	Value *float32
+}
+
+templ (params InputNumFloat) Render() {
+	<div>
+		<label
+			for={ params.Name }
+			class={ "mb-2 block text-sm font-medium text-gray-900 dark:text-white", isRequiredStyling(params.Required) }
+		>{ params.Label }</label>
+		<input
+			type="number"
+			name={ params.Name }
+			id={ params.Name }
+			if params.Value != nil && *params.Value != 0 {
+				value={ strconv.FormatFloat(float64(*params.Value), 'f', -1, 32) }
+			} else {
+				value=""
+			}
+			step="0.01"
+			class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"
+			placeholder={ params.Placeholder }
+			required?={ params.Required }
+		/>
+	</div>
+}

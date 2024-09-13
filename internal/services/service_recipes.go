@@ -495,7 +495,7 @@ func updateInstructionsInRecipe(ctx context.Context, qtx *database.Queries, para
 
 func (rs RecipeService) SaveExternalImage(recipeID uuid.UUID, url *string) {
 	ctx := context.Background()
-	if url == nil {
+	if url == nil || *url == "" {
 		return
 	}
 	imageURL, err := fetchOGImage(*url)

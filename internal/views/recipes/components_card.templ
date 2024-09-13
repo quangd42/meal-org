@@ -6,7 +6,7 @@ templ RecipeCard(id, name, url string, imageURL *string, cuisines string) {
 			<a href={ templ.URL(url) } target="_blank">
 				<img
 					class="mx-auto h-full object-cover dark:hidden"
-					if imageURL != nil {
+					if imageURL != nil && *imageURL != "" {
 						src={ string(templ.URL(*imageURL)) }
 					} else {
 						src="/assets/img/mise-en-plase.jpg"
