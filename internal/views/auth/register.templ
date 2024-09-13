@@ -10,7 +10,7 @@ type RegisterVM struct {
 	shared.CommonVM
 }
 
-func NewRegisterVM(navItems []models.NavItem, errs map[string]any) RegisterVM {
+func NewRegisterVM(navItems []models.NavItem, errs map[string][]string) RegisterVM {
 	return RegisterVM{
 		CommonVM: shared.CommonVM{Title: "Sign Up", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
 	}
@@ -29,36 +29,33 @@ templ RegisterPage(vm RegisterVM) {
 	}
 }
 
-templ RegisterForm(errs map[string]any) {
+templ RegisterForm(errs map[string][]string) {
 	<form hx-post="/register" class="space-y-4 md:space-y-6">
 		<div>
 			<label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Your email</label>
 			<input type="email" name="email" id="email" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm" placeholder="name@example.com"/>
-			if _, ok := errs["email-duplicate"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Email is already taken!</p>
-			}
-			if _, ok := errs["email-required"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Email is required!</p>
-			}
-			if _, ok := errs["email-email"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Invalid email format</p>
+			if emailErrs, ok := errs["email"]; ok {
+				for _, msg := range emailErrs {
+					<p class="mt-2 text-sm text-red-600 dark:text-red-500">{ msg + "!" }</p>
+				}
 			}
 		</div>
 		<div>
 			<label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Password</label>
 			<input type="password" name="password" id="password" placeholder="••••••••" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"/>
-			if _, ok := errs["password-required"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Password is required!</p>
-			}
-			if _, ok := errs["password-min"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Password must be at least 10 characters long!</p>
+			if pwErrs, ok := errs["password"]; ok {
+				for _, msg := range pwErrs {
+					<p class="mt-2 text-sm text-red-600 dark:text-red-500">{ msg + "!" }</p>
+				}
 			}
 		</div>
 		<div>
 			<label for="confirm_password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
 			<input type="password" name="confirm_password" id="confirm_password" placeholder="••••••••" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-blue-600 focus:ring-blue-600 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500 sm:text-sm"/>
-			if _, ok := errs["confirm_password-eqfield"]; ok {
-				<p class="mt-2 text-sm text-red-600 dark:text-red-500">Confirm password does not match!</p>
+			if pwErrs, ok := errs["confirm_password"]; ok {
+				for _, msg := range pwErrs {
+					<p class="mt-2 text-sm text-red-600 dark:text-red-500">{ msg + "!" }</p>
+				}
 			}
 		</div>
 		<div class="flex items-start">

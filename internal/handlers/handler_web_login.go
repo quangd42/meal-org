@@ -16,8 +16,9 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			lr, err := decodeFormValidate[models.LoginRequest](r)
+			loginFailedMsg := map[string][]string{"email": {"Invalid email and/or password"}}
 			if err != nil {
-				vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), map[string]any{"email-password": true})
+				vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), loginFailedMsg)
 				render(w, r, views.LoginPage(vm))
 				return
 			}
@@ -25,7 +26,7 @@ func loginPageHandler(sm *scs.SessionManager, rds RendererService, as AuthServic
 			user, err := as.Login(r.Context(), lr)
 			if err != nil {
 				if errors.Is(err, pgx.ErrNoRows) || errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-					vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), map[string]any{"email-password": true})
+					vm := views.NewLoginVM(rds.GetNavItems(false, r.URL.Path), loginFailedMsg)
 					render(w, r, views.LoginPage(vm))
 					return
 				}

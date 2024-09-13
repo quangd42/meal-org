@@ -15,12 +15,10 @@ import (
 func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			errs := make(map[string]any)
+			errs := make(map[string][]string)
 			ur, err := decodeFormValidate[models.CreateUserRequest](r)
 			if err != nil {
 				for errName, errMsg := range err.(validator.ValidationErrors) {
-					// errName := strings.ToLower(fmt.Sprintf("%s-%s", err.Field(), err.Tag()))
-					fmt.Println(errName)
 					errs[errName] = errMsg
 				}
 				render(w, r, views.RegisterForm(errs))
@@ -33,7 +31,7 @@ func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserSer
 					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 					return
 				}
-				errs["email-duplicate"] = true
+				errs["email"] = []string{"Email is taken"}
 				render(w, r, views.RegisterForm(errs))
 				return
 			}

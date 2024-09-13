@@ -50,17 +50,19 @@ func ValidateStruct(s interface{}) error {
 			var msg string
 			switch err.Tag() {
 			case "email":
-				msg = "invalid email format"
+				msg = "Invalid email format"
 			case "min":
 				if err.Param() == "0" {
-					msg = "cannot be empty"
+					msg = "Cannot be empty"
 					break
 				}
-				msg = fmt.Sprintf("must be at least %s character long", err.Param())
+				msg = fmt.Sprintf("Must be at least %s character long", err.Param())
+			case "eqfield":
+				msg = fmt.Sprintf("Must match %s", err.Param())
 			default:
 				msg = err.Tag()
 			}
-			valErrs[fmt.Sprintf("%s-%s", err.Field(), err.Tag())] = append(valErrs[err.Field()], msg)
+			valErrs[err.Field()] = append(valErrs[err.Field()], msg)
 		}
 
 		return valErrs
