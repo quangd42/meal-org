@@ -7,7 +7,7 @@ import (
 	"github.com/quangd42/meal-planner/internal/views/recipes/forms"
 )
 
-templ RecipeForm(recipe *models.Recipe, errs map[string]any) {
+templ RecipeForm(recipe *models.Recipe, errs map[string][]string) {
 	<form
 		if recipe.ID != uuid.Nil {
 			hx-post={ string(templ.URL(fmt.Sprintf("/recipes/%s", recipe.ID.String()))) }

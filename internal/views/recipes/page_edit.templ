@@ -11,7 +11,7 @@ type EditRecipeVM struct {
 	Recipe models.Recipe
 }
 
-func NewEditRecipeVM(userID uuid.UUID, navItems []models.NavItem, recipe models.Recipe, errs map[string]any) EditRecipeVM {
+func NewEditRecipeVM(userID uuid.UUID, navItems []models.NavItem, recipe models.Recipe, errs map[string][]string) EditRecipeVM {
 	return EditRecipeVM{
 		CommonVM: shared.CommonVM{
 			Title:    "Submit a Recipe",

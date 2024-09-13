@@ -9,7 +9,7 @@ type CommonVM struct {
 	Title    string
 	UserID   uuid.UUID
 	NavItems []models.NavItem
-	Errors   map[string]any
+	Errors   map[string][]string
 }
 
 func NewCommonVM(userID uuid.UUID, navItems []models.NavItem) CommonVM {

@@ -10,7 +10,7 @@ import (
 
 type CreateUserRequest struct {
 	Email           string `json:"email" form:"email" validate:"required,email"`
-	Password        string `json:"password" form:"password" validate:"required,min=10"`
+	Password        string `json:"password" form:"password" validate:"required,min=8"`
 	ConfirmPassword string `json:"confirm_password,omitempty" form:"confirm_password" validate:"omitempty,eqfield=Password"`
 }
 
@@ -19,7 +19,7 @@ func (ur CreateUserRequest) Validate(ctx context.Context) error {
 }
 
 type UpdateUserRequest struct {
-	Password string `json:"password" validate:"required,min=10"`
+	Password string `json:"password" validate:"required,min=8"`
 }
 
 func (ur UpdateUserRequest) Validate(ctx context.Context) error {
@@ -28,7 +28,7 @@ func (ur UpdateUserRequest) Validate(ctx context.Context) error {
 
 type LoginRequest struct {
 	Email    string `json:"email" form:"email" validate:"required,email"`
-	Password string `json:"password" form:"password" validate:"required,min=10"`
+	Password string `json:"password" form:"password" validate:"required,min=8"`
 }
 
 func (ur LoginRequest) Validate(ctx context.Context) error {

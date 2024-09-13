@@ -11,7 +11,7 @@ type ListRecipesVM struct {
 	Recipes []models.RecipeInList
 }
 
-func NewListRecipesVM(navItems []models.NavItem, recipes []models.RecipeInList, errs map[string]any) ListRecipesVM {
+func NewListRecipesVM(navItems []models.NavItem, recipes []models.RecipeInList, errs map[string][]string) ListRecipesVM {
 	return ListRecipesVM{
 		CommonVM: shared.CommonVM{Title: "All Recipes", UserID: uuid.Nil, NavItems: navItems, Errors: errs},
 		Recipes:  recipes,

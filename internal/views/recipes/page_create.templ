@@ -10,7 +10,7 @@ type AddRecipeVM struct {
 	shared.CommonVM
 }
 
-func NewAddRecipeVM(userID uuid.UUID, navItems []models.NavItem, errs map[string]any) AddRecipeVM {
+func NewAddRecipeVM(userID uuid.UUID, navItems []models.NavItem, errs map[string][]string) AddRecipeVM {
 	return AddRecipeVM{
 		shared.CommonVM{
 			Title:    "Submit a Recipe",
