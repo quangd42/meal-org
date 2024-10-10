@@ -64,4 +64,4 @@ sleep 1
 
 # Run integration tests
 echo "Running integration tests..."
-hurl --test --variable host=http://localhost:"$PORT" --variable email=testuser@testorg.com --variable password=verySafePassword1 --glob "tests/integration/**/*.hurl"
+hurl --test --jobs 1 --variable host=http://localhost:"$PORT" --variable email=testuser@testorg.com --variable password=verySafePassword1 --glob "tests/integration/**/*.hurl"
