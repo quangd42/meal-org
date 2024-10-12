@@ -1,23 +1,14 @@
 package handlers
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
 )
 
-type CuisineService interface {
-	CreateCuisine(ctx context.Context, cr models.CuisineRequest) (models.Cuisine, error)
-	UpdateCuisineByID(ctx context.Context, cuisineID uuid.UUID, cr models.CuisineRequest) (models.Cuisine, error)
-	ListCuisines(ctx context.Context) ([]models.Cuisine, error)
-	DeleteCuisine(ctx context.Context, cuisineID uuid.UUID) error
-}
-
-func createCuisineHandler(cs CuisineService) http.HandlerFunc {
+func createCuisineHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cr, err := decodeJSONValidate[models.CuisineRequest](r)
 		if err != nil {
@@ -25,7 +16,7 @@ func createCuisineHandler(cs CuisineService) http.HandlerFunc {
 			return
 		}
 
-		cuisine, err := cs.CreateCuisine(r.Context(), cr)
+		cuisine, err := rs.CreateCuisine(r.Context(), cr)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
 				respondError(w, http.StatusBadRequest, map[string]string{"parent_id": "parent does not exist"})
@@ -39,7 +30,7 @@ func createCuisineHandler(cs CuisineService) http.HandlerFunc {
 	}
 }
 
-func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
+func updateCuisineHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cuisineID, err := getResourceIDFromURL(r)
 		if err != nil {
@@ -53,7 +44,7 @@ func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
 			return
 		}
 
-		cuisine, err := cs.UpdateCuisineByID(r.Context(), cuisineID, cr)
+		cuisine, err := rs.UpdateCuisineByID(r.Context(), cuisineID, cr)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
 				respondError(w, http.StatusBadRequest, map[string]string{"parent_id": "parent does not exist"})
@@ -67,9 +58,9 @@ func updateCuisineHandler(cs CuisineService) http.HandlerFunc {
 	}
 }
 
-func listCuisinesHandler(cs CuisineService) http.HandlerFunc {
+func listCuisinesHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cuisines, err := cs.ListCuisines(r.Context())
+		cuisines, err := rs.ListCuisines(r.Context())
 		if err != nil {
 			respondInternalServerError(w)
 			return
@@ -78,7 +69,7 @@ func listCuisinesHandler(cs CuisineService) http.HandlerFunc {
 	}
 }
 
-func deleteCuisineHandler(cs CuisineService) http.HandlerFunc {
+func deleteCuisineHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cuisineID, err := getResourceIDFromURL(r)
 		if err != nil {
@@ -86,7 +77,7 @@ func deleteCuisineHandler(cs CuisineService) http.HandlerFunc {
 			return
 		}
 
-		err = cs.DeleteCuisine(r.Context(), cuisineID)
+		err = rs.DeleteCuisine(r.Context(), cuisineID)
 		if err != nil {
 			respondDBConstraintsError(w, err, "cuisine children")
 			return

@@ -38,13 +38,13 @@ func run() error {
 	store := database.NewStore(db)
 
 	us := services.NewUserService(store)
-	ts := services.NewTokenService(store)
+	as := services.NewTokenService(store)
 	rs := services.NewRecipeService(store)
 	rds := services.NewRendererService()
 	sm := services.NewSessionManager(store)
 
 	r := chi.NewRouter()
-	handlers.AddRoutes(r, sm, rds, us, ts, rs, rs, rs)
+	handlers.AddRoutes(r, sm, rds, us, as, rs)
 
 	server := &http.Server{
 		Addr:         ":" + port,

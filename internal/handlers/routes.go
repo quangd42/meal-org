@@ -17,8 +17,6 @@ func AddRoutes(
 	us UserService,
 	as AuthService,
 	rs RecipeService,
-	is IngredientService,
-	cs CuisineService,
 ) {
 	// Top level middlewares
 	r.Use(chiMiddleware.StripSlashes)
@@ -65,8 +63,8 @@ func AddRoutes(
 		r.Mount("/users", usersAPIRouter(us, as))
 		r.Mount("/auth", authAPIRouter(as))
 		r.Mount("/recipes", recipesAPIRouter(rs))
-		r.Mount("/ingredients", ingredientsAPIRouter(is))
-		r.Mount("/cuisines", cuisinesAPIRouter(cs))
+		r.Mount("/ingredients", ingredientsAPIRouter(rs))
+		r.Mount("/cuisines", cuisinesAPIRouter(rs))
 	})
 }
 
@@ -121,29 +119,29 @@ func recipesAPIRouter(rs RecipeService) http.Handler {
 	return r
 }
 
-func ingredientsAPIRouter(is IngredientService) http.Handler {
+func ingredientsAPIRouter(rs RecipeService) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.AuthVerifier())
-	r.Post("/", createIngredientHandler(is))
-	r.Get("/", listIngredientsHandler(is))
+	r.Post("/", createIngredientHandler(rs))
+	r.Get("/", listIngredientsHandler(rs))
 
-	r.Put("/{id}", updateIngredientHandler(is))
-	r.Delete("/{id}", deleteIngredientHandler(is))
+	r.Put("/{id}", updateIngredientHandler(rs))
+	r.Delete("/{id}", deleteIngredientHandler(rs))
 
 	return r
 }
 
 // TODO: create, update and delete should be restricted to admin only
-func cuisinesAPIRouter(cs CuisineService) http.Handler {
+func cuisinesAPIRouter(rs RecipeService) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.AuthVerifier())
-	r.Post("/", createCuisineHandler(cs))
-	r.Get("/", listCuisinesHandler(cs))
+	r.Post("/", createCuisineHandler(rs))
+	r.Get("/", listCuisinesHandler(rs))
 
-	r.Put("/{id}", updateCuisineHandler(cs))
-	r.Delete("/{id}", deleteCuisineHandler(cs))
+	r.Put("/{id}", updateCuisineHandler(rs))
+	r.Delete("/{id}", deleteCuisineHandler(rs))
 
 	return r
 }
