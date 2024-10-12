@@ -20,6 +20,18 @@ type RecipeService interface {
 	DeleteRecipeByID(ctx context.Context, recipeID uuid.UUID) error
 	ListRecipesWithCuisinesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error)
 	SaveExternalImage(recipeID uuid.UUID, recipeURL *string)
+
+	// Ingredients
+	CreateIngredient(ctx context.Context, arg models.IngredientRequest) (models.Ingredient, error)
+	UpdateIngredientByID(ctx context.Context, ingredientID uuid.UUID, arg models.IngredientRequest) (models.Ingredient, error)
+	ListIngredients(ctx context.Context) ([]models.Ingredient, error)
+	DeleteIngredient(ctx context.Context, ingredientID uuid.UUID) error
+
+	// Cuisines
+	CreateCuisine(ctx context.Context, cr models.CuisineRequest) (models.Cuisine, error)
+	UpdateCuisineByID(ctx context.Context, cuisineID uuid.UUID, cr models.CuisineRequest) (models.Cuisine, error)
+	ListCuisines(ctx context.Context) ([]models.Cuisine, error)
+	DeleteCuisine(ctx context.Context, cuisineID uuid.UUID) error
 }
 
 // TODO: allow for uploading images
