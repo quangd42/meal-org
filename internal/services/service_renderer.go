@@ -7,13 +7,6 @@ import (
 
 type Renderer struct{}
 
-var nav = models.NavItem{
-	Link: models.Link{
-		Name: "Home",
-		URL:  "/",
-	},
-}
-
 var privateNavItems = []models.NavItem{
 	{
 		Link: models.Link{

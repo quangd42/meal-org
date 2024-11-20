@@ -4,16 +4,16 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
-type contextKey struct {
-	name string
-}
+type contextKey int
 
-var (
-	UserIDCtxKey = &contextKey{"userID"}
-	TokenCtxKey  = &contextKey{"token"}
+const (
+	_ contextKey = iota
+	userIDCtxKey
+	tokenCtxKey
 )
 
 // TODO: split this into two: on to verify if token is good, one to
@@ -34,11 +34,35 @@ func AuthVerifier() func(http.Handler) http.Handler {
 			}
 
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, UserIDCtxKey, userID)
-			ctx = context.WithValue(ctx, TokenCtxKey, token)
+			ctx = ContextWithUserID(ctx, userID)
+			ctx = ContextWithToken(ctx, token)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 		return http.HandlerFunc(hfn)
 	}
+}
+
+func UserIDFromContext(r *http.Request) (uuid.UUID, error) {
+	userID, ok := r.Context().Value(userIDCtxKey).(uuid.UUID)
+	if !ok {
+		return uuid.UUID{}, nil
+	}
+	return userID, nil
+}
+
+func ContextWithUserID(ctx context.Context, userID uuid.UUID) context.Context {
+	return context.WithValue(ctx, userIDCtxKey, userID)
+}
+
+func TokenFromContext(r *http.Request) (string, error) {
+	token, ok := r.Context().Value(tokenCtxKey).(string)
+	if !ok {
+		return "", nil
+	}
+	return token, nil
+}
+
+func ContextWithToken(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, tokenCtxKey, token)
 }

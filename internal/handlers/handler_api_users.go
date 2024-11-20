@@ -59,9 +59,9 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 
 func updateUserHandler(us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
-			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+		userID, err := middleware.UserIDFromContext(r)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
 
@@ -83,13 +83,13 @@ func updateUserHandler(us UserService) http.HandlerFunc {
 
 func forgetMeHandler(us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
-			respondError(w, http.StatusUnauthorized, auth.ErrTokenNotFound.Error())
+		userID, err := middleware.UserIDFromContext(r)
+		if err != nil {
+			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
 
-		err := us.DeleteUserByID(r.Context(), userID)
+		err = us.DeleteUserByID(r.Context(), userID)
 		if err != nil {
 			respondInternalServerError(w)
 			return

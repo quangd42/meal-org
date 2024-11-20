@@ -68,15 +68,6 @@ func AddRoutes(
 	})
 }
 
-// authRouter
-func authRouter(as AuthService) http.Handler {
-	r := chi.NewRouter()
-
-	_ = as
-
-	return r
-}
-
 // usersAPIRouter
 func usersAPIRouter(us UserService, as AuthService) http.Handler {
 	r := chi.NewRouter()
