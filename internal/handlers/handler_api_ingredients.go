@@ -1,15 +1,24 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
 )
 
+type IngredientService interface {
+	CreateIngredient(ctx context.Context, arg models.IngredientRequest) (models.Ingredient, error)
+	UpdateIngredientByID(ctx context.Context, ingredientID uuid.UUID, arg models.IngredientRequest) (models.Ingredient, error)
+	ListIngredients(ctx context.Context) ([]models.Ingredient, error)
+	DeleteIngredient(ctx context.Context, ingredientID uuid.UUID) error
+}
+
 // TODO: restrict operation on ingredients to admin
-func createIngredientHandler(rs RecipeService) http.HandlerFunc {
+func createIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		arg, err := decodeJSONValidate[models.IngredientRequest](r)
 		if err != nil {
@@ -17,7 +26,7 @@ func createIngredientHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		ingredient, err := rs.CreateIngredient(r.Context(), arg)
+		ingredient, err := is.CreateIngredient(r.Context(), arg)
 		if err != nil {
 			respondDBConstraintsError(w, err, "ingredient name")
 			return
@@ -27,7 +36,7 @@ func createIngredientHandler(rs RecipeService) http.HandlerFunc {
 	}
 }
 
-func updateIngredientHandler(rs RecipeService) http.HandlerFunc {
+func updateIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ingredientID, err := getResourceIDFromURL(r)
 		if err != nil {
@@ -41,7 +50,7 @@ func updateIngredientHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		ingredient, err := rs.UpdateIngredientByID(r.Context(), ingredientID, arg)
+		ingredient, err := is.UpdateIngredientByID(r.Context(), ingredientID, arg)
 		if err != nil {
 			if errors.Is(err, services.ErrResourceNotFound) {
 				respondError(w, http.StatusBadRequest, map[string]string{"id": err.Error()})
@@ -55,9 +64,9 @@ func updateIngredientHandler(rs RecipeService) http.HandlerFunc {
 	}
 }
 
-func listIngredientsHandler(rs RecipeService) http.HandlerFunc {
+func listIngredientsHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ingredients, err := rs.ListIngredients(r.Context())
+		ingredients, err := is.ListIngredients(r.Context())
 		if err != nil {
 			respondInternalServerError(w)
 			return
@@ -67,7 +76,7 @@ func listIngredientsHandler(rs RecipeService) http.HandlerFunc {
 	}
 }
 
-func deleteIngredientHandler(rs RecipeService) http.HandlerFunc {
+func deleteIngredientHandler(is IngredientService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ingredientID, err := getResourceIDFromURL(r)
 		if err != nil {
@@ -75,7 +84,7 @@ func deleteIngredientHandler(rs RecipeService) http.HandlerFunc {
 			return
 		}
 
-		err = rs.DeleteIngredient(r.Context(), ingredientID)
+		err = is.DeleteIngredient(r.Context(), ingredientID)
 		if err != nil {
 			respondDBConstraintsError(w, err, "ingredient children")
 			return

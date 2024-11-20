@@ -13,6 +13,9 @@ import (
 )
 
 type RecipeService interface {
+	IngredientService
+	CuisineService
+
 	CreateRecipe(ctx context.Context, userID uuid.UUID, rr models.RecipeRequest) (models.Recipe, error)
 	UpdateRecipeByID(ctx context.Context, userID, recipeID uuid.UUID, rr models.RecipeRequest) (models.Recipe, error)
 	GetRecipeByID(ctx context.Context, recipeID uuid.UUID) (models.Recipe, error)
@@ -20,25 +23,13 @@ type RecipeService interface {
 	DeleteRecipeByID(ctx context.Context, recipeID uuid.UUID) error
 	ListRecipesWithCuisinesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error)
 	SaveExternalImage(recipeID uuid.UUID, recipeURL *string)
-
-	// Ingredients
-	CreateIngredient(ctx context.Context, arg models.IngredientRequest) (models.Ingredient, error)
-	UpdateIngredientByID(ctx context.Context, ingredientID uuid.UUID, arg models.IngredientRequest) (models.Ingredient, error)
-	ListIngredients(ctx context.Context) ([]models.Ingredient, error)
-	DeleteIngredient(ctx context.Context, ingredientID uuid.UUID) error
-
-	// Cuisines
-	CreateCuisine(ctx context.Context, cr models.CuisineRequest) (models.Cuisine, error)
-	UpdateCuisineByID(ctx context.Context, cuisineID uuid.UUID, cr models.CuisineRequest) (models.Cuisine, error)
-	ListCuisines(ctx context.Context) ([]models.Cuisine, error)
-	DeleteCuisine(ctx context.Context, cuisineID uuid.UUID) error
 }
 
 // TODO: allow for uploading images
 func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
+		userID, err := middleware.UserIDFromContext(r)
+		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
@@ -61,8 +52,8 @@ func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 
 func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
+		userID, err := middleware.UserIDFromContext(r)
+		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
@@ -99,8 +90,8 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 
 func listRecipesHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
+		userID, err := middleware.UserIDFromContext(r)
+		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
@@ -117,8 +108,8 @@ func listRecipesHandler(rs RecipeService) http.HandlerFunc {
 
 func getRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
+		_, err := middleware.UserIDFromContext(r)
+		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}
@@ -147,8 +138,8 @@ func getRecipeHandler(rs RecipeService) http.HandlerFunc {
 // make sure that instructions and ingredient links are deleted
 func deleteRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := r.Context().Value(middleware.UserIDCtxKey).(uuid.UUID)
-		if !ok {
+		_, err := middleware.UserIDFromContext(r)
+		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
 		}

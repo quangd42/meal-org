@@ -1,12 +1,21 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
 )
+
+type CuisineService interface {
+	CreateCuisine(ctx context.Context, cr models.CuisineRequest) (models.Cuisine, error)
+	UpdateCuisineByID(ctx context.Context, cuisineID uuid.UUID, cr models.CuisineRequest) (models.Cuisine, error)
+	ListCuisines(ctx context.Context) ([]models.Cuisine, error)
+	DeleteCuisine(ctx context.Context, cuisineID uuid.UUID) error
+}
 
 func createCuisineHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
