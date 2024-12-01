@@ -7,22 +7,26 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/quangd42/meal-planner/internal/auth"
 	"github.com/quangd42/meal-planner/internal/database"
 	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/services/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Auth struct {
-	store *database.Store
+	jwtSecret string
+	store     *database.Store
 }
 
-func NewTokenService(store *database.Store) Auth {
-	return Auth{store: store}
+func NewAuthService(store *database.Store, jwtSecret string) Auth {
+	return Auth{
+		jwtSecret: jwtSecret,
+		store:     store,
+	}
 }
 
 func (as Auth) GenerateAccessToken(ctx context.Context, userID uuid.UUID) (string, error) {
-	jwt, err := auth.CreateJWT(userID, auth.ExpirationDurationAccess)
+	jwt, err := auth.CreateJWT(as.jwtSecret, userID, auth.ExpirationDurationAccess)
 	if err != nil {
 		return "", err
 	}

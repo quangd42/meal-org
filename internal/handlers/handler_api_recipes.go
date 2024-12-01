@@ -6,10 +6,9 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/auth"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
-	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 type RecipeService interface {
@@ -28,7 +27,7 @@ type RecipeService interface {
 // TODO: allow for uploading images
 func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := middleware.UserIDFromContext(r)
+		userID, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
@@ -52,7 +51,7 @@ func createRecipeHandler(rs RecipeService) http.HandlerFunc {
 
 func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := middleware.UserIDFromContext(r)
+		userID, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
@@ -90,7 +89,7 @@ func updateRecipeHandler(rs RecipeService) http.HandlerFunc {
 
 func listRecipesHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := middleware.UserIDFromContext(r)
+		userID, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
@@ -108,7 +107,7 @@ func listRecipesHandler(rs RecipeService) http.HandlerFunc {
 
 func getRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := middleware.UserIDFromContext(r)
+		_, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
@@ -138,7 +137,7 @@ func getRecipeHandler(rs RecipeService) http.HandlerFunc {
 // make sure that instructions and ingredient links are deleted
 func deleteRecipeHandler(rs RecipeService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, err := middleware.UserIDFromContext(r)
+		_, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return

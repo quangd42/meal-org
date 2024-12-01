@@ -1,11 +1,11 @@
-package middleware
+package services
 
 import (
 	"context"
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/services/auth"
+	"github.com/quangd42/meal-planner/internal/auth"
 )
 
 type contextKey int
@@ -19,7 +19,7 @@ const (
 // TODO: split this into two: on to verify if token is good, one to
 // extract, verify and return user information
 
-func AuthVerifier() func(http.Handler) http.Handler {
+func (as Auth) AuthVerifier() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		hfn := func(w http.ResponseWriter, r *http.Request) {
 			token, err := auth.GetHeaderToken(r)
@@ -27,7 +27,7 @@ func AuthVerifier() func(http.Handler) http.Handler {
 				http.Error(w, auth.ErrTokenNotFound.Error(), http.StatusUnauthorized)
 				return
 			}
-			userID, err := auth.VerifyJWT(token)
+			userID, err := auth.VerifyJWT(as.jwtSecret, token)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
