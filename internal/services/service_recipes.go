@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -117,7 +118,14 @@ func (rs RecipeService) CreateRecipe(ctx context.Context, userID uuid.UUID, arg 
 
 	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 
-	return r, tx.Commit(ctx)
+	err = tx.Commit(ctx)
+	if err != nil {
+		return r, err
+	}
+
+	go rs.saveExternalImage(dbRecipe.ID, dbRecipe.ExternalUrl)
+
+	return r, nil
 }
 
 func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID uuid.UUID, arg models.RecipeRequest) (models.Recipe, error) {
@@ -140,6 +148,12 @@ func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID u
 	defer tx.Rollback(ctx)
 
 	qtx := rs.store.Q.WithTx(tx)
+
+	// Find current External URL
+	currentRecipe, err := qtx.GetRecipeByID(ctx, recipeID)
+	if err != nil {
+		return models.Recipe{}, err
+	}
 
 	// Update host Recipe
 	dbRecipe, err := qtx.UpdateRecipeByID(ctx, database.UpdateRecipeByIDParams{
@@ -178,7 +192,18 @@ func (rs RecipeService) UpdateRecipeByID(ctx context.Context, userID, recipeID u
 	// Assemble all updated data
 	r = assembleWholeRecipe(dbRecipe, dbCuisines, dbIngredients, dbInstructions)
 
-	return r, tx.Commit(ctx)
+	err = tx.Commit(ctx)
+	if err != nil {
+		return r, err
+	}
+
+	// Only fetch external image if the external URL has changed
+	// Read is cheap, write is expensive
+	if arg.ExternalURL != nil && currentRecipe.ExternalUrl != nil && *arg.ExternalURL != *currentRecipe.ExternalUrl {
+		go rs.saveExternalImage(dbRecipe.ID, dbRecipe.ExternalUrl)
+	}
+
+	return r, nil
 }
 
 func (rs RecipeService) ListRecipesByUserID(ctx context.Context, userID uuid.UUID, pgn models.RecipesPagination) ([]models.RecipeInList, error) {
@@ -493,21 +518,40 @@ func updateInstructionsInRecipe(ctx context.Context, qtx *database.Queries, para
 	return dbInstructions, nil
 }
 
-func (rs RecipeService) SaveExternalImage(recipeID uuid.UUID, url *string) {
-	ctx := context.Background()
-	if url == nil || *url == "" {
+func (rs RecipeService) saveExternalImage(recipeID uuid.UUID, recipeURL *string) {
+	if recipeURL == nil || *recipeURL == "" {
 		return
 	}
-	imageURL, err := fetchOGImage(*url)
-	if err != nil {
-		log.Println(err, url)
-	}
-	err = rs.store.Q.SaveExternalImageURL(ctx, database.SaveExternalImageURLParams{
-		ID:               recipeID,
-		ExternalImageUrl: &imageURL,
-	})
-	if err != nil {
-		log.Println(err, url)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	ch := make(chan error)
+	defer close(ch)
+	go func() {
+		imageURL, err := fetchOGImage(*recipeURL)
+		if err != nil {
+
+			// Attempt to "delete" current external image, but ignore error
+			_ = rs.store.Q.SaveExternalImageURL(ctx, database.SaveExternalImageURLParams{
+				ID:               recipeID,
+				ExternalImageUrl: nil,
+			})
+
+			ch <- err
+			return
+		}
+		err = rs.store.Q.SaveExternalImageURL(ctx, database.SaveExternalImageURLParams{
+			ID:               recipeID,
+			ExternalImageUrl: &imageURL,
+		})
+		ch <- err
+	}()
+	select {
+	case <-ctx.Done():
+		log.Printf("failed to save external image, %s: timed out ", recipeURL)
+	case err := <-ch:
+		if err != nil {
+			log.Printf("failed to save external image %s: %v ", recipeURL, err)
+		}
 	}
 }
 
@@ -520,6 +564,7 @@ func fetchOGImage(url string) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Println(err)
+		return "", fmt.Errorf("cannot create request to %s", url)
 	}
 
 	// req.Header.Set("User-Agent", agent)
@@ -537,6 +582,7 @@ func fetchOGImage(url string) (string, error) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err, url)
+		return "", fmt.Errorf("cannot fetch %s", url)
 	}
 	defer resp.Body.Close()
 
@@ -544,6 +590,7 @@ func fetchOGImage(url string) (string, error) {
 	reader, err := gzip.NewReader(resp.Body)
 	if err != nil {
 		log.Println(err, url)
+		return "", fmt.Errorf("cannot decompress response from %s", url)
 	}
 	defer reader.Close()
 
