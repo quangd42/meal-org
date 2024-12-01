@@ -6,10 +6,9 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/middleware"
+	"github.com/quangd42/meal-planner/internal/auth"
 	"github.com/quangd42/meal-planner/internal/models"
 	"github.com/quangd42/meal-planner/internal/services"
-	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 type UserService interface {
@@ -59,7 +58,7 @@ func createUserHandler(us UserService, as AuthService) http.HandlerFunc {
 
 func updateUserHandler(us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := middleware.UserIDFromContext(r)
+		userID, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return
@@ -83,7 +82,7 @@ func updateUserHandler(us UserService) http.HandlerFunc {
 
 func forgetMeHandler(us UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID, err := middleware.UserIDFromContext(r)
+		userID, err := services.UserIDFromContext(r)
 		if err != nil {
 			respondError(w, http.StatusBadRequest, auth.ErrTokenNotFound.Error())
 			return

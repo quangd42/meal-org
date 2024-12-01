@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/quangd42/meal-planner/internal/auth"
 	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/services/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,6 +20,7 @@ type AuthService interface {
 	ValidateRefreshToken(ctx context.Context, refreshToken string) (uuid.UUID, error)
 	RevokeRefreshToken(ctx context.Context, refreshToken string) error
 	Login(ctx context.Context, lr models.LoginRequest) (models.User, error)
+	AuthVerifier() func(http.Handler) http.Handler
 }
 
 func loginAPIHandler(as AuthService) http.HandlerFunc {

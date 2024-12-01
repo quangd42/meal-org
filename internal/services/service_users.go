@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/quangd42/meal-planner/internal/auth"
 	"github.com/quangd42/meal-planner/internal/database"
 	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/services/auth"
 )
 
 var ErrHashPassword = errors.New("error hashing password")

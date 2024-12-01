@@ -16,11 +16,7 @@ type UserClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (uc *UserClaims) GetUserID() uuid.UUID {
-	return uc.UserID
-}
-
-func CreateJWT(userID uuid.UUID, d time.Duration) (string, error) {
+func CreateJWT(jwtSecret string, userID uuid.UUID, d time.Duration) (string, error) {
 	now := time.Now().UTC()
 	claims := UserClaims{
 		userID,
@@ -40,7 +36,7 @@ func CreateJWT(userID uuid.UUID, d time.Duration) (string, error) {
 	return signedString, nil
 }
 
-func VerifyJWT(tokenString string) (uuid.UUID, error) {
+func VerifyJWT(jwtSecret, tokenString string) (uuid.UUID, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(jwtSecret), nil
 	})

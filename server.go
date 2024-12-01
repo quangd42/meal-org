@@ -28,6 +28,11 @@ func run() error {
 		port = ":8080"
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("missing env settings: jwtSecret")
+	}
+
 	db, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
@@ -38,7 +43,7 @@ func run() error {
 	store := database.NewStore(db)
 
 	us := services.NewUserService(store)
-	as := services.NewTokenService(store)
+	as := services.NewAuthService(store, jwtSecret)
 	rs := services.NewRecipeService(store)
 	rds := services.NewRendererService()
 	sm := services.NewSessionManager(store)

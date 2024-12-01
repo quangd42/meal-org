@@ -2,11 +2,9 @@ package auth
 
 import (
 	"errors"
-	"log"
-	"os"
 	"time"
 
-	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -22,14 +20,14 @@ var (
 	ErrClaimTypeInvalid = errors.New("claim type cannot be verified")
 )
 
-var jwtSecret string
+func HashPassword(password []byte) ([]byte, error) {
+	hash, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	return hash, nil
+}
 
-func init() {
-	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
-		log.Fatal("error loading env file: jwt")
-	}
-	jwtSecret = os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		log.Fatal("missing env settings: jwtSecret")
-	}
+func ValidateHash(hash, password []byte) error {
+	return bcrypt.CompareHashAndPassword(hash, password)
 }

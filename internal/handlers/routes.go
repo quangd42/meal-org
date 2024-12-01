@@ -5,9 +5,8 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/quangd42/meal-planner/internal/middleware"
 )
 
 func AddRoutes(
@@ -19,7 +18,7 @@ func AddRoutes(
 	rs RecipeService,
 ) {
 	// Top level middlewares
-	r.Use(chiMiddleware.StripSlashes)
+	r.Use(middleware.StripSlashes)
 	r.Use(sm.LoadAndSave)
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
@@ -62,9 +61,9 @@ func AddRoutes(
 
 		r.Mount("/users", usersAPIRouter(us, as))
 		r.Mount("/auth", authAPIRouter(as))
-		r.Mount("/recipes", recipesAPIRouter(rs))
-		r.Mount("/ingredients", ingredientsAPIRouter(rs))
-		r.Mount("/cuisines", cuisinesAPIRouter(rs))
+		r.Mount("/recipes", recipesAPIRouter(rs, as))
+		r.Mount("/ingredients", ingredientsAPIRouter(rs, as))
+		r.Mount("/cuisines", cuisinesAPIRouter(rs, as))
 	})
 }
 
@@ -74,7 +73,7 @@ func usersAPIRouter(us UserService, as AuthService) http.Handler {
 
 	r.Post("/", createUserHandler(us, as))
 	r.Group(func(r chi.Router) {
-		r.Use(middleware.AuthVerifier())
+		r.Use(as.AuthVerifier())
 		r.Put("/", updateUserHandler(us))
 		r.Delete("/", forgetMeHandler(us))
 	})
@@ -94,10 +93,10 @@ func authAPIRouter(as AuthService) http.Handler {
 }
 
 // recipesAPIRouter
-func recipesAPIRouter(rs RecipeService) http.Handler {
+func recipesAPIRouter(rs RecipeService, as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.AuthVerifier())
+	r.Use(as.AuthVerifier())
 	r.Post("/", createRecipeHandler(rs))
 	r.Get("/", listRecipesHandler(rs))
 
@@ -110,10 +109,10 @@ func recipesAPIRouter(rs RecipeService) http.Handler {
 	return r
 }
 
-func ingredientsAPIRouter(rs RecipeService) http.Handler {
+func ingredientsAPIRouter(rs RecipeService, as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.AuthVerifier())
+	r.Use(as.AuthVerifier())
 	r.Post("/", createIngredientHandler(rs))
 	r.Get("/", listIngredientsHandler(rs))
 
@@ -124,10 +123,10 @@ func ingredientsAPIRouter(rs RecipeService) http.Handler {
 }
 
 // TODO: create, update and delete should be restricted to admin only
-func cuisinesAPIRouter(rs RecipeService) http.Handler {
+func cuisinesAPIRouter(rs RecipeService, as AuthService) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.AuthVerifier())
+	r.Use(as.AuthVerifier())
 	r.Post("/", createCuisineHandler(rs))
 	r.Get("/", listCuisinesHandler(rs))
 
