@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/models/validator"
+	"github.com/quangd42/meal-org/internal/models/validator"
 )
 
 type IngredientRequest struct {

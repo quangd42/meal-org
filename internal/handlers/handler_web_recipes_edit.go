@@ -7,7 +7,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	views "github.com/quangd42/meal-planner/internal/views/recipes"
+	views "github.com/quangd42/meal-org/internal/views/recipes"
 )
 
 func editRecipePageHandler(sm *scs.SessionManager, rds RendererService, rs RecipeService) http.HandlerFunc {

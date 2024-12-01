@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/a-h/templ"
-	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-org/internal/models"
 )
 
 type Renderer struct{}

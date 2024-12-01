@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/quangd42/meal-planner/internal/services"
+	"github.com/quangd42/meal-org/internal/services"
 )
 
 func respondJSON[T any](w http.ResponseWriter, code int, v T) {

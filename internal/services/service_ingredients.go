@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/database"
-	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-org/internal/database"
+	"github.com/quangd42/meal-org/internal/models"
 )
 
 func (rs RecipeService) CreateIngredient(ctx context.Context, arg models.IngredientRequest) (models.Ingredient, error) {

@@ -7,7 +7,7 @@ import (
 	"github.com/alexedwards/scs/pgxstore"
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/database"
+	"github.com/quangd42/meal-org/internal/database"
 )
 
 func NewSessionManager(store *database.Store) *scs.SessionManager {

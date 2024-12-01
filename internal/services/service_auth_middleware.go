@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/auth"
+	"github.com/quangd42/meal-org/internal/auth"
 )
 
 type contextKey int

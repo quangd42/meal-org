@@ -7,8 +7,8 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/jackc/pgx/v5"
-	"github.com/quangd42/meal-planner/internal/models"
-	views "github.com/quangd42/meal-planner/internal/views/auth"
+	"github.com/quangd42/meal-org/internal/models"
+	views "github.com/quangd42/meal-org/internal/views/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 

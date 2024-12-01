@@ -5,8 +5,8 @@ import (
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/models"
-	views "github.com/quangd42/meal-planner/internal/views/home"
+	"github.com/quangd42/meal-org/internal/models"
+	views "github.com/quangd42/meal-org/internal/views/home"
 )
 
 type RendererService interface {

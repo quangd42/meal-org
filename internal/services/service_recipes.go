@@ -11,8 +11,8 @@ import (
 
 	"github.com/dyatlov/go-opengraph/opengraph"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/database"
-	"github.com/quangd42/meal-planner/internal/models"
+	"github.com/quangd42/meal-org/internal/database"
+	"github.com/quangd42/meal-org/internal/models"
 )
 
 var ErrUnauthorized = errors.New("unauthorized")
@@ -547,10 +547,10 @@ func (rs RecipeService) saveExternalImage(recipeID uuid.UUID, recipeURL *string)
 	}()
 	select {
 	case <-ctx.Done():
-		log.Printf("failed to save external image, %s: timed out ", recipeURL)
+		log.Printf("failed to save external image, %s: timed out\n", *recipeURL)
 	case err := <-ch:
 		if err != nil {
-			log.Printf("failed to save external image %s: %v ", recipeURL, err)
+			log.Printf("failed to save external image %s: %v\n", *recipeURL, err)
 		}
 	}
 }

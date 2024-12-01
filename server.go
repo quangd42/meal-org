@@ -11,9 +11,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
-	"github.com/quangd42/meal-planner/internal/database"
-	"github.com/quangd42/meal-planner/internal/handlers"
-	"github.com/quangd42/meal-planner/internal/services"
+	"github.com/quangd42/meal-org/internal/database"
+	"github.com/quangd42/meal-org/internal/handlers"
+	"github.com/quangd42/meal-org/internal/services"
 
 	_ "github.com/lib/pq"
 )

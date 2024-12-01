@@ -8,8 +8,8 @@ import (
 	"github.com/ajg/form"
 	"github.com/alexedwards/scs/v2"
 	"github.com/google/uuid"
-	"github.com/quangd42/meal-planner/internal/models"
-	views "github.com/quangd42/meal-planner/internal/views/recipes"
+	"github.com/quangd42/meal-org/internal/models"
+	views "github.com/quangd42/meal-org/internal/views/recipes"
 )
 
 func addRecipePageHandler(sm *scs.SessionManager, rds RendererService, rs RecipeService) http.HandlerFunc {

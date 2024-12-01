@@ -1,4 +1,4 @@
-module github.com/quangd42/meal-planner
+module github.com/quangd42/meal-org
 
 go 1.22.1
 

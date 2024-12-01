@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/models/validator"
-	"github.com/quangd42/meal-planner/internal/services"
-	views "github.com/quangd42/meal-planner/internal/views/auth"
+	"github.com/quangd42/meal-org/internal/models"
+	"github.com/quangd42/meal-org/internal/models/validator"
+	"github.com/quangd42/meal-org/internal/services"
+	views "github.com/quangd42/meal-org/internal/views/auth"
 )
 
 func registerPageHandler(sm *scs.SessionManager, rds RendererService, us UserService) http.HandlerFunc {

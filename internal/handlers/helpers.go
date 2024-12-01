@@ -13,8 +13,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
-	"github.com/quangd42/meal-planner/internal/models"
-	"github.com/quangd42/meal-planner/internal/models/validator"
+	"github.com/quangd42/meal-org/internal/models"
+	"github.com/quangd42/meal-org/internal/models/validator"
 )
 
 func getPaginationParamValue(r *http.Request, name string, defaultValue int32) int32 {
